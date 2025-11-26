@@ -1,49 +1,72 @@
 package com.proyecto.SsYPp.Entity;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
+import lombok.Getter;
+import lombok.Setter;
 
-import java.io.Serializable;
-import java.sql.Timestamp;
+import java.time.OffsetDateTime;
+import java.time.OffsetTime;
 
-
+@Getter
+@Setter
 @Entity
-@Data
-@Table(name = "users")
-public class Usuario  implements Serializable{
-
+@Table(name = "usuarios")
+public class Usuario {
     @Id
-    private Long id_usuario;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "idusuario", nullable = false)
+    private Long id;
 
-    private String name;
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "nombre", nullable = false)
+    private String nombre;
 
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "primerapellido", nullable = false)
+    private String primerapellido;
+
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "segundoapellido", nullable = false)
+    private String segundoapellido;
+
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "email", nullable = false)
     private String email;
 
-    private String email_verified_at;
+    @Column(name = "emailverifiedat")
+    private OffsetDateTime emailverifiedat;
 
+    @Size(max = 255)
+    @NotNull
+    @Column(name = "password", nullable = false)
     private String password;
 
-    private String remember_token;
+    @Size(max = 255)
+    @Column(name = "rememberedtoken")
+    private String rememberedtoken;
 
-    private Timestamp created_at;
+    @Column(name = "createdat")
+    private OffsetTime createdat;
 
-    private Timestamp updated_at;
+    @Column(name = "updatedat")
+    private OffsetTime updatedat;
 
-    private Boolean status;
+    @NotNull
+    @Column(name = "status", nullable = false)
+    private Boolean status = false;
 
-    //colocar MANYTOONE requiere crear la variable apartir del objeto
-    private Integer rol_id;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "idrol")
+    private Rol idrol;
 
-    private String matricula;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "carreras_idcarrera")
+    private Carrera carrerasIdcarrera;
 
-    //colocar MANYTOONE requiere crear la variable apartir del objeto
-    private Integer escuela_id;
-
-    //colocar MANYTOONE requiere crear la variable apartir del objeto
-    private Integer carrera_id;
-
-    //EJEMPLO
-    //@ManyToOne
-    //@JoinColumn(name = "uaads")
-    //private Catuads uaads;
 }
