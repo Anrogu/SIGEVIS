@@ -79,7 +79,7 @@ public class UsuarioImpl implements UsuarioService {
     // Metodo Dto a Entidad
     private Usuario convertirDTOaEntidad(UsuarioDto dto) {
         Rol rol = rolRepository.findById(dto.getIdrol())
-                .orElseThrow(() -> new RuntimeException("Rol con ID " + dto.getCarrerasIdcarrera() + " no existe."));
+                .orElseThrow(() -> new RuntimeException("Rol con ID " + dto.getIdrol() + " no existe."));
         Carrera carrera = carreraRepository.findById(dto.getCarrerasIdcarrera())
                 .orElseThrow(() -> new RuntimeException("carrera no encontrada"));
 

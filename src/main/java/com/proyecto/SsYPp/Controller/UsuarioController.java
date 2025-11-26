@@ -26,8 +26,8 @@ public class UsuarioController {
     }
 
     @DeleteMapping("/delete/{id}")
-    public String deleteUsuarios(@PathVariable Integer usuario){
-        usuarioService.delete(usuario);
+    public String deleteUsuarios(@PathVariable Integer id){ // Parameter changed from 'usuario' to 'id'
+        usuarioService.delete(id);
         return "se ha borrado el usuario";
     }
 
@@ -36,8 +36,10 @@ public class UsuarioController {
         return usuarioService.create(usuario);
     }
 
-    @PutMapping("/update/")
-    public UsuarioDto updateUsuarios(@Valid @RequestBody UsuarioDto usuarios){
+    @PutMapping("/update/{id}")
+    public UsuarioDto updateUsuarios(
+            @PathVariable Integer id,
+            @Valid @RequestBody UsuarioDto usuarios) {
         return usuarioService.update(usuarios);
     }
 }
