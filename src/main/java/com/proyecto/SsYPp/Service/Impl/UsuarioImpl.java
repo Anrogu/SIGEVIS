@@ -38,6 +38,12 @@ public class UsuarioImpl implements UsuarioService {
     }
 
     @Override
+    public UsuarioDto getUsuarioByEmail(String email) {
+        Usuario usuario= usuarioRepository.findByEmail(email);
+        return convertirEntidadADTO(usuario);
+    }
+
+    @Override
     public void delete(Integer id) {
         usuarioRepository.deleteById(id);
     }
@@ -59,7 +65,6 @@ public class UsuarioImpl implements UsuarioService {
         Usuario actualizado = usuarioRepository.save(usuario);
         return convertirEntidadADTO(actualizado);
     }
-
 
     // Metodo Entidad a Dto
     private UsuarioDto convertirEntidadADTO(Usuario usuario) {

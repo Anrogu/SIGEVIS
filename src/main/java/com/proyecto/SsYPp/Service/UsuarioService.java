@@ -10,8 +10,8 @@ public interface UsuarioService {
 
     public List<UsuarioDto> getAll();
     public UsuarioDto getUsuario(Integer id);
+    public UsuarioDto getUsuarioByEmail(String email);
     public void delete(Integer id);
     public UsuarioDto create(UsuarioDto usuario);
     public UsuarioDto update(UsuarioDto usuario);
-
 }
