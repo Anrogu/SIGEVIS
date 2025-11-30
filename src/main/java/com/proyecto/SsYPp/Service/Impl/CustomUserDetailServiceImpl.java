@@ -1,5 +1,7 @@
 package com.proyecto.SsYPp.Service.Impl;
+import com.proyecto.SsYPp.Entity.Rol;
 import com.proyecto.SsYPp.Entity.Usuario;
+import com.proyecto.SsYPp.Repository.RolRepository;
 import com.proyecto.SsYPp.Repository.UsuarioRepository;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
@@ -7,33 +9,33 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.Collections;
 import java.util.List;
+
 
 @Service
 public class CustomUserDetailServiceImpl implements UserDetailsService {
 
     private final UsuarioRepository usuarioRepository;
 
-    public CustomUserDetailServiceImpl(UsuarioRepository usuarioRepository) {
+    public CustomUserDetailServiceImpl(UsuarioRepository usuarioRepository, RolRepository rolRepository) {
         this.usuarioRepository = usuarioRepository;
     }
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 
-        // 1. Busca el usuario en la base de datos usando el Repositorio
         Usuario usuario = usuarioRepository.findByEmail(email);
-        // 2. Define las Autoridades/Roles (temporalmente, un solo rol)
-        // NOTA: Para producción, este rol debería obtenerse de tu tabla 'roles' usando idrol.
+        if (usuario == null) {
+            throw new UsernameNotFoundException("Usuario no encontrado con email: " + email);
+        }
+        Rol rolDelUsuario = usuario.getIdrol();
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_ADMIN")
+                new SimpleGrantedAuthority("ROLE_" + rolDelUsuario.getNombre().toUpperCase())
         );
-
         return new User(
-                usuario.getEmail(),           // El nombre de usuario (el correo)
-                usuario.getPassword(),        // La contraseña (DEBE estar cifrada con BCrypt en la BD)
-                authorities                   // Los roles/permisos del usuario
+                usuario.getEmail(),
+                usuario.getPassword(),
+                authorities
         );
     }
 }

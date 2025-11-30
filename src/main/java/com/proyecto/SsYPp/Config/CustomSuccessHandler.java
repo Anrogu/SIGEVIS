@@ -1,5 +1,4 @@
 package com.proyecto.SsYPp.Config;
-
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -28,11 +27,9 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
             String role = authority.getAuthority();
 
             if (role.equals("ROLE_ADMIN")) {
-                // Redirige al administrador a index.html (que es su dashboard)
                 redirectURL = "/index.html";
                 break;
             }
-            // Si tuvieras otros roles (ej. ROLE_TECNICO), la lógica iría aquí
         }
 
         response.sendRedirect(redirectURL);

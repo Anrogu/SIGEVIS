@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Página de Inicio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e2f0fb;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+        }
+        .welcome-container {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            max-width: 600px;
+            margin-bottom: 20px;
+        }
+        .welcome-container h1 {
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+        .welcome-container p {
+            color: #555;
+            line-height: 1.6;
+        }
+        .logout-form button {
+            background-color: #dc3545;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+        .logout-form button:hover {
+            background-color: #c82333;
+        }
+        .user-info {
+            margin-top: 30px;
+            font-size: 1.1em;
+            color: #007bff;
+        }
+    </style>
+</head>
+<body>
+<div class="welcome-container">
+    <h1>¡Bienvenido a la Página Principal!</h1>
+    <p>Has iniciado sesión correctamente y ahora puedes acceder al contenido protegido.</p>
+
+    <div class="user-info">
+        <p>Usuario actual:
+            <span th:if="${#authorization.expression('isAuthenticated()')}"
+                  th:text="${#authentication.name}">[Nombre de Usuario]</span>
+
+            <span th:unless="${#authorization.expression('isAuthenticated()')}">No Autenticado</span>
+        </p>
+    </div>
+
+    <p>Desde aquí puedes navegar por tu aplicación.</p>
+</div>
+
+<form th:action="@{/logout}" method="post" class="logout-form">
+    <button type="submit">Cerrar Sesión</button>
+</form>
+</body>
+</html>
+```http://googleusercontent.com/image_generation_content/0

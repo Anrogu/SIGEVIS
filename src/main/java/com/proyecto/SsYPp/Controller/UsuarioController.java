@@ -31,15 +31,15 @@ public class UsuarioController {
         return "se ha borrado el usuario";
     }
 
-    @PostMapping("/create/")
-    public UsuarioDto crearUsuario(@Valid @RequestBody UsuarioDto usuario) {
-        return usuarioService.create(usuario);
-    }
-
     @PutMapping("/update/{id}")
     public UsuarioDto updateUsuarios(
             @PathVariable Integer id,
             @Valid @RequestBody UsuarioDto usuarios) {
         return usuarioService.update(usuarios);
+    }
+    @GetMapping("/email/{email}")
+
+        public UsuarioDto getEmail(@PathVariable String email){
+        return usuarioService.getUsuarioByEmail(email);
     }
 }
