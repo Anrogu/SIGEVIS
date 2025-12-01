@@ -52,12 +52,20 @@ public class UsuarioImpl implements UsuarioService {
     public void delete(Integer id) {
         usuarioRepository.deleteById(id);
     }
-
+    @Override
+    public boolean existsByEmail(String email) {
+        return usuarioRepository.findByEmail(email) != null;
+    }
     @Override
     public UsuarioDto create(UsuarioDto usuarioDto) {
+        if (existsByEmail(usuarioDto.getEmail())) {
+            // Lanza una excepción si el correo ya existe
+            throw new IllegalArgumentException("El correo electrónico " + usuarioDto.getEmail() + " ya está registrado.");
+        }
         String rawPassword = usuarioDto.getPassword();
         String encodedPassword = passwordEncoder.encode(rawPassword);
         usuarioDto.setPassword(encodedPassword);
+
         Usuario usuario = convertirDTOaEntidad(usuarioDto);
         Usuario guardado = usuarioRepository.save(usuario);
         return convertirEntidadADTO(guardado);
@@ -67,6 +75,10 @@ public class UsuarioImpl implements UsuarioService {
     public UsuarioDto update(UsuarioDto usuarioDto) {
         if (usuarioDto.getNombre() == null) {
             throw new IllegalArgumentException("El ID es obligatorio para actualizar");
+        }
+        if (existsByEmail(usuarioDto.getEmail())) {
+            // Lanza una excepción si el correo ya existe
+            throw new IllegalArgumentException("El correo electrónico " + usuarioDto.getEmail() + " ya está registrado.");
         }
         String rawPassword = usuarioDto.getPassword();
         String encodedPassword = passwordEncoder.encode(rawPassword);

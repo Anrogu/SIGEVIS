@@ -16,10 +16,11 @@ public class AuthController {
     @Autowired
     private UsuarioService usuarioService;
 
-    @PostMapping("/registro")
-    public ResponseEntity<UsuarioDto> registerUsuario(@Valid @RequestBody UsuarioDto usuarioDto) {
+    @PostMapping("/register")
+    public ResponseEntity<UsuarioDto> registerUsuario(@Valid @ModelAttribute UsuarioDto usuarioDto) {
         UsuarioDto nuevoUsuario = usuarioService.create(usuarioDto);
         return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
+
     }
     @GetMapping("/perfil")
     public ResponseEntity<?> getAuthenticatedUserProfile(@AuthenticationPrincipal UserDetails userDetails) {

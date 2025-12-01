@@ -23,11 +23,12 @@ public class SecurityConfig {
                         // Rutas públicas que no requieren autenticación
                         .requestMatchers(
                                 "/",                      // La URL raíz
-                                "/login",                 // La vista de login (GET)
+                                "/login",
+                                "/register",// La vista de login (GET)
                                 "/css/**",
                                 "/js/**",
                                 "/images/**",
-                                "/api/usuarios/create/**" // Ruta de registro pública
+                                "/gob/auth/register" // Ruta de registro pública
                         ).permitAll()
 
                         // Cualquier otra URL REQUIERE autenticación (protección)

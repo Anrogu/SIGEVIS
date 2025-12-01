@@ -1,8 +1,11 @@
 package com.proyecto.SsYPp.Service;
+import com.proyecto.SsYPp.Entity.Carrera;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public interface CarreraService {
 
-
+    public List<Carrera> getAllCarreras();
 }

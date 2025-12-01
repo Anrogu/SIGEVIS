@@ -12,6 +12,10 @@ public interface UsuarioService {
     public UsuarioDto getUsuario(Integer id);
     public UsuarioDto getUsuarioByEmail(String email);
     public void delete(Integer id);
+
+    boolean existsByEmail(String email);
+
     public UsuarioDto create(UsuarioDto usuario);
     public UsuarioDto update(UsuarioDto usuario);
+
 }
