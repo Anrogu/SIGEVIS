@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asignaciones - SSyPp</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<header class="main-header">
+    <div class="logo-area">
+        <img src="/img/escudo_colibri.png" alt="Escudo de México" class="logo-escudo">
+        <img src="/img/escudo_estado_mexico.png" alt="Gobierno del Estado de México" class="logo-estado">
+    </div>
+
+    <h1 class="page-title">ASIGNACIONES</h1>
+
+    <nav class="user-nav">
+        <a href="index.html" class="nav-button">INICIO</a>
+        <a href="#" id="logout-button" class="nav-button">CERRAR SESIÓN</a>
+    </nav>
+</header>
+
+<main class="content-container">
+
+    <div class="split-view-container">
+
+        <section class="asignaciones-list-section data-panel">
+            <h2 class="panel-title">ASIGNACIONES</h2>
+
+            <table class="data-table">
+                <thead>
+                <tr>
+                    <th>PRESTADOR</th>
+                    <th>ÁREA ACTUAL</th>
+                    <th>PERIODO</th>
+                </tr>
+                </thead>
+
+                <tbody id="asignaciones-table-body">
+                </tbody>
+            </table>
+
+            <div class="pagination-controls">
+                <a href="#" class="page-link active">1</a>
+                <a href="#" class="page-link">2</a>
+                <a href="#" class="page-link">3</a>
+                <a href="#" class="page-link">&gt;</a>
+            </div>
+        </section>
+
+        <section class="reasignacion-section data-panel">
+            <h2 class="panel-title" id="reasignar-title">Reasignar a [Seleccione Prestador]</h2>
+
+            <form id="reasignacion-form">
+                <div class="form-group">
+                    <label for="nueva-area">Nueva Área:</label>
+                    <input type="text" id="nueva-area" name="nueva-area" required placeholder="Escriba el nombre de la nueva área">
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary" id="confirmar-reasignacion-btn">Confirmar</button>
+                    <button type="button" class="btn btn-secondary" id="editar-reasignacion-btn">Editar</button>
+                </div>
+            </form>
+        </section>
+
+    </div> </main>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

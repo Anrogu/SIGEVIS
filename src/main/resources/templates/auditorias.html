@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auditorías - SSyPp</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+
+<header class="main-header">
+    <div class="logo-area">
+        <img src="/img/escudo_colibri.png" alt="Escudo de México" class="logo-escudo">
+        <img src="/img/escudo_estado_mexico.png" alt="Gobierno del Estado de México" class="logo-estado">
+    </div>
+
+    <h1 class="page-title">AUDITORÍAS</h1>
+
+    <nav class="user-nav">
+        <a href="index.html" class="nav-button">INICIO</a>
+        <a href="#" id="logout-button" class="nav-button">CERRAR SESIÓN</a>
+    </nav>
+</header>
+
+<main class="content-container">
+
+    <section class="auditoria-filters-section">
+        <div class="filters-left">
+            <input type="text" id="search-auditoria" placeholder="Buscar por usuario, acción">
+
+            <select id="filter-tipo-dato">
+                <option value="">Todos Tipos / Datos</option>
+                <option value="creacion">Creación</option>
+                <option value="edicion">Edición</option>
+                <option value="eliminacion">Eliminación</option>
+            </select>
+
+            <input type="date" id="filter-fecha" placeholder="dd/mm/aaaa">
+
+            <button id="restablecer-btn" class="btn btn-secondary">Restablecer</button>
+        </div>
+
+    </section>
+
+    <section class="auditoria-list-section">
+        <table class="data-table">
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>USUARIO</th>
+                <th>ROL</th>
+                <th>ACCIÓN</th>
+                <th>DESCRIPCIÓN</th>
+                <th>FECHA Y HORA</th>
+            </tr>
+            </thead>
+
+            <tbody id="auditoria-table-body">
+            </tbody>
+        </table>
+
+        <div class="pagination-controls">
+            <a href="#" class="page-link active">1</a>
+            <a href="#" class="page-link">2</a>
+            <a href="#" class="page-link">3</a>
+            <a href="#" class="page-link">&gt;</a>
+        </div>
+    </section>
+
+</main>
+
+<script src="/js/main.js"></script>
+</body>
+</html>

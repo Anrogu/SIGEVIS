@@ -20,4 +20,31 @@ public class ViewController {
     public String redirectToIndex() {
         return "redirect:/index";
     }
+
+// --- Módulos del Dashboard ---
+
+    @GetMapping("/vacantes")
+    public String mostrarVacantes() {
+        return "vacantes";
+    }
+
+    @GetMapping("/asignaciones")
+    public String mostrarAsignaciones() {
+        return "asignaciones";
+    }
+
+    @GetMapping("/usuarios")
+    public String mostrarUsuarios() {
+        return "usuarios";
+    }
+
+    @GetMapping("/auditorias")
+    public String mostrarAuditorias() {
+        return "auditorias";
+    }
+
+    @GetMapping("/catalogos")
+    public String mostrarCatalogos() {
+        return "catalogos";
+    }
 }
