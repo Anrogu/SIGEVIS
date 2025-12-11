@@ -5,7 +5,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import java.time.LocalDateTime;
+
+import java.time.OffsetTime;
 
 @Entity
 @Table(name = "Vacantes")
@@ -19,7 +20,7 @@ public class Vacante {
     private String descripcion;
     private Integer numeroPlazas;
     private Boolean estatus;
-    private LocalDateTime fechaPublicacion;
+    private OffsetTime fechaPublicacion;
     private String requisitos;
     private String carrera;
 
@@ -76,11 +77,11 @@ public class Vacante {
         this.estatus = estatus;
     }
 
-    public LocalDateTime getFechaPublicacion() {
+    public OffsetTime getFechaPublicacion() {
         return fechaPublicacion;
     }
 
-    public void setFechaPublicacion(LocalDateTime fechaPublicacion) {
+    public void setFechaPublicacion(OffsetTime fechaPublicacion) {
         this.fechaPublicacion = fechaPublicacion;
     }
 
