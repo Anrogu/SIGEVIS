@@ -1,7 +1,10 @@
-package com.proyecto.SsYPp.Model;
+package com.proyecto.SsYPp.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "\"Escuela\"")
@@ -17,4 +20,8 @@ public class Escuela {
     private String claveCentroTrabajo;
     private String coordinadorUnidad;
     private String formatoCorreo;
+
+    @OneToMany(mappedBy = "escuela")
+    private Set<Convenio> convenios = new LinkedHashSet<>();
+
 }

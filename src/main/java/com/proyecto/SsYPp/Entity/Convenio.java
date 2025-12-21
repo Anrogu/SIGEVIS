@@ -1,8 +1,10 @@
-package com.proyecto.SsYPp.Model;
+package com.proyecto.SsYPp.Entity;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "\"Convenios\"")
@@ -23,4 +25,8 @@ public class Convenio {
     @ManyToOne
     @JoinColumn(name = "Escuela_idEscuela")
     private Escuela escuela;
+
+    @OneToMany(mappedBy = "conveniosIdconvenio")
+    private Set<ConvenioCarrera> convenioCarreras = new LinkedHashSet<>();
+
 }

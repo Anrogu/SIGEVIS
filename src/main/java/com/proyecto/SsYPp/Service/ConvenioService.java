@@ -1,6 +1,6 @@
 package com.proyecto.SsYPp.Service;
 
-import com.proyecto.SsYPp.Model.Convenio;
+import com.proyecto.SsYPp.Entity.Convenio;
 import com.proyecto.SsYPp.Repository.ConvenioRepository;
 import org.springframework.stereotype.Service;
 

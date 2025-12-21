@@ -23,19 +23,16 @@ public class CustomUserDetailServiceImpl implements UserDetailsService {
     }
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-
         Usuario usuario = usuarioRepository.findByEmail(email);
-        if (usuario == null) {
-            throw new UsernameNotFoundException("Usuario no encontrado con email: " + email);
-        }
-        Rol rolDelUsuario = usuario.getIdrol();
-        List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + rolDelUsuario.getNombre().toUpperCase())
-        );
-        return new User(
-                usuario.getEmail(),
-                usuario.getPassword(),
-                authorities
-        );
+        if (usuario == null) throw new UsernameNotFoundException("Usuario no encontrado");
+
+        // Mapeamos el ID numérico de tu tabla al formato ROLE_X
+        String authority = "ROLE_" + usuario.getIdrol().getId();
+
+        return User.builder()
+                .username(usuario.getEmail())
+                .password(usuario.getPassword())
+                .authorities(authority)
+                .build();
     }
 }

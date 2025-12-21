@@ -1,4 +1,5 @@
 package com.proyecto.SsYPp.Config;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -8,30 +9,27 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.Collection;
 
 @Component
 public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
     @Override
-    public void onAuthenticationSuccess(
-            HttpServletRequest request,
-            HttpServletResponse response,
-            Authentication authentication) throws IOException, ServletException {
+    public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
 
-        String redirectURL = "/index.html"; // Redirección por defecto
+        // DEBUGGING
+        System.out.println("AUTORIDADES ACTUALES: " + authentication.getAuthorities());
 
-        Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
+        String role = authentication.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .findFirst()
+                .orElse("");
 
-        for (GrantedAuthority authority : authorities) {
-            String role = authority.getAuthority();
+        String redirectURL = switch (role) {
+            case "ROLE_1" -> "/index";
+            case "ROLE_2" -> "/vacantes";
+            default       -> "/login?error=true";
+        };
 
-            if (role.equals("ROLE_ADMIN")) {
-                redirectURL = "/index.html";
-                break;
-            }
-        }
-
-        response.sendRedirect(redirectURL);
+        response.sendRedirect(request.getContextPath() + redirectURL);
     }
 }

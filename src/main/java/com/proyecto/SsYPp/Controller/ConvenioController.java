@@ -1,6 +1,6 @@
 package com.proyecto.SsYPp.Controller;
 
-import com.proyecto.SsYPp.Model.Convenio;
+import com.proyecto.SsYPp.Entity.Convenio;
 import com.proyecto.SsYPp.Repository.EscuelaRepository;
 import com.proyecto.SsYPp.Service.ConvenioService;
 import org.springframework.stereotype.Controller;

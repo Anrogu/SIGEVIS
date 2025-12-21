@@ -66,7 +66,7 @@ public class UsuarioImpl implements UsuarioService {
         String encodedPassword = passwordEncoder.encode(rawPassword);
         usuarioDto.setPassword(encodedPassword);
 
-        Usuario usuario = convertirDTOaEntidad(usuarioDto);
+        Usuario usuario = convertirDTOAEntidad(usuarioDto);
         Usuario guardado = usuarioRepository.save(usuario);
         return convertirEntidadADTO(guardado);
     }
@@ -83,7 +83,7 @@ public class UsuarioImpl implements UsuarioService {
         String rawPassword = usuarioDto.getPassword();
         String encodedPassword = passwordEncoder.encode(rawPassword);
         usuarioDto.setPassword(encodedPassword);
-        Usuario usuario = convertirDTOaEntidad(usuarioDto);
+        Usuario usuario = convertirDTOAEntidad(usuarioDto);
         Usuario actualizado = usuarioRepository.save(usuario);
         return convertirEntidadADTO(actualizado);
     }
@@ -102,7 +102,7 @@ public class UsuarioImpl implements UsuarioService {
     }
 
     // Metodo Dto a Entidad
-    private Usuario convertirDTOaEntidad(UsuarioDto dto) {
+    private Usuario convertirDTOAEntidad(UsuarioDto dto) {
         Rol rol = rolRepository.findById(dto.getIdrol())
                 .orElseThrow(() -> new RuntimeException("Rol con ID " + dto.getIdrol() + " no existe."));
         Carrera carrera = carreraRepository.findById(dto.getCarrerasIdcarrera())
