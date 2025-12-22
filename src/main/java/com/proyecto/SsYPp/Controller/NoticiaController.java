@@ -1,8 +1,6 @@
 package com.proyecto.SsYPp.Controller;
 
 import com.proyecto.SsYPp.Dto.NoticiaDto;
-import com.proyecto.SsYPp.Dto.UsuarioDto;
-import com.proyecto.SsYPp.Entity.Noticia;
 import com.proyecto.SsYPp.Service.NoticiaService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +20,13 @@ public class NoticiaController {
      return noticiaService.get(noticia);
  }
     @GetMapping("/getAll")
-    public List<NoticiaDto> getUsuarios(){
+    public List<NoticiaDto> getNoticias(){
         return noticiaService.getAll();
     }
     @DeleteMapping("/delete/{id}")
     public String deleteNoticia(@PathVariable Long id){ // Parameter changed from 'usuario' to 'id'
         noticiaService.delete(id);
-        return "se ha borrado el usuario";
+        return "se ha borrado la noticia";
     }
 
     @PutMapping("/update/{id}")
