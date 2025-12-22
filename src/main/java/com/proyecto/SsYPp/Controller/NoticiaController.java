@@ -1,5 +1,6 @@
 package com.proyecto.SsYPp.Controller;
 
+import com.proyecto.SsYPp.Dto.NoticiaDto;
 import com.proyecto.SsYPp.Dto.UsuarioDto;
 import com.proyecto.SsYPp.Entity.Noticia;
 import com.proyecto.SsYPp.Service.NoticiaService;
@@ -17,11 +18,11 @@ public class NoticiaController {
  @Autowired
  NoticiaService noticiaService;
  @GetMapping("/{noticia}")
- public Noticia getNoticia(@PathVariable Long noticia){
+ public NoticiaDto getNoticia(@PathVariable Long noticia){
      return noticiaService.get(noticia);
  }
     @GetMapping("/getAll")
-    public List<Noticia> getUsuarios(){
+    public List<NoticiaDto> getUsuarios(){
         return noticiaService.getAll();
     }
     @DeleteMapping("/delete/{id}")
@@ -31,13 +32,14 @@ public class NoticiaController {
     }
 
     @PutMapping("/update/{id}")
-    public Noticia updateNoticia(
+    public NoticiaDto updateNoticia(
             @PathVariable Integer id,
-            @Valid @RequestBody Noticia noticia) {
+            @Valid @RequestBody NoticiaDto noticia) {
         return noticiaService.update(noticia);
     }
-    public ResponseEntity<Noticia> registerNoticia(@Valid @ModelAttribute Noticia noticia) {
-        Noticia nuevaNoticia = noticiaService.create(noticia);
+    @PostMapping("/create")
+    public ResponseEntity<NoticiaDto> registerNoticia(@Valid @ModelAttribute NoticiaDto noticia) {
+        NoticiaDto nuevaNoticia = noticiaService.create(noticia);
         return new ResponseEntity<>(nuevaNoticia, HttpStatus.CREATED);
 
     }
