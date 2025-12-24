@@ -360,3 +360,33 @@ body{
   .content-grid.is-split{ grid-template-columns: 1fr; }
   .panel--right{ display: block; } /* en móvil se muestra abajo */
 }
+/* ====== VACANTES: botones como Figma ====== */
+.btn--gold{
+  background: #c9a25a;
+  border-color: #c9a25a;
+  color: #1f1f1f;
+  padding: 7px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.btn--wine{
+  background: #8b1d2c;
+  border-color: #8b1d2c;
+  color: #fff;
+  padding: 7px 18px;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+/* inputs pequeños (para No. Vacantes y Fecha) */
+.input--small{
+  height: 30px;
+  padding: 6px 8px;
+}
+
+/* acciones del form centradas (como diseño) */
+.form-actions--center{
+  justify-content: center;
+  gap: 18px;
+}

@@ -1,136 +1,435 @@
 <!DOCTYPE html>
-<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Vacantes - SSyPp</title>
-
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-    <link rel="stylesheet" href="/css/styles.css">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Administrador | Vacantes</title>
+    <link rel="stylesheet" href="/css/admin.css" />
 </head>
+
 <body>
+<div class="app">
 
-<header class="main-header">
-    <div class="logo-area">
-        <img src="/img/escudo_colibri.png" alt="Escudo de México" class="logo-escudo">
-        <img src="/img/escudo_estado_mexico.png" alt="Gobierno del Estado de México" class="logo-estado">
-    </div>
+    <!-- TOP BAR -->
+    <header class="topbar">
+        <div class="topbar__left">
+            <span class="topbar__title">ADMINISTRADOR</span>
+        </div>
 
-    <h1 class="page-title">VACANTES</h1>
+        <div class="topbar__right">
+            <div class="logos">
+                <img src="/img/Escudo_colibri.png" alt="Escudo Colibrí" class="logo-img">
+                <img src="/img/EscudoGEM.png" alt="Escudo GEM" class="logo-img">
+            </div>
+        </div>
+    </header>
 
-    <nav class="user-nav">
-        <a href="index.html" class="nav-button">INICIO</a>
+    <!-- SUBMODULE TABS + LOGOUT -->
+    <nav class="tabs">
+        <div class="tabs__left">
+            <a class="tab" href="/index">NOTICIAS</a>
+            <a class="tab tab--active" href="/vacantes.html">VACANTES</a>
+            <a class="tab" href="/asignaciones.html">ASIGNACIONES</a>
+            <a class="tab" href="/actividades.html">ACTIVIDADES Y EVIDENCIAS</a>
+            <a class="tab" href="/convenios.html">CONVENIOS</a>
+            <a class="tab" href="/catalogos.html">CATÁLOGOS</a>
+            <a class="tab" href="/usuarios.html">USUARIOS Y ROLES</a>
+            <a class="tab" href="/auditorias.html">AUDITORÍA</a>
+        </div>
+
+        <div class="tabs__right">
+            <button class="btn btn--outline btn--logout" type="button" id="btnLogout">
+                CERRAR SESIÓN
+            </button>
+        </div>
     </nav>
-</header>
-<form th:action="@{/cerrar-sesion}" method="post" style="display:inline;">
-    <button type="submit" class="nav-button" style="background: none; border: none; padding: 0; cursor: pointer;">
-        CERRAR SESIÓN
-    </button>
-</form>
 
-<div id="main-content" class="container-fluid content-container">
-    <div class="row w-100 mx-auto">
+    <!-- SEARCH BAR -->
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="searchVac" class="search__input" type="text" placeholder="Buscar Vacante por Nombre, Unidad..." />
+        </div>
+        <button class="btn btn--primary" type="button" id="btnSearchVac">Buscar</button>
+    </section>
 
-        <div id="vacantes-list-col" class="col-12">
+    <!-- CONTENT (RECORRIDO) -->
+    <section class="content-grid" id="vacLayout">
 
-            <section class="vacantes-controls">
-                <div class="search-filters">
-                    <input type="text" id="search-institucion" placeholder="Buscar por institución, carrera">
+        <!-- IZQUIERDA: TABLA -->
+        <main class="panel panel--left">
+            <div class="panel__header">
+                <h2 class="panel__title">VACANTES</h2>
 
-                    <select id="filter-tipo">
-                        <option value="">Tipo</option>
-                        <option value="ss">Servicio Social</option>
-                        <option value="pp">Prácticas Profesionales</option>
-                    </select>
+                <div class="panel__actions">
+                    <button class="btn btn--primary" type="button" id="btnNewVac">
+                        Nueva Vacante <span class="icon">＋</span>
+                    </button>
                 </div>
+            </div>
 
-                <button id="create-vacante-btn" class="btn btn-primary" onclick="mostrarFormulario()">Crear Vacante</button>
-            </section>
-
-            <section class="vacantes-list-section">
-                <table class="data-table">
+            <div class="table-wrap">
+                <table class="table">
                     <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>TÍTULO</th>
-                        <th>ÁREA</th>
-                        <th>ESTADO</th>
-                        <th>ACCIONES</th>
+                        <th>Fecha</th>
+                        <th>Nombre de la Vacante</th>
+                        <th>Unidad</th>
+                        <th>No. Vacantes</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                        <th class="th-actions">Acciones</th>
                     </tr>
                     </thead>
 
-                    <tbody id="vacantes-table-body">
-                    <tr>
-                        <td>1</td>
-                        <td>TITULO</td>
-                        <td>TI</td>
-                        <td>Publicado</td>
-                        <td>
-                            <button class="btn-action edit-btn">Editar</button>
-                            <button class="btn-action delete-btn">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>2</td>
-                        <td>CONTABILIDAD</td>
-                        <td>Dirección de TI</td>
-                        <td>Borrador</td>
-                        <td>
-                            <button class="btn-action edit-btn">Editar</button>
-                            <button class="btn-action delete-btn">Eliminar</button>
-                        </td>
-                    </tr>
-                    </tbody>
+                    <!-- Se llena con JS -->
+                    <tbody id="vacantesBody"></tbody>
                 </table>
-
-                <div class="pagination-controls">
-                    <a href="#" class="page-link active">1</a>
-                    <a href="#" class="page-link">2</a>
-                    <a href="#" class="page-link">3</a>
-                    <a href="#" class="page-link">4</a>
-                    <a href="#" class="page-link">&gt;</a>
-                </div>
-            </section>
-        </div> <div id="vacantes-form-col" class="col-6 d-none">
-
-        <section id="vacante-form-section" class="vacante-form-container">
-            <div class="form-header">
-                <h2 class="form-title">Crear/Administrar Vacantes</h2>
             </div>
 
-            <form id="vacante-form" class="vacante-grid-form">
+            <div class="pagination">
+                <button class="page page--active" type="button">1</button>
+                <button class="page" type="button">2</button>
+                <button class="page" type="button">3</button>
+                <button class="page" type="button">4</button>
+                <button class="page" type="button">5</button>
+                <button class="page" type="button">›</button>
+            </div>
+        </main>
 
-                <div class="form-column">
-                    <label for="titulo">Título vacante:</label>
-                    <input type="text" id="titulo" name="titulo" placeholder="Ej. Auxiliar administrativo" required>
+        <!-- DERECHA: FORMULARIO -->
+        <aside id="vacFormPanel" class="panel panel--right">
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">VACANTES</h3>
+            </div>
 
-                    <label for="perfil">Perfil requerido:</label>
-                    <input type="text" id="perfil" name="perfil" placeholder="Selecciona perfil">
+            <form class="form" id="vacForm">
 
+                <div class="form-row">
+                    <label>Título de la Vacante</label>
+                    <input id="nombrePuesto" type="text" placeholder="Ej. Auxiliar Administrativo..." />
                 </div>
 
-                <div class="form-column">
-                    <label for="area">Área administrativa:</label>
-                    <select id="area" name="area" required>
-                        <option value="">Selecciona el área</option>
-                        <option value="aux">Auxiliar administrativo</option>
-                    </select>
-
+                <div class="form-row">
+                    <label>Descripción</label>
+                    <textarea id="descripcion" rows="3" placeholder="Describe brevemente la vacante..."></textarea>
                 </div>
 
-                <div class="form-full-width">
-                    <label for="descripcion">Descripción:</label>
-                    <textarea id="descripcion" name="descripcion" rows="5"></textarea>
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Unidad / Área solicitante</label>
+                        <select id="AreasDgp_idArea">
+                            <option value="1">Archivo</option>
+                            <option value="2">Jurídico</option>
+                            <option value="3">Desarrollo Tecnológico</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Perfil requerido</label>
+                        <select id="Perfiles_idPerfil">
+                            <option value="1">Ingeniero en Sistemas</option>
+                            <option value="2">Administrador</option>
+                            <option value="3">Contador</option>
+                        </select>
+                    </div>
                 </div>
 
-                <div class="form-actions form-full-width">
-                    <button type="submit" class="btn btn-primary" id="publish-btn">Publicar vacante</button>
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Modalidad</label>
+                        <select id="Modalidades_idModalidad">
+                            <option value="1">Presencial</option>
+                            <option value="2">Remoto</option>
+                            <option value="3">Híbrido</option>
+                        </select>
+                    </div>
 
-                    <button type="button" class="btn btn-secondary" id="cancel-form-btn" onclick="ocultarFormulario()">Cancelar</button>
+                    <div>
+                        <label>Horario</label>
+                        <select id="Horarios_idHorario">
+                            <option value="1">Matutino</option>
+                            <option value="2">Vespertino</option>
+                            <option value="3">Tiempo Completo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>Requisitos</label>
+                    <textarea id="requisitos" rows="3" placeholder="Ej. Ser alumno regular, promedio mínimo..."></textarea>
+                </div>
+
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Número de Vacantes</label>
+                        <input id="numeroPlazas" class="input--small" type="number" min="1" placeholder="5" />
+                    </div>
+
+                    <div>
+                        <label>Programar Publicación</label>
+                        <!-- Tu back maneja OffsetTime; aquí dejamos date pero no lo mandamos (para evitar error) -->
+                        <input id="fechaPublicacion" class="input--small" type="time" step="1" />
+                    </div>
+                </div>
+
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Carrera</label>
+                        <input id="carrera" type="text" placeholder="Ej. Sistemas, Administración..." />
+                    </div>
+
+                    <div>
+                        <label>Estatus</label>
+                        <select id="estatus">
+                            <option value="true">Publicado</option>
+                            <option value="false">No publicado</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>Asignación (ID)</label>
+                    <input id="Asignaciones_idAsignacion" type="number" min="1" placeholder="Ej. 1" />
+                </div>
+
+                <div class="form-actions form-actions--center">
+                    <button type="submit" class="btn btn--gold">Guardar</button>
+                    <button type="button" class="btn btn--wine" id="btnCancelVac">Cancelar</button>
                 </div>
             </form>
-        </section>
-    </div> </div> </div> <script src="/js/main.js"></script>
+        </aside>
+
+    </section>
+</div>
+
+<script>
+    const btnLogout = document.getElementById("btnLogout");
+
+btnLogout?.addEventListener("click", async () => {
+  try {
+    const res = await fetch("/logout", {
+      method: "POST",
+      credentials: "same-origin"
+    });
+
+    if (res.ok || res.status === 302) {
+      window.location.href = "/login?logout";
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
+    document.addEventListener("DOMContentLoaded", () => {
+      const API = "/vacantes";
+
+      const btnNew = document.getElementById("btnNewVac");
+      const btnCancel = document.getElementById("btnCancelVac");
+      const layout = document.getElementById("vacLayout");
+
+      const tbody = document.getElementById("vacantesBody");
+      const form = document.getElementById("vacForm");
+
+      const searchInput = document.getElementById("searchVac");
+      const btnSearch = document.getElementById("btnSearchVac");
+
+      let vacantesCache = [];
+      let editing = null; // objeto en edición (sin usar GET /{id})
+
+      function openForm(){ layout.classList.add("is-split"); }
+      function closeForm(){ layout.classList.remove("is-split"); editing = null; form.reset(); }
+
+      btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
+      btnCancel?.addEventListener("click", closeForm);
+
+      async function cargarVacantes() {
+        const res = await fetch(`${API}/getAll`, { headers: { "Accept": "application/json" } });
+        if (!res.ok) {
+          console.error("Error getAll:", await res.text());
+          return;
+        }
+        vacantesCache = await res.json();
+        renderVacantes(vacantesCache);
+      }
+
+      function pillEstatus(estatus) {
+        return estatus === true
+          ? `<span class="pill pill--ok">Publicado</span>`
+          : `<span class="pill pill--bad">No publicado</span>`;
+      }
+
+      function fmtHora(hora) {
+        // puede venir "08:00:00-06:00" (OffsetTime) o "08:00:00.000000" (time(6))
+        if (!hora) return "";
+        const s = String(hora);
+        return s.slice(0, 8); // HH:MM:SS
+      }
+
+      function renderVacantes(lista) {
+        tbody.innerHTML = "";
+        lista.forEach(v => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td>${fmtHora(v.fechaPublicacion)}</td>
+            <td>${v.nombrePuesto ?? ""}</td>
+            <td>${v.AreasDgp_idArea ?? ""}</td>
+            <td>${v.numeroPlazas ?? ""}</td>
+            <td>${v.Horarios_idHorario ?? ""}</td>
+            <td>${pillEstatus(v.estatus)}</td>
+            <td class="actions">
+              <button class="btn btn--mini" type="button" data-edit="${v.idVacantes}">Editar</button>
+              <button class="btn btn--mini btn--outline" type="button" data-del="${v.idVacantes}">Eliminar</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+
+      tbody.addEventListener("click", async (e) => {
+        const editBtn = e.target.closest("[data-edit]");
+        const delBtn = e.target.closest("[data-del]");
+
+        if (editBtn) {
+          const id = Number(editBtn.getAttribute("data-edit"));
+          editing = vacantesCache.find(x => Number(x.idVacantes) === id);
+          if (!editing) return;
+
+          document.getElementById("nombrePuesto").value = editing.nombrePuesto ?? "";
+          document.getElementById("descripcion").value = editing.descripcion ?? "";
+          document.getElementById("requisitos").value = editing.requisitos ?? "";
+          document.getElementById("carrera").value = editing.carrera ?? "";
+          document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
+
+          document.getElementById("AreasDgp_idArea").value = editing.AreasDgp_idArea ?? "";
+          document.getElementById("Perfiles_idPerfil").value = editing.Perfiles_idPerfil ?? "";
+          document.getElementById("Modalidades_idModalidad").value = editing.Modalidades_idModalidad ?? "";
+          document.getElementById("Horarios_idHorario").value = editing.Horarios_idHorario ?? "";
+          document.getElementById("Asignaciones_idAsignacion").value = editing.Asignaciones_idAsignacion ?? "";
+
+          document.getElementById("estatus").value = String(editing.estatus ?? true);
+
+          // input type="time" acepta "HH:MM" o "HH:MM:SS"
+          const hhmmss = fmtHora(editing.fechaPublicacion); // "HH:MM:SS"
+          document.getElementById("fechaPublicacion").value = hhmmss || "";
+
+          openForm();
+        }
+
+        if (delBtn) {
+          const id = delBtn.getAttribute("data-del");
+          if (!confirm("¿Eliminar esta vacante?")) return;
+
+          const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
+          if (!res.ok) {
+            console.error("Error delete:", await res.text());
+            alert("No se pudo eliminar. Revisa consola.");
+            return;
+          }
+          cargarVacantes();
+        }
+      });
+
+      form.addEventListener("submit", async (e) => {
+        e.preventDefault();
+
+        // ===== fechaPublicacion: OffsetTime requiere offset =====
+        // input time devuelve "HH:MM" o "HH:MM:SS"
+        const timeVal = document.getElementById("fechaPublicacion").value;
+        const hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
+
+        // Ajusta si tu app usa otro huso; aquí usamos -06:00 (México centro)
+        const timeWithOffset = hhmmss ? `${hhmmss}-06:00` : null;
+
+        if (!timeWithOffset) {
+          alert("Selecciona una hora en 'Programar Publicación'.");
+          return;
+        }
+
+        const payloadCommon = {
+          idVacantes: editing?.idVacantes ?? null,
+          nombrePuesto: document.getElementById("nombrePuesto").value.trim(),
+          descripcion: document.getElementById("descripcion").value.trim(),
+          requisitos: document.getElementById("requisitos").value.trim(),
+          carrera: document.getElementById("carrera").value.trim(),
+          numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
+          estatus: document.getElementById("estatus").value === "true",
+          AreasDgp_idArea: Number(document.getElementById("AreasDgp_idArea").value || 0),
+          Perfiles_idPerfil: Number(document.getElementById("Perfiles_idPerfil").value || 0),
+          Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
+          Horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
+          Asignaciones_idAsignacion: Number(document.getElementById("Asignaciones_idAsignacion").value || 0),
+          fechaPublicacion: timeWithOffset
+        };
+
+        // Validaciones mínimas
+        if (!payloadCommon.nombrePuesto || !payloadCommon.descripcion || payloadCommon.numeroPlazas < 1) {
+          alert("Completa Título, Descripción y Número de Vacantes (mínimo 1).");
+          return;
+        }
+        if (!payloadCommon.AreasDgp_idArea || !payloadCommon.Perfiles_idPerfil || !payloadCommon.Modalidades_idModalidad ||
+            !payloadCommon.Horarios_idHorario || !payloadCommon.Asignaciones_idAsignacion) {
+          alert("Selecciona Área/Perfil/Modalidad/Horario y Asignación (ID).");
+          return;
+        }
+
+        if (editing) {
+          // UPDATE -> tu back usa @RequestBody (JSON)
+          const res = await fetch(`${API}/update/${editing.idVacantes}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payloadCommon)
+          });
+
+          if (!res.ok) {
+            console.error("Error update:", await res.text());
+            alert("No se pudo actualizar. Revisa consola.");
+            return;
+          }
+
+        } else {
+          // CREATE -> tu back usa @ModelAttribute => FormData
+          const fd = new FormData();
+          Object.entries(payloadCommon).forEach(([k, v]) => {
+            if (v === null || v === undefined) return;
+            fd.append(k, String(v));
+          });
+
+          const res = await fetch(`${API}/create`, {
+            method: "POST",
+            body: fd
+          });
+
+          if (!res.ok) {
+            console.error("Error create:", await res.text());
+            alert("No se pudo crear. Revisa consola.");
+            return;
+          }
+        }
+
+        await cargarVacantes();
+        closeForm();
+      });
+
+      function filtrar() {
+        const q = (searchInput?.value || "").toLowerCase().trim();
+        if (!q) return renderVacantes(vacantesCache);
+
+        const filtradas = vacantesCache.filter(v => {
+          const nombre = (v.nombrePuesto ?? "").toLowerCase();
+          const carrera = (v.carrera ?? "").toLowerCase();
+          const unidad = String(v.AreasDgp_idArea ?? "").toLowerCase();
+          return nombre.includes(q) || carrera.includes(q) || unidad.includes(q);
+        });
+
+        renderVacantes(filtradas);
+      }
+
+      btnSearch?.addEventListener("click", filtrar);
+      searchInput?.addEventListener("input", filtrar);
+
+      cargarVacantes();
+    });
+</script>
+
 </body>
 </html>

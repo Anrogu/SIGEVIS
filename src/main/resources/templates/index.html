@@ -28,17 +28,19 @@
     <nav class="tabs">
         <div class="tabs__left">
             <a class="tab tab--active" href="/index">NOTICIAS</a>
-            <a class="tab" href="/vacantes.html">VACANTES</a>
-            <a class="tab" href="/asignaciones.html">ASIGNACIONES</a>
-            <a class="tab" href="/actividades.html">ACTIVIDADES Y EVIDENCIAS</a>
-            <a class="tab" href="/convenios.html">CONVENIOS</a>
-            <a class="tab" href="/catalogos.html">CATÁLOGOS</a>
-            <a class="tab" href="/usuarios.html">USUARIOS Y ROLES</a>
-            <a class="tab" href="/auditorias.html">AUDITORÍA</a>
+            <a class="tab" href="/vacantes">VACANTES</a>
+            <a class="tab" href="/asignaciones">ASIGNACIONES</a>
+            <a class="tab" href="/actividades">ACTIVIDADES Y EVIDENCIAS</a>
+            <a class="tab" href="/convenios">CONVENIOS</a>
+            <a class="tab" href="/catalogos">CATÁLOGOS</a>
+            <a class="tab" href="/usuarios">USUARIOS Y ROLES</a>
+            <a class="tab" href="/auditorias">AUDITORÍA</a>
         </div>
 
         <div class="tabs__right">
-            <button class="btn btn--outline btn--logout" type="button">CERRAR SESIÓN</button>
+            <button class="btn btn--outline btn--logout" type="button" id="btnLogout">
+                CERRAR SESIÓN
+            </button>
         </div>
     </nav>
 
@@ -157,6 +159,23 @@
 </div>
 
 <script>
+    const btnLogout = document.getElementById("btnLogout");
+
+btnLogout?.addEventListener("click", async () => {
+  try {
+    const res = await fetch("/logout", {
+      method: "POST",
+      credentials: "same-origin"
+    });
+
+    if (res.ok || res.status === 302) {
+      window.location.href = "/login?logout";
+    }
+  } catch (err) {
+    console.error(err);
+  }
+});
+
     document.addEventListener("DOMContentLoaded", () => {
       const API = {
         all: "/noticias/getAll",
@@ -481,7 +500,7 @@
         if (editingId) actualizarNoticia(editingId);
         else crearNoticia();
       });
-    
+
       // Inicial
       cargarNoticias();
     });

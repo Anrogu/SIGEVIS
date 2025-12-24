@@ -38,6 +38,5 @@ public class VacanteController {
     public ResponseEntity<VacanteDto> registerVacante(@Valid @ModelAttribute VacanteDto vacante) {
         VacanteDto nuevaVacante = vacanteService.create(vacante);
         return new ResponseEntity<>(nuevaVacante, HttpStatus.CREATED);
-
     }
 }

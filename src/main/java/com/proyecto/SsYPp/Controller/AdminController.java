@@ -3,7 +3,6 @@ package com.proyecto.SsYPp.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
 public class AdminController {
-
     // El return "nombreArchivo" busca: src/main/resources/templates/nombreArchivo.html
 
     @GetMapping("/vacantes.html")
