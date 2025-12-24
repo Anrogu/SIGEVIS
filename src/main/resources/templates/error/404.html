@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>404 Not Found</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body class="gob-body">
+
+<div class="gob-card gob-error">
+
+    <div class="gob-error-img">
+        <img th:src="@{/img/Escudo_colibri.png}" alt="Colibrí">
+    </div>
+
+    <h1 class="gob-error-code">404</h1>
+    <p class="gob-error-text">Not Found</p>
+
+    <a class="gob-btn" th:href="@{/}">Volver</a>
+</div>
+
+</body>
+</html>
