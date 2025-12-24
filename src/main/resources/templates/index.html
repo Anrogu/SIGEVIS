@@ -1,419 +1,491 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Administrador - Edomex Style</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        /* --- VARIABLES Y RESET --- */
-        :root {
-            --primary-color: #9D2449; /* Color institucional aprox */
-            --text-color: #333;
-            --gray-light: #f5f5f5;
-            --border-color: #ddd;
-            --success-bg: #e8f5e9;
-            --success-text: #2e7d32;
-            --warning-bg: #fff3e0;
-            --warning-text: #ef6c00;
-            --danger-bg: #ffebee;
-            --danger-text: #c62828;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        body {
-            background-color: #fff;
-            color: var(--text-color);
-            padding: 20px;
-        }
-
-        /* --- HEADER --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-bottom: 20px;
-            border-bottom: 3px solid var(--primary-color);
-        }
-
-        .header-title {
-            font-weight: 800;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-        }
-
-        .header-logos {
-            display: flex;
-            gap: 15px;
-        }
-
-        .header-logos img {
-            height: 40px; /* Ajusta según tus logos reales */
-        }
-
-        /* --- NAVEGACIÓN --- */
-        nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--border-color);
-            margin-bottom: 20px;
-        }
-
-        .nav-links a {
-            text-decoration: none;
-            color: var(--text-color);
-            font-weight: 600;
-            font-size: 0.85rem;
-            margin-right: 20px;
-            text-transform: uppercase;
-        }
-
-        .nav-links a.active {
-            border-bottom: 2px solid var(--text-color);
-        }
-
-        .logout-btn {
-            border: 1px solid var(--text-color);
-            padding: 5px 15px;
-            background: none;
-            cursor: pointer;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-        }
-
-        /* --- BUSCADOR --- */
-        .search-bar {
-            position: relative;
-            margin-bottom: 30px;
-        }
-
-        .search-bar input {
-            width: 100%;
-            padding: 12px 15px 12px 40px;
-            border: 1px solid var(--border-color);
-            border-radius: 25px;
-            font-size: 0.9rem;
-            outline: none;
-        }
-
-        .search-icon {
-            position: absolute;
-            left: 15px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #999;
-        }
-
-        .btn-search {
-            position: absolute;
-            right: 5px;
-            top: 4px;
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 25px;
-            border-radius: 20px;
-            cursor: pointer;
-        }
-
-        /* --- SECCIÓN NOTICIAS (TABLA) --- */
-        .content-box {
-            border: 1px solid var(--text-color);
-            padding: 20px;
-            margin-bottom: 30px;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .section-title {
-            font-weight: 800;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-        }
-
-        .btn-new {
-            background-color: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 8px 15px;
-            font-size: 0.8rem;
-            cursor: pointer;
-            border-radius: 4px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 0.85rem;
-        }
-
-        th {
-            text-align: left;
-            padding: 10px;
-            font-weight: 700;
-            color: #444;
-        }
-
-        td {
-            padding: 15px 10px;
-            border-bottom: 1px solid #eee;
-        }
-
-        /* Estilos de Estado (Badges) */
-        .badge {
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-weight: 600;
-            font-size: 0.75rem;
-            display: inline-block;
-            text-align: center;
-            min-width: 80px;
-        }
-        .status-published { background-color: var(--success-bg); color: var(--success-text); }
-        .status-warning { background-color: var(--warning-bg); color: var(--warning-text); }
-        .status-expired { background-color: var(--danger-bg); color: var(--danger-text); }
-
-        /* Botones de acción */
-        .action-btn {
-            background: white;
-            border: 1px solid var(--text-color);
-            padding: 4px 10px;
-            border-radius: 15px;
-            cursor: pointer;
-            margin-right: 5px;
-            font-size: 0.75rem;
-        }
-        .action-btn:hover { background-color: #f0f0f0; }
-
-        /* Paginación */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            gap: 10px;
-            margin-top: 20px;
-        }
-        .page-item {
-            border: 1px solid var(--text-color);
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-        .page-item:hover { background-color: #eee; }
-
-        /* --- PREVIEW NOTICIA (Inferior) --- */
-        .preview-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 40px;
-            padding-top: 20px;
-        }
-
-        .preview-text {
-            flex: 2;
-        }
-
-        .preview-text h3 {
-            font-size: 1rem;
-            font-weight: 800;
-            margin-bottom: 15px;
-        }
-
-        .preview-text p {
-            font-size: 0.85rem;
-            line-height: 1.5;
-            margin-bottom: 10px;
-            color: #555;
-        }
-
-        .preview-text ul {
-            list-style-position: inside;
-            font-size: 0.85rem;
-            color: #555;
-            margin-top: 10px;
-        }
-
-        .preview-image {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            min-width: 250px;
-        }
-
-        .preview-image img {
-            width: 100%;
-            max-width: 300px;
-            height: auto;
-        }
-
-        /* --- FOOTER --- */
-        footer {
-            text-align: center;
-            font-size: 0.7rem;
-            color: #888;
-            margin-top: 40px;
-            padding-top: 10px;
-            border-top: 1px solid #eee;
-        }
-
-    </style>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Administrador | Noticias</title>
+    <link rel="stylesheet" href="/css/admin.css" />
 </head>
+
 <body>
+<div class="app">
 
-<header>
-    <div class="header-title">Administrador</div>
-    <div class="header-logos">
-        <img src="/img/EscudoGEM.png" alt="Gobierno" class="logo-edomex">
-        <img src="/img/Escudo_colibri.png" alt="Gobierno" class="logo-edomex">
-    </div>
-</header>
-
-<nav>
-    <div class="nav-links">
-        <a href="#" class="active">NOTICIAS</a>
-        <a href="#">VACANTES</a>
-        <a href="#">ASIGNACIONES</a>
-        <a href="#">ACTIVIDADES Y EVIDENCIAS</a>
-        <a href="#">CONVENIOS</a>
-        <a href="#">CATÁLOGOS</a>
-        <a href="#">USUARIOS Y ROLES</a>
-        <a href="#">AUDITORIA</a>
-    </div>
-    <button class="logout-btn">CERRAR SESION <i class="fas fa-sign-out-alt"></i></button>
-</nav>
-
-<div class="search-bar">
-    <i class="fas fa-search search-icon"></i>
-    <input type="text" placeholder="Buscar Noticia por nombre...">
-    <button class="btn-search">Buscar</button>
-</div>
-
-<div class="content-box">
-
-    <div class="section-header">
-        <div class="section-title">NOTICIAS</div>
-        <button class="btn-new">Nueva Noticia <i class="fas fa-plus-circle"></i></button>
-    </div>
-
-    <table>
-        <thead>
-        <tr>
-            <th>Fecha</th>
-            <th>Nombre de la Noticia</th>
-            <th>Categoría</th>
-            <th>Visibilidad</th>
-            <th>Tipo de Noticia</th>
-            <th>Estatus</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr>
-            <td>09/12/2025</td>
-            <td>Día Internacional de la No Violencia</td>
-            <td>Comunicado Oficial</td>
-            <td>Solo Prestadores</td>
-            <td>Noticia Destacada</td>
-            <td><span class="badge status-published">Publicada</span></td>
-            <td>
-                <button class="action-btn">Editar <i class="far fa-edit"></i></button>
-                <button class="action-btn">Eliminar <i class="far fa-trash-alt"></i></button>
-            </td>
-        </tr>
-        <tr>
-            <td>30/11/2025</td>
-            <td>Convocatoria Oficial de Servicio Social 2025</td>
-            <td>Convocatoria</td>
-            <td>Publico General</td>
-            <td>Noticia en Portada</td>
-            <td><span class="badge status-warning">Por Vencer</span></td>
-            <td>
-                <button class="action-btn">Editar <i class="far fa-edit"></i></button>
-                <button class="action-btn">Eliminar <i class="far fa-trash-alt"></i></button>
-            </td>
-        </tr>
-        <tr>
-            <td>30/11/2025</td>
-            <td>Día Internacional de la No Violencia</td>
-            <td>Comunicado Oficial</td>
-            <td>Publico General</td>
-            <td>Noticia en Portada</td>
-            <td><span class="badge status-expired">Vencido</span></td>
-            <td>
-                <button class="action-btn">Editar <i class="far fa-edit"></i></button>
-                <button class="action-btn">Eliminar <i class="far fa-trash-alt"></i></button>
-            </td>
-        </tr>
-        <tr>
-            <td>30/11/2025</td>
-            <td>Convocatoria Oficial de Servicio Social 2025</td>
-            <td>Comunicado Oficial</td>
-            <td>Publico General</td>
-            <td>Noticia en Portada</td>
-            <td><span class="badge status-published">Publicada</span></td>
-            <td>
-                <button class="action-btn">Editar <i class="far fa-edit"></i></button>
-                <button class="action-btn">Eliminar <i class="far fa-trash-alt"></i></button>
-            </td>
-        </tr>
-        </tbody>
-    </table>
-
-    <div class="pagination">
-        <div class="page-item">1</div>
-        <div class="page-item">2</div>
-        <div class="page-item">3</div>
-        <div class="page-item">4</div>
-        <div class="page-item">5</div>
-        <div class="page-item"><i class="fas fa-chevron-right"></i></div>
-    </div>
-
-    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #ddd;">
-
-    <div class="preview-container">
-        <div class="preview-text">
-            <h3>Gobierno del Estado de México Reconoce a Nuevos Prestadores de Servicio Social y Prácticas Profesionales</h3>
-            <p>La Oficialía Mayor del Gobierno del Estado de México informa a la comunidad estudiantil que se encuentra abierta la convocatoria para integrar prestadores de servicio social durante el periodo febrero-julio 2025.</p>
-            <p>Esta iniciativa tiene como objetivo brindar a jóvenes universitarios y de nivel técnico la oportunidad de desarrollar competencias profesionales, participar en proyectos institucionales y contribuir al fortalecimiento de la gestión administrativa del Gobierno estatal.</p>
-            <p>Los estudiantes interesados podrán participar en áreas como:</p>
-            <ul>
-                <li>Gestión documental</li>
-                <li>Atención ciudadana</li>
-                <li>Análisis administrativo</li>
-                <li>Sistemas y tecnologías de la información</li>
-                <li>Recursos materiales y servicios generales</li>
-            </ul>
-            <br>
-            <p style="font-size: 0.75rem; color: #777;">La convocatoria está dirigida a estudiantes mayores de 18 años que cuenten con al menos el 70% de créditos concluidos y pertenezcan a instituciones educativas con convenio vigente...</p>
+    <!-- TOP BAR -->
+    <header class="topbar">
+        <div class="topbar__left">
+            <span class="topbar__title">ADMINISTRADOR</span>
         </div>
 
-        <div class="preview-image">
-            <img src="https://via.placeholder.com/350x250?text=Ilustracion+Servicio+Social" alt="Ilustración Servicio Social">
+        <div class="topbar__right">
+            <div class="logos">
+                <img src="/img/Escudo_colibri.png" alt="Escudo Colibrí" class="logo-img">
+                <img src="/img/EscudoGEM.png" alt="Escudo GEM" class="logo-img">
+            </div>
         </div>
-    </div>
+    </header>
 
+    <!-- SUBMODULE TABS + LOGOUT -->
+    <nav class="tabs">
+        <div class="tabs__left">
+            <a class="tab tab--active" href="/index">NOTICIAS</a>
+            <a class="tab" href="/vacantes.html">VACANTES</a>
+            <a class="tab" href="/asignaciones.html">ASIGNACIONES</a>
+            <a class="tab" href="/actividades.html">ACTIVIDADES Y EVIDENCIAS</a>
+            <a class="tab" href="/convenios.html">CONVENIOS</a>
+            <a class="tab" href="/catalogos.html">CATÁLOGOS</a>
+            <a class="tab" href="/usuarios.html">USUARIOS Y ROLES</a>
+            <a class="tab" href="/auditorias.html">AUDITORÍA</a>
+        </div>
+
+        <div class="tabs__right">
+            <button class="btn btn--outline btn--logout" type="button">CERRAR SESIÓN</button>
+        </div>
+    </nav>
+
+    <!-- SEARCH BAR (filtra en front por título) -->
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input class="search__input" id="searchTitulo" type="text" placeholder="Buscar Noticia por título..." />
+        </div>
+        <button class="btn btn--primary" id="btnBuscar" type="button">Buscar</button>
+    </section>
+
+    <!-- CONTENT (SE RECORRE CUANDO ABRES FORM) -->
+    <section class="content-grid" id="newsLayout">
+
+        <!-- IZQUIERDA: TABLA + PREVIEW ABAJO -->
+        <main class="panel panel--left">
+            <div class="panel__header">
+                <h2 class="panel__title">NOTICIAS</h2>
+
+                <div class="panel__actions">
+                    <button class="btn btn--primary" type="button" id="btnNewNews">
+                        Nueva Noticia <span class="icon">＋</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table" id="tableFull">
+                    <thead>
+                    <tr>
+                        <th>Hora Publicación</th>
+                        <th>Título</th>
+                        <th>Autor</th>
+                        <th>Estatus</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <!-- VACÍO: SE LLENA CON EL BACK -->
+                    <tbody id="newsTbody"></tbody>
+                </table>
+            </div>
+
+            <!-- PAGINACIÓN DINÁMICA (4 POR PÁGINA) -->
+            <div class="pagination" id="pagination"></div>
+
+            <!-- PREVIEW (SE MUESTRA AL DAR CLIC EN UNA FILA) -->
+            <section class="panel panel--preview" id="newsPreview" style="margin-top:16px; display:none;">
+                <div class="panel__header">
+                    <h3 class="panel__subtitle" id="previewTitle">Título</h3>
+
+                    <div class="panel__actions">
+                        <button class="btn btn--outline btn--mini" type="button" id="btnClosePreview">Cerrar</button>
+                    </div>
+                </div>
+
+                <div style="padding:12px 16px;">
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+                        <span><b>Hora:</b> <span id="previewHora"></span></span>
+                        <span><b>Autor:</b> <span id="previewAutor"></span></span>
+                        <span><b>Estatus:</b> <span id="previewEstatus"></span></span>
+                    </div>
+
+                    <div id="previewContenido" style="white-space:pre-wrap; line-height:1.45;"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- DERECHA: FORMULARIO -->
+        <aside id="newsFormPanel" class="panel panel--right">
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">Datos de la noticia</h3>
+            </div>
+
+            <form class="form" id="newsForm">
+                <div class="form-row">
+                    <label>Título</label>
+                    <input id="inpTitulo" type="text" placeholder="Escribe el título..." />
+                </div>
+
+                <div class="form-row">
+                    <label>Contenido</label>
+                    <textarea id="txtContenido" rows="6" placeholder="Redacta aquí el contenido completo..."></textarea>
+                </div>
+
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Estatus</label>
+                        <select id="selEstatus">
+                            <option value="Publicada">Publicada</option>
+                            <option value="Por vencer">Por vencer</option>
+                            <option value="Vencida">Vencida</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Hora de publicación</label>
+                        <input id="inpHora" type="time" />
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>ID Autor (Usuario)</label>
+                    <input id="inpAutorId" type="number" placeholder="Ej: 1" />
+                </div>
+
+                <div class="form-actions">
+                    <button type="button" class="btn btn--outline" id="btnCancelNews">Cancelar</button>
+                    <button type="submit" class="btn btn--primary">Guardar</button>
+                </div>
+            </form>
+        </aside>
+
+    </section>
 </div>
 
-<footer>
-    Desarrollado por el Área de Desarrollo Tecnológico
-</footer>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const API = {
+        all: "/noticias/getAll",
+        one: (id) => `/noticias/${id}`,
+        create: "/noticias/create",
+        update: (id) => `/noticias/update/${id}`,
+        del: (id) => `/noticias/delete/${id}`,
+      };
+
+      const layout = document.getElementById("newsLayout");
+      const tbody = document.getElementById("newsTbody");
+
+      const btnNew = document.getElementById("btnNewNews");
+      const btnCancel = document.getElementById("btnCancelNews");
+      const form = document.getElementById("newsForm");
+
+      const inpTitulo = document.getElementById("inpTitulo");
+      const txtContenido = document.getElementById("txtContenido");
+      const selEstatus = document.getElementById("selEstatus");
+      const inpHora = document.getElementById("inpHora");
+      const inpAutorId = document.getElementById("inpAutorId");
+
+      const searchInput = document.getElementById("searchTitulo");
+      const btnBuscar = document.getElementById("btnBuscar");
+
+      // Preview refs
+      const preview = document.getElementById("newsPreview");
+      const previewTitle = document.getElementById("previewTitle");
+      const previewHora = document.getElementById("previewHora");
+      const previewAutor = document.getElementById("previewAutor");
+      const previewEstatus = document.getElementById("previewEstatus");
+      const previewContenido = document.getElementById("previewContenido");
+      const btnClosePreview = document.getElementById("btnClosePreview");
+
+      // Pagination refs/state
+      const pagination = document.getElementById("pagination");
+      const PAGE_SIZE = 4;
+      let currentPage = 1;
+
+      let editingId = null;
+      let cacheNoticias = [];
+      let currentList = [];
+
+      function openForm(){ layout.classList.add("is-split"); }
+      function closeForm(){ layout.classList.remove("is-split"); }
+      function limpiarForm(){ editingId = null; form.reset(); }
+
+      function escapeHtml(str) {
+        return String(str ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;")
+          .replaceAll("'", "&#039;");
+      }
+
+      function fmtHora(offsetTimeStr){
+        if (!offsetTimeStr) return "";
+        const m = String(offsetTimeStr).match(/^(\d{2}:\d{2})/);
+        return m ? m[1] : String(offsetTimeStr);
+      }
+
+      function pillEstatus(estatus) {
+        const e = (estatus || "").toLowerCase();
+        if (e.includes("public")) return `<span class="pill pill--ok">${escapeHtml(estatus)}</span>`;
+        if (e.includes("venc")) return `<span class="pill pill--bad">${escapeHtml(estatus)}</span>`;
+        if (e.includes("por")) return `<span class="pill pill--warn">${escapeHtml(estatus)}</span>`;
+        return `<span class="pill">${escapeHtml(estatus || "")}</span>`;
+      }
+
+      function showPreview(n) {
+        if (!preview) return;
+        previewTitle.textContent = n.titulo ?? "";
+        previewHora.textContent = fmtHora(n.fechaPublicacion) ?? "";
+        previewAutor.textContent = n.nombreAutor ?? "";
+        previewEstatus.textContent = n.estatus ?? "";
+        previewContenido.textContent = n.contenido ?? "";
+        preview.style.display = "block";
+        preview.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function hidePreview() {
+        if (!preview) return;
+        preview.style.display = "none";
+        previewTitle.textContent = "";
+        previewHora.textContent = "";
+        previewAutor.textContent = "";
+        previewEstatus.textContent = "";
+        previewContenido.textContent = "";
+      }
+
+      btnClosePreview?.addEventListener("click", hidePreview);
+
+      function renderTabla(lista){
+        tbody.innerHTML = lista.map(n => `
+          <tr class="news-row" data-row-id="${n.id}" style="cursor:pointer;">
+            <td>${fmtHora(n.fechaPublicacion)}</td>
+            <td>${escapeHtml(n.titulo)}</td>
+            <td>${escapeHtml(n.nombreAutor ?? "")}</td>
+            <td>${pillEstatus(n.estatus)}</td>
+            <td class="actions">
+              <button class="btn btn--mini" type="button" data-action="edit" data-id="${n.id}">Editar</button>
+              <button class="btn btn--mini btn--outline" type="button" data-action="delete" data-id="${n.id}">Eliminar</button>
+            </td>
+          </tr>
+        `).join("");
+      }
+
+      // ===== PAGINACIÓN (4 POR PÁGINA) =====
+      function getTotalPages(list) {
+        return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+      }
+
+      function getPageSlice(list, page) {
+        const start = (page - 1) * PAGE_SIZE;
+        return list.slice(start, start + PAGE_SIZE);
+      }
+
+      function renderPagination(totalPages) {
+        if (!pagination) return;
+
+        let html = "";
+        html += `<button class="page" type="button" data-page="prev" ${currentPage === 1 ? "disabled" : ""}>‹</button>`;
+
+        for (let p = 1; p <= totalPages; p++) {
+          html += `<button class="page ${p === currentPage ? "page--active" : ""}" type="button" data-page="${p}">${p}</button>`;
+        }
+
+        html += `<button class="page" type="button" data-page="next" ${currentPage === totalPages ? "disabled" : ""}>›</button>`;
+        pagination.innerHTML = html;
+      }
+
+      function renderTablaPaginada(list) {
+        currentList = Array.isArray(list) ? list : [];
+        const totalPages = getTotalPages(currentList);
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        const pageItems = getPageSlice(currentList, currentPage);
+        renderTabla(pageItems);
+        renderPagination(totalPages);
+      }
+
+      pagination?.addEventListener("click", (e) => {
+        const btn = e.target.closest("button[data-page]");
+        if (!btn) return;
+
+        const totalPages = getTotalPages(currentList);
+
+        const val = btn.dataset.page;
+        if (val === "prev" && currentPage > 1) currentPage--;
+        else if (val === "next" && currentPage < totalPages) currentPage++;
+        else {
+          const n = Number(val);
+          if (!isNaN(n)) currentPage = n;
+        }
+
+        renderTablaPaginada(currentList);
+      });
+
+      // ===== API CALLS =====
+      async function cargarNoticias(){
+        const res = await fetch(API.all);
+        if (!res.ok) {
+          alert("Error cargando noticias (GET /noticias/getAll).");
+          return;
+        }
+        cacheNoticias = await res.json();
+        currentPage = 1;
+        renderTablaPaginada(cacheNoticias);
+        hidePreview();
+      }
+
+      async function cargarParaEditar(id){
+        const res = await fetch(API.one(id));
+        if (!res.ok) { alert("No se pudo cargar la noticia."); return; }
+        const n = await res.json();
+
+        editingId = n.id;
+        inpTitulo.value = n.titulo ?? "";
+        txtContenido.value = n.contenido ?? "";
+        selEstatus.value = n.estatus ?? "Publicada";
+        inpAutorId.value = n.autoridIdusuario ?? "";
+        inpHora.value = fmtHora(n.fechaPublicacion) || "";
+
+        openForm();
+      }
+
+      async function eliminarNoticia(id){
+        if (!confirm("¿Seguro que deseas eliminar esta noticia?")) return;
+        const res = await fetch(API.del(id), { method: "DELETE" });
+        if (!res.ok) { alert("Error al eliminar."); return; }
+        await cargarNoticias();
+      }
+
+      // "HH:MM" -> "HH:MM:00-06:00" para OffsetTime
+      function horaAOffsetTime(hhmm, offset = "-06:00"){
+        return `${hhmm}:00${offset}`;
+      }
+
+      async function crearNoticia(){
+        const titulo = inpTitulo.value.trim();
+        const contenido = txtContenido.value.trim();
+        const estatus = selEstatus.value;
+        const autorId = inpAutorId.value.trim();
+        const hhmm = inpHora.value;
+
+        if (!titulo || !contenido || !estatus || !autorId || !hhmm) {
+          alert("Completa: Título, Contenido, Estatus, Hora y AutorId.");
+          return;
+        }
+
+        const fd = new FormData();
+        fd.append("titulo", titulo);
+        fd.append("contenido", contenido);
+        fd.append("estatus", estatus);
+        fd.append("fechaPublicacion", horaAOffsetTime(hhmm));
+        fd.append("autoridIdusuario", autorId);
+
+        const res = await fetch(API.create, { method: "POST", body: fd });
+
+        if (!res.ok) {
+          const txt = await res.text().catch(()=> "");
+          alert("Error al crear.\n" + txt + "\nTip: si dice Usuario no encontrado, revisa el AutorId.");
+          return;
+        }
+
+        limpiarForm(); closeForm();
+        await cargarNoticias();
+      }
+
+      async function actualizarNoticia(id){
+        const titulo = inpTitulo.value.trim();
+        const contenido = txtContenido.value.trim();
+        const estatus = selEstatus.value;
+        const autorId = Number(inpAutorId.value);
+        const hhmm = inpHora.value;
+
+        if (!id) { alert("No hay ID para actualizar."); return; }
+        if (!titulo || !contenido || !estatus || !autorId || !hhmm) {
+          alert("Completa: Título, Contenido, Estatus, Hora y AutorId.");
+          return;
+        }
+
+        const payload = {
+          id: id,
+          titulo,
+          contenido,
+          estatus,
+          fechaPublicacion: horaAOffsetTime(hhmm),
+          autoridIdusuario: autorId
+        };
+
+        const res = await fetch(API.update(id), {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+
+        if (!res.ok) {
+          const txt = await res.text().catch(()=> "");
+          alert("Error al actualizar.\n" + txt);
+          return;
+        }
+
+        limpiarForm(); closeForm();
+        await cargarNoticias();
+      }
+
+      function buscarLocal(){
+        const q = (searchInput.value || "").toLowerCase().trim();
+        if (!q) {
+          currentPage = 1;
+          renderTablaPaginada(cacheNoticias);
+          return;
+        }
+
+        const filtradas = cacheNoticias.filter(n =>
+          String(n.titulo || "").toLowerCase().includes(q)
+        );
+
+        currentPage = 1;
+        renderTablaPaginada(filtradas);
+      }
+
+      // Eventos UI
+      btnNew?.addEventListener("click", () => { limpiarForm(); openForm(); });
+      btnCancel?.addEventListener("click", () => { limpiarForm(); closeForm(); });
+
+      btnBuscar?.addEventListener("click", buscarLocal);
+      searchInput?.addEventListener("keydown", (e) => {
+        if (e.key === "Enter") { e.preventDefault(); buscarLocal(); }
+      });
+
+      // Delegación en tabla: botones + click en fila para preview
+      tbody.addEventListener("click", async (e) => {
+        // Botones Editar/Eliminar
+        const btn = e.target.closest("button[data-action]");
+        if (btn) {
+          const id = Number(btn.dataset.id);
+          if (!id) return;
+
+          if (btn.dataset.action === "edit") cargarParaEditar(id);
+          if (btn.dataset.action === "delete") eliminarNoticia(id);
+          return;
+        }
+
+        // Click en fila => preview
+        const row = e.target.closest("tr[data-row-id]");
+        if (!row) return;
+
+        const id = Number(row.dataset.rowId);
+        if (!id) return;
+
+        const res = await fetch(API.one(id));
+        if (!res.ok) { alert("No se pudo cargar el detalle."); return; }
+        const n = await res.json();
+        showPreview(n);
+      });
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        if (editingId) actualizarNoticia(editingId);
+        else crearNoticia();
+      });
+    
+      // Inicial
+      cargarNoticias();
+    });
+</script>
 
 </body>
 </html>
