@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         // 1. Rutas públicas
-                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/gob/auth/register").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/img/**", "/gob/auth/register").permitAll()
 
                         // 2. REGLAS ESTRICTAS
                         // Solo quien tenga ROLE_1 puede ver el index
@@ -67,8 +67,8 @@ public class SecurityConfig {
                         .permitAll()
                 )
 
-        //-------------------------------------------------------------------------------------------
-        //.exceptionHandling(ex -> ex.accessDeniedPage("/error/403"))
+                //-------------------------------------------------------------------------------------------
+                //.exceptionHandling(ex -> ex.accessDeniedPage("/error/403"))
                 .build();
     }
 }

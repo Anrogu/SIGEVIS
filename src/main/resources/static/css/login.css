@@ -1,7 +1,38 @@
+:root {
+    /* Letra */
+    --font-family: 'Poppins', sans-serif;
+
+    /* Paleta de Colores */
+    --color-vino: #7b1e3d;
+    --color-dorado: #B59560;
+    --color-dorado-claro: #B88E55;
+    --color-negro: #010101;
+    --color-gris: #CCCCCC;
+    --color-crema: #F5E0C7;
+
+    --color-verde: #7EF5FC;
+    --color-rojo: #FDECEA;
+    --color-naranja: #FFF4E5;
+
+    --color-Texto-verde: #517D32;
+    --color-Texto-rojo: #C84141;
+    --color-Texto-naranja: #C77700;
+
+    /* Variables de UI */
+    --texto-oscuro: #333333;
+    --texto-claro: #ffffff;
+    --borde-input: #CCCCCC;
+
+    /* VARIABLES DE IMÁGENES */
+    --img-fondo-login: url('/img/Fondo_1.png');
+    --img-degradado: url('/img/Degradado.png');
+    --logo-mixto: url('/img/EscudosGEM.png');
+}
+
 /* === General === */
 body {
-    font-family: 'Poppins', sans-serif;
-    background-color: #ffffff;
+    font-family: var(--font-family);
+    background-color: var(--texto-claro);
     margin: 0;
     padding: 0;
 }
@@ -11,7 +42,7 @@ body {
     width: 90%;
     max-width: 1100px;
     margin: 5% auto;
-    background-color: #fff;
+    background-color: var(--texto-claro);
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
     border-radius: 12px;
     overflow: hidden;
@@ -20,7 +51,7 @@ body {
 /* === Panel Izquierdo === */
 .login-left {
     flex: 1;
-    background-image: url('/img/fondo_1.png'); /* tu imagen aquí */
+    background-image: var(--img-fondo-login);
     background-size: cover;
     background-position: center;
     display: flex;
@@ -29,7 +60,7 @@ body {
 }
 
 .login-left .overlay {
-    background: rgba(123, 30, 61, 0.9); /* tono vino */
+    background: rgba(123, 30, 61, 0.9);
     width: 100%;
     height: 100%;
     display: flex;
@@ -38,7 +69,7 @@ body {
 }
 
 .login-left h2 {
-    color: #fff;
+    color: var(--texto-claro);
     font-size: 2.8rem;
     font-weight: bold;
     text-align: center;
@@ -47,20 +78,24 @@ body {
 /* === Panel Derecho === */
 .login-right {
     flex: 1.2;
+    background-image: var(--img-degradado);
     padding: 50px 60px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+    position: relative;
 }
 
+/* LOGO: Arriba a la derecha */
 .logo-edomex {
-    width: 200px;
-    display: block;
-    margin-left: auto;
+    width: 150px;
+    position: absolute;
+    top: 25px;
+    right: 25px;
 }
 
 h1 {
-    color: #000;
+    color: var(--color-negro);
     font-size: 1.8rem;
     margin-bottom: 25px;
 }
@@ -69,22 +104,23 @@ label {
     font-weight: 500;
     margin-top: 10px;
     display: block;
-    color: #333;
+    color: var(--texto-oscuro);
 }
 
 input, select {
     width: 100%;
     padding: 12px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--borde-input);
     border-radius: 8px;
     margin-top: 5px;
     font-size: 1rem;
     outline: none;
     transition: border-color 0.3s;
+    box-sizing: border-box;
 }
 
 input:focus, select:focus {
-    border-color: #7B1E3D;
+    border-color: var(--color-vino);
 }
 
 .password-container {
@@ -97,13 +133,14 @@ input:focus, select:focus {
     top: 35%;
     cursor: pointer;
     font-size: 1rem;
+    color: var(--texto-oscuro);
 }
 
 /* === Botón === */
 .btn-login {
     width: 100%;
-    background-color: #7B1E3D;
-    color: white;
+    background-color: var(--color-vino);
+    color: var(--texto-claro);
     border: none;
     padding: 14px;
     border-radius: 8px;
@@ -123,11 +160,11 @@ input:focus, select:focus {
     width: 100%;
     height: 5px;
     background: repeating-linear-gradient(
-        90deg,
-        #b48954,
-        #b48954 20px,
-        transparent 20px,
-        transparent 40px
+            90deg,
+            var(--color-dorado),
+            var(--color-dorado) 20px,
+            transparent 20px,
+            transparent 40px
     );
     margin: 25px 0;
 }
@@ -141,165 +178,12 @@ footer {
 
 /* === Error === */
 .error-msg {
-    color: red;
+    color: var(--color-Texto-rojo);
     text-align: center;
     font-weight: 500;
 }
 
-/*
-    =================================================
-    ESTRUCTURA GENERAL Y LAYOUT (2 COLUMNAS)
-    =================================================
-*/
-
-body {
-    margin: 0;
-    padding: 0;
-    font-family: Arial, sans-serif;
-    background-color: #f0f2f5;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    min-height: 100vh;
-}
-
-.login-container {
-    display: flex;
-    width: 900px;
-    max-width: 95%;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-/* PANEL IZQUIERDO (DECORATIVO) */
-.login-left {
-    flex: 1;
-    /* Reemplazar con una imagen de fondo relevante para el gobierno/plataforma */
-    background-image: url('URL_DE_TU_IMAGEN_DE_FONDO_AQUI');
-    background-color: #003366; /* Azul oscuro como fallback */
-    background-size: cover;
-    background-position: center;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    min-height: 550px; /* Altura mínima para asegurar visibilidad */
-}
-
-.overlay {
-    background-color: rgba(0, 50, 100, 0.75); /* Capa semi-transparente para texto */
-    padding: 40px;
-    text-align: center;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-}
-
-.login-left h2 {
-    font-size: 2em;
-    font-weight: bold;
-    margin-bottom: 10px;
-}
-
-
-/* PANEL DERECHO (FORMULARIO) */
-.login-right {
-    flex: 1;
-    padding: 30px;
-    display: flex;
-    flex-direction: column;
-    background-color: #ffffff;
-}
-
-.header {
-    text-align: center;
-    margin-bottom: 15px;
-}
-
-.logo-edomex {
-    max-width: 100px; /* Tamaño del escudo */
-    height: auto;
-}
-
-h2 {
-    text-align: center;
-    color: #333;
-    margin-bottom: 20px;
-    font-size: 1.5em;
-    font-weight: 600;
-}
-
-/*
-    =================================================
-    ESTILOS DEL FORMULARIO (MANTENIENDO TUS CLASES)
-    =================================================
-*/
-
-.form-group {
-    margin-bottom: 15px;
-}
-.form-group label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
-    color: #555;
-    font-size: 0.9em;
-}
-.form-group input, .form-group select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    box-sizing: border-box;
-    font-size: 1em;
-}
-
-/* Botón de Registro (btn-login) */
-.btn-login {
-    /* Color verde como en tu código original */
-    background-color: #7B1E3D !important;
-    color: white !important;
-    padding: 12px 20px !important;
-    border: none !important;
-    border-radius: 5px !important;
-    cursor: pointer !important;
-    font-size: 1em !important;
-    font-weight: bold !important;
-    margin-top: 15px !important;
-    transition: background-color 0.3s ease;
-}
-
-.decorative-line {
-    border-top: 1px solid #eee;
-    margin: 20px 0 15px 0;
-}
-
-.login-link {
-    text-align: center;
-    font-size: 0.9em;
-}
-
-.login-link a {
-    color: #007bff;
-    text-decoration: none;
-}
-
-.footer-text p {
-    font-size: 0.75em;
-    color: #aaa;
-    margin-top: 20px;
-    text-align: center;
-}
-
-/*
-    =================================================
-    RESPONSIVE (PARA MÓVILES)
-    =================================================
-*/
+/* === Responsive === */
 @media (max-width: 768px) {
     .login-container {
         flex-direction: column;
@@ -307,10 +191,17 @@ h2 {
     }
 
     .login-left {
-        display: none; /* Oculta el panel decorativo en pantallas pequeñas */
+        display: none;
     }
 
     .login-right {
-        padding: 20px;
+        padding: 30px;
+    }
+
+    /* En móviles, el logo puede regresar al centro o mantenerse arriba si prefieres */
+    .logo-edomex {
+        position: static;
+        margin: 0 auto 20px auto;
+        display: block;
     }
 }

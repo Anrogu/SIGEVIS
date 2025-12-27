@@ -161,116 +161,116 @@
 <script>
     const btnLogout = document.getElementById("btnLogout");
 
-btnLogout?.addEventListener("click", async () => {
-  try {
-    const res = await fetch("/logout", {
-      method: "POST",
-      credentials: "same-origin"
+    btnLogout?.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/logout", {
+                method: "POST",
+                credentials: "same-origin"
+            });
+
+            if (res.ok || res.status === 302) {
+                window.location.href = "/login?logout";
+            }
+        } catch (err) {
+            console.error(err);
+        }
     });
 
-    if (res.ok || res.status === 302) {
-      window.location.href = "/login?logout";
-    }
-  } catch (err) {
-    console.error(err);
-  }
-});
-
     document.addEventListener("DOMContentLoaded", () => {
-      const API = {
-        all: "/noticias/getAll",
-        one: (id) => `/noticias/${id}`,
-        create: "/noticias/create",
-        update: (id) => `/noticias/update/${id}`,
-        del: (id) => `/noticias/delete/${id}`,
-      };
+        const API = {
+            all: "/noticias/getAll",
+            one: (id) => `/noticias/${id}`,
+            create: "/noticias/create",
+            update: (id) => `/noticias/update/${id}`,
+            del: (id) => `/noticias/delete/${id}`,
+        };
 
-      const layout = document.getElementById("newsLayout");
-      const tbody = document.getElementById("newsTbody");
+        const layout = document.getElementById("newsLayout");
+        const tbody = document.getElementById("newsTbody");
 
-      const btnNew = document.getElementById("btnNewNews");
-      const btnCancel = document.getElementById("btnCancelNews");
-      const form = document.getElementById("newsForm");
+        const btnNew = document.getElementById("btnNewNews");
+        const btnCancel = document.getElementById("btnCancelNews");
+        const form = document.getElementById("newsForm");
 
-      const inpTitulo = document.getElementById("inpTitulo");
-      const txtContenido = document.getElementById("txtContenido");
-      const selEstatus = document.getElementById("selEstatus");
-      const inpHora = document.getElementById("inpHora");
-      const inpAutorId = document.getElementById("inpAutorId");
+        const inpTitulo = document.getElementById("inpTitulo");
+        const txtContenido = document.getElementById("txtContenido");
+        const selEstatus = document.getElementById("selEstatus");
+        const inpHora = document.getElementById("inpHora");
+        const inpAutorId = document.getElementById("inpAutorId");
 
-      const searchInput = document.getElementById("searchTitulo");
-      const btnBuscar = document.getElementById("btnBuscar");
+        const searchInput = document.getElementById("searchTitulo");
+        const btnBuscar = document.getElementById("btnBuscar");
 
-      // Preview refs
-      const preview = document.getElementById("newsPreview");
-      const previewTitle = document.getElementById("previewTitle");
-      const previewHora = document.getElementById("previewHora");
-      const previewAutor = document.getElementById("previewAutor");
-      const previewEstatus = document.getElementById("previewEstatus");
-      const previewContenido = document.getElementById("previewContenido");
-      const btnClosePreview = document.getElementById("btnClosePreview");
+        // Preview refs
+        const preview = document.getElementById("newsPreview");
+        const previewTitle = document.getElementById("previewTitle");
+        const previewHora = document.getElementById("previewHora");
+        const previewAutor = document.getElementById("previewAutor");
+        const previewEstatus = document.getElementById("previewEstatus");
+        const previewContenido = document.getElementById("previewContenido");
+        const btnClosePreview = document.getElementById("btnClosePreview");
 
-      // Pagination refs/state
-      const pagination = document.getElementById("pagination");
-      const PAGE_SIZE = 4;
-      let currentPage = 1;
+        // Pagination refs/state
+        const pagination = document.getElementById("pagination");
+        const PAGE_SIZE = 4;
+        let currentPage = 1;
 
-      let editingId = null;
-      let cacheNoticias = [];
-      let currentList = [];
+        let editingId = null;
+        let cacheNoticias = [];
+        let currentList = [];
 
-      function openForm(){ layout.classList.add("is-split"); }
-      function closeForm(){ layout.classList.remove("is-split"); }
-      function limpiarForm(){ editingId = null; form.reset(); }
+        function openForm(){ layout.classList.add("is-split"); }
+        function closeForm(){ layout.classList.remove("is-split"); }
+        function limpiarForm(){ editingId = null; form.reset(); }
 
-      function escapeHtml(str) {
-        return String(str ?? "")
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
+        function escapeHtml(str) {
+            return String(str ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
 
-      function fmtHora(offsetTimeStr){
-        if (!offsetTimeStr) return "";
-        const m = String(offsetTimeStr).match(/^(\d{2}:\d{2})/);
-        return m ? m[1] : String(offsetTimeStr);
-      }
+        function fmtHora(offsetTimeStr){
+            if (!offsetTimeStr) return "";
+            const m = String(offsetTimeStr).match(/^(\d{2}:\d{2})/);
+            return m ? m[1] : String(offsetTimeStr);
+        }
 
-      function pillEstatus(estatus) {
-        const e = (estatus || "").toLowerCase();
-        if (e.includes("public")) return `<span class="pill pill--ok">${escapeHtml(estatus)}</span>`;
-        if (e.includes("venc")) return `<span class="pill pill--bad">${escapeHtml(estatus)}</span>`;
-        if (e.includes("por")) return `<span class="pill pill--warn">${escapeHtml(estatus)}</span>`;
-        return `<span class="pill">${escapeHtml(estatus || "")}</span>`;
-      }
+        function pillEstatus(estatus) {
+            const e = (estatus || "").toLowerCase();
+            if (e.includes("public")) return `<span class="pill pill--ok">${escapeHtml(estatus)}</span>`;
+            if (e.includes("venc")) return `<span class="pill pill--bad">${escapeHtml(estatus)}</span>`;
+            if (e.includes("por")) return `<span class="pill pill--warn">${escapeHtml(estatus)}</span>`;
+            return `<span class="pill">${escapeHtml(estatus || "")}</span>`;
+        }
 
-      function showPreview(n) {
-        if (!preview) return;
-        previewTitle.textContent = n.titulo ?? "";
-        previewHora.textContent = fmtHora(n.fechaPublicacion) ?? "";
-        previewAutor.textContent = n.nombreAutor ?? "";
-        previewEstatus.textContent = n.estatus ?? "";
-        previewContenido.textContent = n.contenido ?? "";
-        preview.style.display = "block";
-        preview.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+        function showPreview(n) {
+            if (!preview) return;
+            previewTitle.textContent = n.titulo ?? "";
+            previewHora.textContent = fmtHora(n.fechaPublicacion) ?? "";
+            previewAutor.textContent = n.nombreAutor ?? "";
+            previewEstatus.textContent = n.estatus ?? "";
+            previewContenido.textContent = n.contenido ?? "";
+            preview.style.display = "block";
+            preview.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
 
-      function hidePreview() {
-        if (!preview) return;
-        preview.style.display = "none";
-        previewTitle.textContent = "";
-        previewHora.textContent = "";
-        previewAutor.textContent = "";
-        previewEstatus.textContent = "";
-        previewContenido.textContent = "";
-      }
+        function hidePreview() {
+            if (!preview) return;
+            preview.style.display = "none";
+            previewTitle.textContent = "";
+            previewHora.textContent = "";
+            previewAutor.textContent = "";
+            previewEstatus.textContent = "";
+            previewContenido.textContent = "";
+        }
 
-      btnClosePreview?.addEventListener("click", hidePreview);
+        btnClosePreview?.addEventListener("click", hidePreview);
 
-      function renderTabla(lista){
-        tbody.innerHTML = lista.map(n => `
+        function renderTabla(lista){
+            tbody.innerHTML = lista.map(n => `
           <tr class="news-row" data-row-id="${n.id}" style="cursor:pointer;">
             <td>${fmtHora(n.fechaPublicacion)}</td>
             <td>${escapeHtml(n.titulo)}</td>
@@ -282,227 +282,227 @@ btnLogout?.addEventListener("click", async () => {
             </td>
           </tr>
         `).join("");
-      }
-
-      // ===== PAGINACIÓN (4 POR PÁGINA) =====
-      function getTotalPages(list) {
-        return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-      }
-
-      function getPageSlice(list, page) {
-        const start = (page - 1) * PAGE_SIZE;
-        return list.slice(start, start + PAGE_SIZE);
-      }
-
-      function renderPagination(totalPages) {
-        if (!pagination) return;
-
-        let html = "";
-        html += `<button class="page" type="button" data-page="prev" ${currentPage === 1 ? "disabled" : ""}>‹</button>`;
-
-        for (let p = 1; p <= totalPages; p++) {
-          html += `<button class="page ${p === currentPage ? "page--active" : ""}" type="button" data-page="${p}">${p}</button>`;
         }
 
-        html += `<button class="page" type="button" data-page="next" ${currentPage === totalPages ? "disabled" : ""}>›</button>`;
-        pagination.innerHTML = html;
-      }
-
-      function renderTablaPaginada(list) {
-        currentList = Array.isArray(list) ? list : [];
-        const totalPages = getTotalPages(currentList);
-        if (currentPage > totalPages) currentPage = totalPages;
-
-        const pageItems = getPageSlice(currentList, currentPage);
-        renderTabla(pageItems);
-        renderPagination(totalPages);
-      }
-
-      pagination?.addEventListener("click", (e) => {
-        const btn = e.target.closest("button[data-page]");
-        if (!btn) return;
-
-        const totalPages = getTotalPages(currentList);
-
-        const val = btn.dataset.page;
-        if (val === "prev" && currentPage > 1) currentPage--;
-        else if (val === "next" && currentPage < totalPages) currentPage++;
-        else {
-          const n = Number(val);
-          if (!isNaN(n)) currentPage = n;
+        // ===== PAGINACIÓN (4 POR PÁGINA) =====
+        function getTotalPages(list) {
+            return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
         }
 
-        renderTablaPaginada(currentList);
-      });
-
-      // ===== API CALLS =====
-      async function cargarNoticias(){
-        const res = await fetch(API.all);
-        if (!res.ok) {
-          alert("Error cargando noticias (GET /noticias/getAll).");
-          return;
-        }
-        cacheNoticias = await res.json();
-        currentPage = 1;
-        renderTablaPaginada(cacheNoticias);
-        hidePreview();
-      }
-
-      async function cargarParaEditar(id){
-        const res = await fetch(API.one(id));
-        if (!res.ok) { alert("No se pudo cargar la noticia."); return; }
-        const n = await res.json();
-
-        editingId = n.id;
-        inpTitulo.value = n.titulo ?? "";
-        txtContenido.value = n.contenido ?? "";
-        selEstatus.value = n.estatus ?? "Publicada";
-        inpAutorId.value = n.autoridIdusuario ?? "";
-        inpHora.value = fmtHora(n.fechaPublicacion) || "";
-
-        openForm();
-      }
-
-      async function eliminarNoticia(id){
-        if (!confirm("¿Seguro que deseas eliminar esta noticia?")) return;
-        const res = await fetch(API.del(id), { method: "DELETE" });
-        if (!res.ok) { alert("Error al eliminar."); return; }
-        await cargarNoticias();
-      }
-
-      // "HH:MM" -> "HH:MM:00-06:00" para OffsetTime
-      function horaAOffsetTime(hhmm, offset = "-06:00"){
-        return `${hhmm}:00${offset}`;
-      }
-
-      async function crearNoticia(){
-        const titulo = inpTitulo.value.trim();
-        const contenido = txtContenido.value.trim();
-        const estatus = selEstatus.value;
-        const autorId = inpAutorId.value.trim();
-        const hhmm = inpHora.value;
-
-        if (!titulo || !contenido || !estatus || !autorId || !hhmm) {
-          alert("Completa: Título, Contenido, Estatus, Hora y AutorId.");
-          return;
+        function getPageSlice(list, page) {
+            const start = (page - 1) * PAGE_SIZE;
+            return list.slice(start, start + PAGE_SIZE);
         }
 
-        const fd = new FormData();
-        fd.append("titulo", titulo);
-        fd.append("contenido", contenido);
-        fd.append("estatus", estatus);
-        fd.append("fechaPublicacion", horaAOffsetTime(hhmm));
-        fd.append("autoridIdusuario", autorId);
+        function renderPagination(totalPages) {
+            if (!pagination) return;
 
-        const res = await fetch(API.create, { method: "POST", body: fd });
+            let html = "";
+            html += `<button class="page" type="button" data-page="prev" ${currentPage === 1 ? "disabled" : ""}>‹</button>`;
 
-        if (!res.ok) {
-          const txt = await res.text().catch(()=> "");
-          alert("Error al crear.\n" + txt + "\nTip: si dice Usuario no encontrado, revisa el AutorId.");
-          return;
+            for (let p = 1; p <= totalPages; p++) {
+                html += `<button class="page ${p === currentPage ? "page--active" : ""}" type="button" data-page="${p}">${p}</button>`;
+            }
+
+            html += `<button class="page" type="button" data-page="next" ${currentPage === totalPages ? "disabled" : ""}>›</button>`;
+            pagination.innerHTML = html;
         }
 
-        limpiarForm(); closeForm();
-        await cargarNoticias();
-      }
+        function renderTablaPaginada(list) {
+            currentList = Array.isArray(list) ? list : [];
+            const totalPages = getTotalPages(currentList);
+            if (currentPage > totalPages) currentPage = totalPages;
 
-      async function actualizarNoticia(id){
-        const titulo = inpTitulo.value.trim();
-        const contenido = txtContenido.value.trim();
-        const estatus = selEstatus.value;
-        const autorId = Number(inpAutorId.value);
-        const hhmm = inpHora.value;
-
-        if (!id) { alert("No hay ID para actualizar."); return; }
-        if (!titulo || !contenido || !estatus || !autorId || !hhmm) {
-          alert("Completa: Título, Contenido, Estatus, Hora y AutorId.");
-          return;
+            const pageItems = getPageSlice(currentList, currentPage);
+            renderTabla(pageItems);
+            renderPagination(totalPages);
         }
 
-        const payload = {
-          id: id,
-          titulo,
-          contenido,
-          estatus,
-          fechaPublicacion: horaAOffsetTime(hhmm),
-          autoridIdusuario: autorId
-        };
+        pagination?.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-page]");
+            if (!btn) return;
 
-        const res = await fetch(API.update(id), {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+            const totalPages = getTotalPages(currentList);
+
+            const val = btn.dataset.page;
+            if (val === "prev" && currentPage > 1) currentPage--;
+            else if (val === "next" && currentPage < totalPages) currentPage++;
+            else {
+                const n = Number(val);
+                if (!isNaN(n)) currentPage = n;
+            }
+
+            renderTablaPaginada(currentList);
         });
 
-        if (!res.ok) {
-          const txt = await res.text().catch(()=> "");
-          alert("Error al actualizar.\n" + txt);
-          return;
+        // ===== API CALLS =====
+        async function cargarNoticias(){
+            const res = await fetch(API.all);
+            if (!res.ok) {
+                alert("Error cargando noticias (GET /noticias/getAll).");
+                return;
+            }
+            cacheNoticias = await res.json();
+            currentPage = 1;
+            renderTablaPaginada(cacheNoticias);
+            hidePreview();
         }
 
-        limpiarForm(); closeForm();
-        await cargarNoticias();
-      }
+        async function cargarParaEditar(id){
+            const res = await fetch(API.one(id));
+            if (!res.ok) { alert("No se pudo cargar la noticia."); return; }
+            const n = await res.json();
 
-      function buscarLocal(){
-        const q = (searchInput.value || "").toLowerCase().trim();
-        if (!q) {
-          currentPage = 1;
-          renderTablaPaginada(cacheNoticias);
-          return;
+            editingId = n.id;
+            inpTitulo.value = n.titulo ?? "";
+            txtContenido.value = n.contenido ?? "";
+            selEstatus.value = n.estatus ?? "Publicada";
+            inpAutorId.value = n.autoridIdusuario ?? "";
+            inpHora.value = fmtHora(n.fechaPublicacion) || "";
+
+            openForm();
         }
 
-        const filtradas = cacheNoticias.filter(n =>
-          String(n.titulo || "").toLowerCase().includes(q)
-        );
-
-        currentPage = 1;
-        renderTablaPaginada(filtradas);
-      }
-
-      // Eventos UI
-      btnNew?.addEventListener("click", () => { limpiarForm(); openForm(); });
-      btnCancel?.addEventListener("click", () => { limpiarForm(); closeForm(); });
-
-      btnBuscar?.addEventListener("click", buscarLocal);
-      searchInput?.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") { e.preventDefault(); buscarLocal(); }
-      });
-
-      // Delegación en tabla: botones + click en fila para preview
-      tbody.addEventListener("click", async (e) => {
-        // Botones Editar/Eliminar
-        const btn = e.target.closest("button[data-action]");
-        if (btn) {
-          const id = Number(btn.dataset.id);
-          if (!id) return;
-
-          if (btn.dataset.action === "edit") cargarParaEditar(id);
-          if (btn.dataset.action === "delete") eliminarNoticia(id);
-          return;
+        async function eliminarNoticia(id){
+            if (!confirm("¿Seguro que deseas eliminar esta noticia?")) return;
+            const res = await fetch(API.del(id), { method: "DELETE" });
+            if (!res.ok) { alert("Error al eliminar."); return; }
+            await cargarNoticias();
         }
 
-        // Click en fila => preview
-        const row = e.target.closest("tr[data-row-id]");
-        if (!row) return;
+        // "HH:MM" -> "HH:MM:00-06:00" para OffsetTime
+        function horaAOffsetTime(hhmm, offset = "-06:00"){
+            return `${hhmm}:00${offset}`;
+        }
 
-        const id = Number(row.dataset.rowId);
-        if (!id) return;
+        async function crearNoticia(){
+            const titulo = inpTitulo.value.trim();
+            const contenido = txtContenido.value.trim();
+            const estatus = selEstatus.value;
+            const autorId = inpAutorId.value.trim();
+            const hhmm = inpHora.value;
 
-        const res = await fetch(API.one(id));
-        if (!res.ok) { alert("No se pudo cargar el detalle."); return; }
-        const n = await res.json();
-        showPreview(n);
-      });
+            if (!titulo || !contenido || !estatus || !autorId || !hhmm) {
+                alert("Completa: Título, Contenido, Estatus, Hora y AutorId.");
+                return;
+            }
 
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (editingId) actualizarNoticia(editingId);
-        else crearNoticia();
-      });
+            const fd = new FormData();
+            fd.append("titulo", titulo);
+            fd.append("contenido", contenido);
+            fd.append("estatus", estatus);
+            fd.append("fechaPublicacion", horaAOffsetTime(hhmm));
+            fd.append("autoridIdusuario", autorId);
 
-      // Inicial
-      cargarNoticias();
+            const res = await fetch(API.create, { method: "POST", body: fd });
+
+            if (!res.ok) {
+                const txt = await res.text().catch(()=> "");
+                alert("Error al crear.\n" + txt + "\nTip: si dice Usuario no encontrado, revisa el AutorId.");
+                return;
+            }
+
+            limpiarForm(); closeForm();
+            await cargarNoticias();
+        }
+
+        async function actualizarNoticia(id){
+            const titulo = inpTitulo.value.trim();
+            const contenido = txtContenido.value.trim();
+            const estatus = selEstatus.value;
+            const autorId = Number(inpAutorId.value);
+            const hhmm = inpHora.value;
+
+            if (!id) { alert("No hay ID para actualizar."); return; }
+            if (!titulo || !contenido || !estatus || !autorId || !hhmm) {
+                alert("Completa: Título, Contenido, Estatus, Hora y AutorId.");
+                return;
+            }
+
+            const payload = {
+                id: id,
+                titulo,
+                contenido,
+                estatus,
+                fechaPublicacion: horaAOffsetTime(hhmm),
+                autoridIdusuario: autorId
+            };
+
+            const res = await fetch(API.update(id), {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload)
+            });
+
+            if (!res.ok) {
+                const txt = await res.text().catch(()=> "");
+                alert("Error al actualizar.\n" + txt);
+                return;
+            }
+
+            limpiarForm(); closeForm();
+            await cargarNoticias();
+        }
+
+        function buscarLocal(){
+            const q = (searchInput.value || "").toLowerCase().trim();
+            if (!q) {
+                currentPage = 1;
+                renderTablaPaginada(cacheNoticias);
+                return;
+            }
+
+            const filtradas = cacheNoticias.filter(n =>
+                String(n.titulo || "").toLowerCase().includes(q)
+            );
+
+            currentPage = 1;
+            renderTablaPaginada(filtradas);
+        }
+
+        // Eventos UI
+        btnNew?.addEventListener("click", () => { limpiarForm(); openForm(); });
+        btnCancel?.addEventListener("click", () => { limpiarForm(); closeForm(); });
+
+        btnBuscar?.addEventListener("click", buscarLocal);
+        searchInput?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); buscarLocal(); }
+        });
+
+        // Delegación en tabla: botones + click en fila para preview
+        tbody.addEventListener("click", async (e) => {
+            // Botones Editar/Eliminar
+            const btn = e.target.closest("button[data-action]");
+            if (btn) {
+                const id = Number(btn.dataset.id);
+                if (!id) return;
+
+                if (btn.dataset.action === "edit") cargarParaEditar(id);
+                if (btn.dataset.action === "delete") eliminarNoticia(id);
+                return;
+            }
+
+            // Click en fila => preview
+            const row = e.target.closest("tr[data-row-id]");
+            if (!row) return;
+
+            const id = Number(row.dataset.rowId);
+            if (!id) return;
+
+            const res = await fetch(API.one(id));
+            if (!res.ok) { alert("No se pudo cargar el detalle."); return; }
+            const n = await res.json();
+            showPreview(n);
+        });
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            if (editingId) actualizarNoticia(editingId);
+            else crearNoticia();
+        });
+
+        // Inicial
+        cargarNoticias();
     });
 </script>
 

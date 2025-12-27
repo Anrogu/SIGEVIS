@@ -10,42 +10,45 @@
 
 <div class="login-container">
 
+    <!-- Panel Izquierdo -->
     <div class="login-left">
         <div class="overlay">
             <h2>¡BIENVENIDO!</h2>
         </div>
     </div>
 
+    <!-- Panel Derecho -->
     <div class="login-right">
         <div class="header">
-            <img src="/img/EscudoGEM.png" alt="Gobierno" class="logo-edomex">
-            <!--img src="/img/LogoGEM.png" alt="Gobierno" class="logo"-->
+            <img th:src="@{/img/EscudosGEM.png}" alt="Gobierno" class="logo-edomex">
         </div>
-
 
         <h1>Iniciar Sesión</h1>
 
         <form th:action="@{/login}" method="post">
-            <label for="correo">Nombre (Correo Electrónico):</label>
+            <label for="correo">Correo Electrónico:</label>
             <input type="email" id="correo" name="email" placeholder="email" required>
 
             <label for="contrasena">Contraseña:</label>
             <div class="password-container">
                 <input type="password" id="contrasena" name="password" required>
-                <span class="toggle-password" onclick="togglePassword()"> </span>
+                <span class="toggle-password" onclick="togglePassword()">👁</span>
             </div>
 
             <button type="submit" class="btn-login">Ingresar al sistema</button>
         </form>
 
+        <!-- Mensaje de error -->
         <p th:if="${param.error}" class="error-msg">
             Credenciales inválidas. Por favor, inténtalo de nuevo.
         </p>
 
+        <!-- Link de registro -->
         <p style="margin-top: 20px;">
             ¿No tienes cuenta? <a th:href="@{/register}">Regístrate aquí</a>
         </p>
 
+        <!-- Footer -->
         <div class="text-center mt-3">
             <p>©2025 - Subdirección de Desarrollo Tecnológico</p>
         </div>
@@ -61,6 +64,3 @@
 
 </body>
 </html>
-
-
-

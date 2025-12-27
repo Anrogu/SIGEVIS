@@ -206,70 +206,70 @@
 <script>
     const btnLogout = document.getElementById("btnLogout");
 
-btnLogout?.addEventListener("click", async () => {
-  try {
-    const res = await fetch("/logout", {
-      method: "POST",
-      credentials: "same-origin"
-    });
+    btnLogout?.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/logout", {
+                method: "POST",
+                credentials: "same-origin"
+            });
 
-    if (res.ok || res.status === 302) {
-      window.location.href = "/login?logout";
-    }
-  } catch (err) {
-    console.error(err);
-  }
-});
-    document.addEventListener("DOMContentLoaded", () => {
-      const API = "/vacantes";
-
-      const btnNew = document.getElementById("btnNewVac");
-      const btnCancel = document.getElementById("btnCancelVac");
-      const layout = document.getElementById("vacLayout");
-
-      const tbody = document.getElementById("vacantesBody");
-      const form = document.getElementById("vacForm");
-
-      const searchInput = document.getElementById("searchVac");
-      const btnSearch = document.getElementById("btnSearchVac");
-
-      let vacantesCache = [];
-      let editing = null; // objeto en edición (sin usar GET /{id})
-
-      function openForm(){ layout.classList.add("is-split"); }
-      function closeForm(){ layout.classList.remove("is-split"); editing = null; form.reset(); }
-
-      btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
-      btnCancel?.addEventListener("click", closeForm);
-
-      async function cargarVacantes() {
-        const res = await fetch(`${API}/getAll`, { headers: { "Accept": "application/json" } });
-        if (!res.ok) {
-          console.error("Error getAll:", await res.text());
-          return;
+            if (res.ok || res.status === 302) {
+                window.location.href = "/login?logout";
+            }
+        } catch (err) {
+            console.error(err);
         }
-        vacantesCache = await res.json();
-        renderVacantes(vacantesCache);
-      }
+    });
+    document.addEventListener("DOMContentLoaded", () => {
+        const API = "/vacantes";
 
-      function pillEstatus(estatus) {
-        return estatus === true
-          ? `<span class="pill pill--ok">Publicado</span>`
-          : `<span class="pill pill--bad">No publicado</span>`;
-      }
+        const btnNew = document.getElementById("btnNewVac");
+        const btnCancel = document.getElementById("btnCancelVac");
+        const layout = document.getElementById("vacLayout");
 
-      function fmtHora(hora) {
-        // puede venir "08:00:00-06:00" (OffsetTime) o "08:00:00.000000" (time(6))
-        if (!hora) return "";
-        const s = String(hora);
-        return s.slice(0, 8); // HH:MM:SS
-      }
+        const tbody = document.getElementById("vacantesBody");
+        const form = document.getElementById("vacForm");
 
-      function renderVacantes(lista) {
-        tbody.innerHTML = "";
-        lista.forEach(v => {
-          const tr = document.createElement("tr");
-          tr.innerHTML = `
+        const searchInput = document.getElementById("searchVac");
+        const btnSearch = document.getElementById("btnSearchVac");
+
+        let vacantesCache = [];
+        let editing = null; // objeto en edición (sin usar GET /{id})
+
+        function openForm(){ layout.classList.add("is-split"); }
+        function closeForm(){ layout.classList.remove("is-split"); editing = null; form.reset(); }
+
+        btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
+        btnCancel?.addEventListener("click", closeForm);
+
+        async function cargarVacantes() {
+            const res = await fetch(`${API}/getAll`, { headers: { "Accept": "application/json" } });
+            if (!res.ok) {
+                console.error("Error getAll:", await res.text());
+                return;
+            }
+            vacantesCache = await res.json();
+            renderVacantes(vacantesCache);
+        }
+
+        function pillEstatus(estatus) {
+            return estatus === true
+                ? `<span class="pill pill--ok">Publicado</span>`
+                : `<span class="pill pill--bad">No publicado</span>`;
+        }
+
+        function fmtHora(hora) {
+            // puede venir "08:00:00-06:00" (OffsetTime) o "08:00:00.000000" (time(6))
+            if (!hora) return "";
+            const s = String(hora);
+            return s.slice(0, 8); // HH:MM:SS
+        }
+
+        function renderVacantes(lista) {
+            tbody.innerHTML = "";
+            lista.forEach(v => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
             <td>${fmtHora(v.fechaPublicacion)}</td>
             <td>${v.nombrePuesto ?? ""}</td>
             <td>${v.AreasDgp_idArea ?? ""}</td>
@@ -281,153 +281,153 @@ btnLogout?.addEventListener("click", async () => {
               <button class="btn btn--mini btn--outline" type="button" data-del="${v.idVacantes}">Eliminar</button>
             </td>
           `;
-          tbody.appendChild(tr);
-        });
-      }
-
-      tbody.addEventListener("click", async (e) => {
-        const editBtn = e.target.closest("[data-edit]");
-        const delBtn = e.target.closest("[data-del]");
-
-        if (editBtn) {
-          const id = Number(editBtn.getAttribute("data-edit"));
-          editing = vacantesCache.find(x => Number(x.idVacantes) === id);
-          if (!editing) return;
-
-          document.getElementById("nombrePuesto").value = editing.nombrePuesto ?? "";
-          document.getElementById("descripcion").value = editing.descripcion ?? "";
-          document.getElementById("requisitos").value = editing.requisitos ?? "";
-          document.getElementById("carrera").value = editing.carrera ?? "";
-          document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
-
-          document.getElementById("AreasDgp_idArea").value = editing.AreasDgp_idArea ?? "";
-          document.getElementById("Perfiles_idPerfil").value = editing.Perfiles_idPerfil ?? "";
-          document.getElementById("Modalidades_idModalidad").value = editing.Modalidades_idModalidad ?? "";
-          document.getElementById("Horarios_idHorario").value = editing.Horarios_idHorario ?? "";
-          document.getElementById("Asignaciones_idAsignacion").value = editing.Asignaciones_idAsignacion ?? "";
-
-          document.getElementById("estatus").value = String(editing.estatus ?? true);
-
-          // input type="time" acepta "HH:MM" o "HH:MM:SS"
-          const hhmmss = fmtHora(editing.fechaPublicacion); // "HH:MM:SS"
-          document.getElementById("fechaPublicacion").value = hhmmss || "";
-
-          openForm();
+                tbody.appendChild(tr);
+            });
         }
 
-        if (delBtn) {
-          const id = delBtn.getAttribute("data-del");
-          if (!confirm("¿Eliminar esta vacante?")) return;
+        tbody.addEventListener("click", async (e) => {
+            const editBtn = e.target.closest("[data-edit]");
+            const delBtn = e.target.closest("[data-del]");
 
-          const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
-          if (!res.ok) {
-            console.error("Error delete:", await res.text());
-            alert("No se pudo eliminar. Revisa consola.");
-            return;
-          }
-          cargarVacantes();
-        }
-      });
+            if (editBtn) {
+                const id = Number(editBtn.getAttribute("data-edit"));
+                editing = vacantesCache.find(x => Number(x.idVacantes) === id);
+                if (!editing) return;
 
-      form.addEventListener("submit", async (e) => {
-        e.preventDefault();
+                document.getElementById("nombrePuesto").value = editing.nombrePuesto ?? "";
+                document.getElementById("descripcion").value = editing.descripcion ?? "";
+                document.getElementById("requisitos").value = editing.requisitos ?? "";
+                document.getElementById("carrera").value = editing.carrera ?? "";
+                document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
 
-        // ===== fechaPublicacion: OffsetTime requiere offset =====
-        // input time devuelve "HH:MM" o "HH:MM:SS"
-        const timeVal = document.getElementById("fechaPublicacion").value;
-        const hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
+                document.getElementById("AreasDgp_idArea").value = editing.AreasDgp_idArea ?? "";
+                document.getElementById("Perfiles_idPerfil").value = editing.Perfiles_idPerfil ?? "";
+                document.getElementById("Modalidades_idModalidad").value = editing.Modalidades_idModalidad ?? "";
+                document.getElementById("Horarios_idHorario").value = editing.Horarios_idHorario ?? "";
+                document.getElementById("Asignaciones_idAsignacion").value = editing.Asignaciones_idAsignacion ?? "";
 
-        // Ajusta si tu app usa otro huso; aquí usamos -06:00 (México centro)
-        const timeWithOffset = hhmmss ? `${hhmmss}-06:00` : null;
+                document.getElementById("estatus").value = String(editing.estatus ?? true);
 
-        if (!timeWithOffset) {
-          alert("Selecciona una hora en 'Programar Publicación'.");
-          return;
-        }
+                // input type="time" acepta "HH:MM" o "HH:MM:SS"
+                const hhmmss = fmtHora(editing.fechaPublicacion); // "HH:MM:SS"
+                document.getElementById("fechaPublicacion").value = hhmmss || "";
 
-        const payloadCommon = {
-          idVacantes: editing?.idVacantes ?? null,
-          nombrePuesto: document.getElementById("nombrePuesto").value.trim(),
-          descripcion: document.getElementById("descripcion").value.trim(),
-          requisitos: document.getElementById("requisitos").value.trim(),
-          carrera: document.getElementById("carrera").value.trim(),
-          numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
-          estatus: document.getElementById("estatus").value === "true",
-          AreasDgp_idArea: Number(document.getElementById("AreasDgp_idArea").value || 0),
-          Perfiles_idPerfil: Number(document.getElementById("Perfiles_idPerfil").value || 0),
-          Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
-          Horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
-          Asignaciones_idAsignacion: Number(document.getElementById("Asignaciones_idAsignacion").value || 0),
-          fechaPublicacion: timeWithOffset
-        };
+                openForm();
+            }
 
-        // Validaciones mínimas
-        if (!payloadCommon.nombrePuesto || !payloadCommon.descripcion || payloadCommon.numeroPlazas < 1) {
-          alert("Completa Título, Descripción y Número de Vacantes (mínimo 1).");
-          return;
-        }
-        if (!payloadCommon.AreasDgp_idArea || !payloadCommon.Perfiles_idPerfil || !payloadCommon.Modalidades_idModalidad ||
-            !payloadCommon.Horarios_idHorario || !payloadCommon.Asignaciones_idAsignacion) {
-          alert("Selecciona Área/Perfil/Modalidad/Horario y Asignación (ID).");
-          return;
-        }
+            if (delBtn) {
+                const id = delBtn.getAttribute("data-del");
+                if (!confirm("¿Eliminar esta vacante?")) return;
 
-        if (editing) {
-          // UPDATE -> tu back usa @RequestBody (JSON)
-          const res = await fetch(`${API}/update/${editing.idVacantes}`, {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payloadCommon)
-          });
-
-          if (!res.ok) {
-            console.error("Error update:", await res.text());
-            alert("No se pudo actualizar. Revisa consola.");
-            return;
-          }
-
-        } else {
-          // CREATE -> tu back usa @ModelAttribute => FormData
-          const fd = new FormData();
-          Object.entries(payloadCommon).forEach(([k, v]) => {
-            if (v === null || v === undefined) return;
-            fd.append(k, String(v));
-          });
-
-          const res = await fetch(`${API}/create`, {
-            method: "POST",
-            body: fd
-          });
-
-          if (!res.ok) {
-            console.error("Error create:", await res.text());
-            alert("No se pudo crear. Revisa consola.");
-            return;
-          }
-        }
-
-        await cargarVacantes();
-        closeForm();
-      });
-
-      function filtrar() {
-        const q = (searchInput?.value || "").toLowerCase().trim();
-        if (!q) return renderVacantes(vacantesCache);
-
-        const filtradas = vacantesCache.filter(v => {
-          const nombre = (v.nombrePuesto ?? "").toLowerCase();
-          const carrera = (v.carrera ?? "").toLowerCase();
-          const unidad = String(v.AreasDgp_idArea ?? "").toLowerCase();
-          return nombre.includes(q) || carrera.includes(q) || unidad.includes(q);
+                const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
+                if (!res.ok) {
+                    console.error("Error delete:", await res.text());
+                    alert("No se pudo eliminar. Revisa consola.");
+                    return;
+                }
+                cargarVacantes();
+            }
         });
 
-        renderVacantes(filtradas);
-      }
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
 
-      btnSearch?.addEventListener("click", filtrar);
-      searchInput?.addEventListener("input", filtrar);
+            // ===== fechaPublicacion: OffsetTime requiere offset =====
+            // input time devuelve "HH:MM" o "HH:MM:SS"
+            const timeVal = document.getElementById("fechaPublicacion").value;
+            const hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
 
-      cargarVacantes();
+            // Ajusta si tu app usa otro huso; aquí usamos -06:00 (México centro)
+            const timeWithOffset = hhmmss ? `${hhmmss}-06:00` : null;
+
+            if (!timeWithOffset) {
+                alert("Selecciona una hora en 'Programar Publicación'.");
+                return;
+            }
+
+            const payloadCommon = {
+                idVacantes: editing?.idVacantes ?? null,
+                nombrePuesto: document.getElementById("nombrePuesto").value.trim(),
+                descripcion: document.getElementById("descripcion").value.trim(),
+                requisitos: document.getElementById("requisitos").value.trim(),
+                carrera: document.getElementById("carrera").value.trim(),
+                numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
+                estatus: document.getElementById("estatus").value === "true",
+                AreasDgp_idArea: Number(document.getElementById("AreasDgp_idArea").value || 0),
+                Perfiles_idPerfil: Number(document.getElementById("Perfiles_idPerfil").value || 0),
+                Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
+                Horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
+                Asignaciones_idAsignacion: Number(document.getElementById("Asignaciones_idAsignacion").value || 0),
+                fechaPublicacion: timeWithOffset
+            };
+
+            // Validaciones mínimas
+            if (!payloadCommon.nombrePuesto || !payloadCommon.descripcion || payloadCommon.numeroPlazas < 1) {
+                alert("Completa Título, Descripción y Número de Vacantes (mínimo 1).");
+                return;
+            }
+            if (!payloadCommon.AreasDgp_idArea || !payloadCommon.Perfiles_idPerfil || !payloadCommon.Modalidades_idModalidad ||
+                !payloadCommon.Horarios_idHorario || !payloadCommon.Asignaciones_idAsignacion) {
+                alert("Selecciona Área/Perfil/Modalidad/Horario y Asignación (ID).");
+                return;
+            }
+
+            if (editing) {
+                // UPDATE -> tu back usa @RequestBody (JSON)
+                const res = await fetch(`${API}/update/${editing.idVacantes}`, {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payloadCommon)
+                });
+
+                if (!res.ok) {
+                    console.error("Error update:", await res.text());
+                    alert("No se pudo actualizar. Revisa consola.");
+                    return;
+                }
+
+            } else {
+                // CREATE -> tu back usa @ModelAttribute => FormData
+                const fd = new FormData();
+                Object.entries(payloadCommon).forEach(([k, v]) => {
+                    if (v === null || v === undefined) return;
+                    fd.append(k, String(v));
+                });
+
+                const res = await fetch(`${API}/create`, {
+                    method: "POST",
+                    body: fd
+                });
+
+                if (!res.ok) {
+                    console.error("Error create:", await res.text());
+                    alert("No se pudo crear. Revisa consola.");
+                    return;
+                }
+            }
+
+            await cargarVacantes();
+            closeForm();
+        });
+
+        function filtrar() {
+            const q = (searchInput?.value || "").toLowerCase().trim();
+            if (!q) return renderVacantes(vacantesCache);
+
+            const filtradas = vacantesCache.filter(v => {
+                const nombre = (v.nombrePuesto ?? "").toLowerCase();
+                const carrera = (v.carrera ?? "").toLowerCase();
+                const unidad = String(v.AreasDgp_idArea ?? "").toLowerCase();
+                return nombre.includes(q) || carrera.includes(q) || unidad.includes(q);
+            });
+
+            renderVacantes(filtradas);
+        }
+
+        btnSearch?.addEventListener("click", filtrar);
+        searchInput?.addEventListener("input", filtrar);
+
+        cargarVacantes();
     });
 </script>
 
