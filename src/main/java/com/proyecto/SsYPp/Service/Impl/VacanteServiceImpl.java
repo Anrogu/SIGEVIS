@@ -9,6 +9,7 @@ import com.proyecto.SsYPp.Service.VacanteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,6 +27,8 @@ public class VacanteServiceImpl implements VacanteService {
     ModalidadRepository modalidadRepository;
     @Autowired
     HorarioRepository horarioRepository;
+    @Autowired
+    CarreraRepository carreraRepository;
 
     @Override
     public VacanteDto create(VacanteDto vacanteDto) {
@@ -62,19 +65,19 @@ public class VacanteServiceImpl implements VacanteService {
     }
     private VacanteDto convertirEntidadADTO(Vacante vacante) {
         VacanteDto vacanteDto = new VacanteDto();
-        vacanteDto.setIdVacantes(vacante.getIdVacantes());
-        vacanteDto.setCarrera(vacante.getCarrera());
+        vacanteDto.setIdVacantes(vacante.getId());
+        vacanteDto.setCarreras_idCarrera(vacante.getCarrerasIdcarerra().getId().intValue());
         vacanteDto.setEstatus(vacante.getEstatus());
         vacanteDto.setDescripcion(vacante.getDescripcion());
         vacanteDto.setNumeroPlazas(vacante.getNumeroPlazas());
-        vacanteDto.setFechaPublicacion(vacante.getFechaPublicacion());
+        vacanteDto.setFechaPublicacion(OffsetTime.from(vacante.getFechaPublicacion()));
         vacanteDto.setRequisitos(vacante.getRequisitos());
         vacanteDto.setNombrePuesto(vacante.getNombrePuesto());
-        vacanteDto.setAsignaciones_idAsignacion(vacante.getAsignaciones_idAsignacion());
-        vacanteDto.setAreasDgp_idArea(vacante.getAreasDgp_idArea());
-        vacanteDto.setModalidades_idModalidad(vacante.getModalidades_idModalidad());
-        vacanteDto.setPerfiles_idPerfil(vacante.getPerfiles_idPerfil());
-        vacanteDto.setHorarios_idHorario(vacante.getHorarios_idHorario());
+        vacanteDto.setAsignaciones_idAsignacion(vacante.getAsignacionesIdasignacion().getId());
+        vacanteDto.setAreasDgp_idArea(vacante.getAreasdgpIdarea().getId());
+        vacanteDto.setModalidades_idModalidad(vacante.getModalidadesIdmodalidad().getId());
+        vacanteDto.setPerfiles_idPerfil(vacante.getPerfilesIdperfil().getId());
+        vacanteDto.setHorarios_idHorario(vacante.getHorariosIdhorario().getId());
 
         return vacanteDto;
     }
@@ -91,21 +94,23 @@ public class VacanteServiceImpl implements VacanteService {
                 .orElseThrow(() -> new RuntimeException("areaDgp no encontrada"));
         Horario horario= horarioRepository.findById(Long.valueOf(dto.getHorarios_idHorario()))
                 .orElseThrow(() -> new RuntimeException("perfil no encontrado"));
+        Carrera carrera=carreraRepository.findById(dto.getCarreras_idCarrera())
+                .orElseThrow(()-> new RuntimeException("carrera no encontrada"));
 
         Vacante vacante = new Vacante();
-        vacante.setIdVacantes(dto.getIdVacantes());
+        vacante.setId(dto.getIdVacantes());
         vacante.setEstatus(dto.getEstatus());
         vacante.setNombrePuesto(dto.getNombrePuesto());
         vacante.setDescripcion(dto.getDescripcion());
         vacante.setNumeroPlazas(dto.getNumeroPlazas());
-        vacante.setFechaPublicacion(dto.getFechaPublicacion());
-        vacante.setCarrera(dto.getCarrera());
+        vacante.setFechaPublicacion(dto.getFechaPublicacion().toLocalTime());
+        vacante.setCarrerasIdcarerra(carrera);
         vacante.setRequisitos(dto.getRequisitos());
-        vacante.setAsignaciones_idAsignacion(asignacion.getId());
-        vacante.setAreasDgp_idArea(areaDgp.getId());
-        vacante.setModalidades_idModalidad(modalidad.getId());
-        vacante.setPerfiles_idPerfil(perfil.getId());
-        vacante.setHorarios_idHorario(horario.getId());
+        vacante.setAsignacionesIdasignacion(asignacion);
+        vacante.setAreasdgpIdarea(areaDgp);
+        vacante.setModalidadesIdmodalidad(modalidad);
+        vacante.setPerfilesIdperfil(perfil);
+        vacante.setHorariosIdhorario(horario);
         return vacante;
     }
 }

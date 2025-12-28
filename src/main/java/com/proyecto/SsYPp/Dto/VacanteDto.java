@@ -28,4 +28,5 @@ public class VacanteDto implements Serializable {
     Integer Horarios_idHorario;
     Integer Modalidades_idModalidad;
     Long Asignaciones_idAsignacion;
+    Integer Carreras_idCarrera;
 }
