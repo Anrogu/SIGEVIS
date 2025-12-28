@@ -9,7 +9,9 @@ import com.proyecto.SsYPp.Service.VacanteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetDateTime;
 import java.time.OffsetTime;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -70,7 +72,7 @@ public class VacanteServiceImpl implements VacanteService {
         vacanteDto.setEstatus(vacante.getEstatus());
         vacanteDto.setDescripcion(vacante.getDescripcion());
         vacanteDto.setNumeroPlazas(vacante.getNumeroPlazas());
-        vacanteDto.setFechaPublicacion(OffsetTime.from(vacante.getFechaPublicacion()));
+        vacanteDto.setFechaPublicacion(vacante.getFechaPublicacion().atOffset(ZoneOffset.UTC));
         vacanteDto.setRequisitos(vacante.getRequisitos());
         vacanteDto.setNombrePuesto(vacante.getNombrePuesto());
         vacanteDto.setAsignaciones_idAsignacion(vacante.getAsignacionesIdasignacion().getId());
@@ -104,8 +106,8 @@ public class VacanteServiceImpl implements VacanteService {
         vacante.setDescripcion(dto.getDescripcion());
         vacante.setNumeroPlazas(dto.getNumeroPlazas());
         vacante.setFechaPublicacion(dto.getFechaPublicacion().toLocalTime());
-        vacante.setCarrerasIdcarerra(carrera);
         vacante.setRequisitos(dto.getRequisitos());
+        vacante.setCarrerasIdcarerra(carrera);
         vacante.setAsignacionesIdasignacion(asignacion);
         vacante.setAreasdgpIdarea(areaDgp);
         vacante.setModalidadesIdmodalidad(modalidad);
