@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administrador | Vacantes</title>
-    <link rel="stylesheet" href="/css/admin.css" />
+    <link rel="stylesheet" href="/css/index.css" />
 </head>
 
 <body>
@@ -18,8 +18,7 @@
 
         <div class="topbar__right">
             <div class="logos">
-                <img src="/img/Escudo_colibri.png" alt="Escudo Colibrí" class="logo-img">
-                <img src="/img/EscudoGEM.png" alt="Escudo GEM" class="logo-img">
+                <img src="/img/EscudosGEM.png" alt="EscudosGEM" class="logo-img">
             </div>
         </div>
     </header>
@@ -63,7 +62,7 @@
 
                 <div class="panel__actions">
                     <button class="btn btn--primary" type="button" id="btnNewVac">
-                        Nueva Vacante <span class="icon">＋</span>
+                        Nueva Vacante<span class="icon"></span>
                     </button>
                 </div>
             </div>
@@ -332,12 +331,10 @@
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
-            // ===== fechaPublicacion: OffsetTime requiere offset =====
-            // input time devuelve "HH:MM" o "HH:MM:SS"
             const timeVal = document.getElementById("fechaPublicacion").value;
             const hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
 
-            // Ajusta si tu app usa otro huso; aquí usamos -06:00 (México centro)
+            // aquí usamos -06:00 (México centro)
             const timeWithOffset = hhmmss ? `${hhmmss}-06:00` : null;
 
             if (!timeWithOffset) {
@@ -387,7 +384,6 @@
                 }
 
             } else {
-                // CREATE -> tu back usa @ModelAttribute => FormData
                 const fd = new FormData();
                 Object.entries(payloadCommon).forEach(([k, v]) => {
                     if (v === null || v === undefined) return;

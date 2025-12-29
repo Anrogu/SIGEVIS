@@ -4,7 +4,7 @@
     --border-2: #b9b9b9;
     --text: #1f1f1f;
     --muted: #666;
-    --primary: #8b1d2c;
+    --color-vino: #7b1e3d;
     --shadow: 0 2px 10px rgba(0,0,0,.08);
 }
 
@@ -12,14 +12,13 @@
 
 body{
     margin: 0;
-    font-family: Arial, Helvetica, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Usamos la fuente del diseño que te gustó */
     color: var(--text);
     background: #f6f6f6;
 }
 
 .app{
     max-width: 1500px;
-    margin: 10px auto;
     background: var(--bg);
     border: 2px solid var(--border-2);
 }
@@ -142,9 +141,9 @@ body{
 }
 
 .btn--primary{
-    background: var(--primary);
+    background: var(--color-vino);
     color: #fff;
-    border-color: var(--primary);
+    border-color: var(--color-vino);
 }
 
 .btn--outline{
@@ -160,18 +159,17 @@ body{
 
 .icon{ margin-left: 4px; }
 
-/* CONTENT GRID (RECORRIDO) */
+/* CONTENT GRID */
 .content-grid{
     display: grid;
-    grid-template-columns: 1fr;     /* tabla ocupa TODO al inicio */
+    grid-template-columns: 1fr;
     gap: 14px;
     padding: 14px;
     transition: grid-template-columns .25s ease;
 }
 
-/* Cuando se abre Nueva Noticia */
 .content-grid.is-split{
-    grid-template-columns: 1.55fr 1fr; /* tabla se recorre a la izquierda */
+    grid-template-columns: 1.55fr 1fr;
 }
 
 /* PANELS */
@@ -206,7 +204,6 @@ body{
     font-weight: 700;
 }
 
-/* FORM PANEL: escondido (no estorba) */
 .panel--right{
     display: none;
     opacity: 0;
@@ -215,7 +212,6 @@ body{
     transition: opacity .25s ease, transform .25s ease;
 }
 
-/* Form visible al abrir */
 .content-grid.is-split .panel--right{
     display: block;
     opacity: 1;
@@ -245,18 +241,34 @@ body{
 }
 
 .table tbody td{
+    text-align: left;
     padding: 8px 10px;
     border-bottom: 1px solid #e6e6e6;
     vertical-align: middle;
 }
 
-.th-actions{ text-align: center; }
+/* 1. EL ENCABEZADO (TH) */
+.th-actions {
+    /* Le damos un ancho fijo generoso para que quepan los dos botones */
+    width: 160px !important;
+    min-width: 160px !important;
+    max-width: 160px !important;
+    text-align: center !important;
+}
 
-.actions{
-    display: flex;
-    justify-content: center;
-    gap: 8px;
-    flex-wrap: wrap;
+/* 2. LA CELDA DEL CUERPO (TD) */
+.actions {
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 10px !important;
+    flex-wrap: nowrap !important;
+    height: 100%;
+    padding: 8px 0 !important;
+}
+
+.actions .btn {
+    margin: 0 !important;
 }
 
 /* STATUS PILLS */
@@ -321,28 +333,6 @@ body{
     gap: 10px;
 }
 
-/* UPLOAD */
-.upload-box{
-    position: relative;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    height: 150px;
-    display: grid;
-    place-items: center;
-    margin: 10px 0;
-    background: #fafafa;
-}
-
-.upload-input{
-    position: absolute;
-    inset: 0;
-    opacity: 0;
-    cursor: pointer;
-}
-
-.upload-icon{ font-size: 28px; }
-.upload-text{ font-size: 11px; color: var(--muted); }
-
 .form-actions{
     display: flex;
     justify-content: flex-end;
@@ -358,40 +348,77 @@ body{
 @media (max-width: 980px){
     .content-grid{ grid-template-columns: 1fr; }
     .content-grid.is-split{ grid-template-columns: 1fr; }
-    .panel--right{ display: block; } /* en móvil se muestra abajo */
-}
-/* ====== VACANTES: botones como Figma ====== */
-.btn--gold{
-    background: #c9a25a;
-    border-color: #c9a25a;
-    color: #1f1f1f;
-    padding: 7px 18px;
-    border-radius: 8px;
-    font-weight: 600;
+    .panel--right{ display: block; }
 }
 
-.btn--wine{
-    background: #8b1d2c;
-    border-color: #8b1d2c;
-    color: #fff;
-    padding: 7px 18px;
-    border-radius: 8px;
-    font-weight: 600;
+/* ====== DISEÑO INFERIOR (ESTILO VIEJO) ====== */
+
+.divider {
+    border: 0;
+    border-top: 1px solid #ddd;
+    margin: 30px 0;
 }
 
-/* inputs pequeños (para No. Vacantes y Fecha) */
-.input--small{
-    height: 30px;
-    padding: 6px 8px;
+/* Preview Estático (Estilo antiguo) */
+.preview-container-static {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px;
+    padding-top: 10px;
 }
 
-/* acciones del form centradas (como diseño) */
-.form-actions--center{
+.preview-text-static {
+    flex: 2;
+}
+
+.preview-text-static h3 {
+    font-size: 1rem;
+    font-weight: 800;
+    margin-bottom: 15px;
+    margin-top: 0;
+    text-transform: uppercase;
+    color: #000;
+}
+
+.preview-text-static p {
+    font-size: 0.85rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.preview-text-static ul {
+    list-style-position: inside;
+    font-size: 0.85rem;
+    color: #555;
+    margin-top: 10px;
+    padding-left: 20px;
+}
+
+.preview-image-static {
+    flex: 1;
+    display: flex;
+    align-items: center;
     justify-content: center;
-    gap: 18px;
+    min-width: 250px;
 }
 
+.preview-image-static img {
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 4px;
+}
 
+/* Footer del panel */
+.panel-footer {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+    margin-top: 30px;
+    text-align: center;
+    font-size: 10px;
+    color: var(--muted);
+}
 
 /* ===============================
    ERRORES 403 / 404

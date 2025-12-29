@@ -4,13 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administrador | Noticias</title>
-    <link rel="stylesheet" href="/css/admin.css" />
+    <link rel="stylesheet" href="/css/index.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 
 <body>
 <div class="app">
 
-    <!-- TOP BAR -->
     <header class="topbar">
         <div class="topbar__left">
             <span class="topbar__title">ADMINISTRADOR</span>
@@ -18,13 +18,11 @@
 
         <div class="topbar__right">
             <div class="logos">
-                <img src="/img/Escudo_colibri.png" alt="Escudo Colibrí" class="logo-img">
-                <img src="/img/EscudoGEM.png" alt="Escudo GEM" class="logo-img">
+                <img src="/img/EscudosGEM.png" alt="Escudo GEM" class="logo-img">
             </div>
         </div>
     </header>
 
-    <!-- SUBMODULE TABS + LOGOUT -->
     <nav class="tabs">
         <div class="tabs__left">
             <a class="tab tab--active" href="/index">NOTICIAS</a>
@@ -44,7 +42,6 @@
         </div>
     </nav>
 
-    <!-- SEARCH BAR (filtra en front por título) -->
     <section class="toolbar">
         <div class="search">
             <span class="search__icon">🔎</span>
@@ -53,17 +50,15 @@
         <button class="btn btn--primary" id="btnBuscar" type="button">Buscar</button>
     </section>
 
-    <!-- CONTENT (SE RECORRE CUANDO ABRES FORM) -->
     <section class="content-grid" id="newsLayout">
 
-        <!-- IZQUIERDA: TABLA + PREVIEW ABAJO -->
         <main class="panel panel--left">
             <div class="panel__header">
                 <h2 class="panel__title">NOTICIAS</h2>
 
                 <div class="panel__actions">
                     <button class="btn btn--primary" type="button" id="btnNewNews">
-                        Nueva Noticia <span class="icon">＋</span>
+                        Nueva noticia <span class="icon"></span>
                     </button>
                 </div>
             </div>
@@ -79,81 +74,100 @@
                         <th class="th-actions">Acciones</th>
                     </tr>
                     </thead>
-
-                    <!-- VACÍO: SE LLENA CON EL BACK -->
                     <tbody id="newsTbody"></tbody>
                 </table>
             </div>
 
-            <!-- PAGINACIÓN DINÁMICA (4 POR PÁGINA) -->
             <div class="pagination" id="pagination"></div>
 
-            <!-- PREVIEW (SE MUESTRA AL DAR CLIC EN UNA FILA) -->
-            <section class="panel panel--preview" id="newsPreview" style="margin-top:16px; display:none;">
+            <section class="panel panel--preview" id="newsPreview" style="margin-top:16px; display:none; background:#fafafa; border:1px solid #eee; padding:10px; border-radius:8px;">
                 <div class="panel__header">
                     <h3 class="panel__subtitle" id="previewTitle">Título</h3>
-
                     <div class="panel__actions">
                         <button class="btn btn--outline btn--mini" type="button" id="btnClosePreview">Cerrar</button>
                     </div>
                 </div>
-
                 <div style="padding:12px 16px;">
-                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px;">
+                    <div style="display:flex; gap:12px; flex-wrap:wrap; margin-bottom:10px; font-size: 0.8rem; color:#555;">
                         <span><b>Hora:</b> <span id="previewHora"></span></span>
                         <span><b>Autor:</b> <span id="previewAutor"></span></span>
                         <span><b>Estatus:</b> <span id="previewEstatus"></span></span>
                     </div>
-
-                    <div id="previewContenido" style="white-space:pre-wrap; line-height:1.45;"></div>
+                    <div id="previewContenido" style="white-space:pre-wrap; line-height:1.45; font-size: 0.9rem;"></div>
                 </div>
             </section>
-        </main>
 
-        <!-- DERECHA: FORMULARIO -->
-        <aside id="newsFormPanel" class="panel panel--right">
-            <div class="panel__header panel__header--compact">
-                <h3 class="panel__subtitle">Datos de la noticia</h3>
+            <hr class="divider" />
+
+            <div class="preview-container-static">
+                <div class="preview-text-static">
+                    <h3>Gobierno del Estado de México Reconoce a Nuevos Prestadores de Servicio Social y Prácticas Profesionales</h3>
+                    <p>La Oficialía Mayor del Gobierno del Estado de México informa a la comunidad estudiantil que se encuentra abierta la convocatoria para integrar prestadores de servicio social durante el periodo febrero-julio 2025.</p>
+                    <p>Esta iniciativa tiene como objetivo brindar a jóvenes universitarios y de nivel técnico la oportunidad de desarrollar competencias profesionales, participar en proyectos institucionales y contribuir al fortalecimiento de la gestión administrativa del Gobierno estatal.</p>
+                    <p>Los estudiantes interesados podrán participar en áreas como:</p>
+                    <ul style="padding-left: 20px;">
+                        <li>Gestión documental</li>
+                        <li>Atención ciudadana</li>
+                        <li>Análisis administrativo</li>
+                        <li>Sistemas y tecnologías de la información</li>
+                        <li>Recursos materiales y servicios generales</li>
+                    </ul>
+                    <br>
+                    <p style="font-size: 0.75rem; color: #777;">La convocatoria está dirigida a estudiantes mayores de 18 años que cuenten con al menos el 70% de créditos concluidos y pertenezcan a instituciones educativas con convenio vigente...</p>
+                </div>
+
+                <div class="preview-image-static">
+                    <img src="/img/IndexImg.png" alt="Imagen Representativa">
+                </div>
             </div>
 
-            <form class="form" id="newsForm">
-                <div class="form-row">
-                    <label>Título</label>
-                    <input id="inpTitulo" type="text" placeholder="Escribe el título..." />
+            <footer class="panel-footer">
+                ©2025 - Subdirección de Desarrollo Tecnológico
+            </footer>
+
+        </main> <aside id="newsFormPanel" class="panel panel--right">
+        <div class="panel__header panel__header--compact">
+            <h3 class="panel__subtitle">Datos de la noticia</h3>
+        </div>
+
+        <form class="form" id="newsForm">
+            <div class="form-row">
+                <label>Título</label>
+                <input id="inpTitulo" type="text" placeholder="Escribe el título..." />
+            </div>
+
+            <div class="form-row">
+                <label>Contenido</label>
+                <textarea id="txtContenido" rows="6" placeholder="Redacta aquí el contenido completo..."></textarea>
+            </div>
+
+            <div class="form-row form-row--2">
+                <div>
+                    <label>Estatus</label>
+                    <select id="selEstatus">
+                        <option value="Publicada">Publicada</option>
+                        <option value="Por vencer">Por vencer</option>
+                        <option value="Vencida">Vencida</option>
+                    </select>
                 </div>
 
-                <div class="form-row">
-                    <label>Contenido</label>
-                    <textarea id="txtContenido" rows="6" placeholder="Redacta aquí el contenido completo..."></textarea>
+                <div>
+                    <label>Hora de publicación</label>
+                    <input id="inpHora" type="time" />
                 </div>
+            </div>
 
-                <div class="form-row form-row--2">
-                    <div>
-                        <label>Estatus</label>
-                        <select id="selEstatus">
-                            <option value="Publicada">Publicada</option>
-                            <option value="Por vencer">Por vencer</option>
-                            <option value="Vencida">Vencida</option>
-                        </select>
-                    </div>
+            <div class="form-row">
+                <label>ID Autor (Usuario)</label>
+                <input id="inpAutorId" type="number" placeholder="Ej: 1" />
+            </div>
 
-                    <div>
-                        <label>Hora de publicación</label>
-                        <input id="inpHora" type="time" />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <label>ID Autor (Usuario)</label>
-                    <input id="inpAutorId" type="number" placeholder="Ej: 1" />
-                </div>
-
-                <div class="form-actions">
-                    <button type="button" class="btn btn--outline" id="btnCancelNews">Cancelar</button>
-                    <button type="submit" class="btn btn--primary">Guardar</button>
-                </div>
-            </form>
-        </aside>
+            <div class="form-actions">
+                <button type="button" class="btn btn--outline" id="btnCancelNews">Cancelar</button>
+                <button type="submit" class="btn btn--primary">Guardar</button>
+            </div>
+        </form>
+    </aside>
 
     </section>
 </div>
@@ -384,6 +398,11 @@
 
             if (!titulo || !contenido || !estatus || !autorId || !hhmm) {
                 alert("Completa: Título, Contenido, Estatus, Hora y AutorId.");
+                return;
+            }
+
+            if (titulo.length > 40) {
+                alert(`El título es muy largo. Tienes ${titulo.length} caracteres, el máximo es 40.`);
                 return;
             }
 
