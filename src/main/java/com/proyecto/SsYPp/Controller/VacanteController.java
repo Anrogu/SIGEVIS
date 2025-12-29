@@ -11,12 +11,13 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 @RestController
 @RequestMapping("/vacantes")
+
 public class VacanteController {
     @Autowired
     VacanteService vacanteService;
     @GetMapping("/{vacantes}")
-    public VacanteDto getVacante(@PathVariable Long vacante){
-        return vacanteService.get(vacante);
+    public VacanteDto getVacante(@PathVariable Long vacantes){
+        return vacanteService.get(vacantes);
     }
     @GetMapping("/getAll")
     public List<VacanteDto> getVacantes(){
@@ -30,13 +31,14 @@ public class VacanteController {
 
     @PutMapping("/update/{id}")
     public VacanteDto updateVacante(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @Valid @RequestBody VacanteDto vacante) {
         return vacanteService.update(vacante);
     }
     @PostMapping("/create")
     public ResponseEntity<VacanteDto> registerVacante(@Valid @ModelAttribute VacanteDto vacante) {
         VacanteDto nuevaVacante = vacanteService.create(vacante);
+
         return new ResponseEntity<>(nuevaVacante, HttpStatus.CREATED);
     }
 }

@@ -16,8 +16,8 @@ public class AsignacionesController {
     @Autowired
     AsignacionService asignacionService;
     @GetMapping("/{asignaciones}")
-    public AsignacionDto getAsignacion(@PathVariable Long asignacion){
-        return asignacionService.get(asignacion);
+    public AsignacionDto getAsignacion(@PathVariable Long asignaciones){
+        return asignacionService.get(asignaciones);
     }
     @GetMapping("/getAll")
     public List<AsignacionDto> getAsignaciones(){
@@ -31,7 +31,7 @@ public class AsignacionesController {
 
     @PutMapping("/update/{id}")
     public AsignacionDto updateAsignacion(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @Valid @RequestBody AsignacionDto asignacion) {
         return asignacionService.update(asignacion);
     }

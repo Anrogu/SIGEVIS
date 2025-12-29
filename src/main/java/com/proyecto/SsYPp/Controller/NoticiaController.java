@@ -31,7 +31,7 @@ public class NoticiaController {
 
     @PutMapping("/update/{id}")
     public NoticiaDto updateNoticia(
-            @PathVariable Integer id,
+            @PathVariable Long id,
             @Valid @RequestBody NoticiaDto noticia) {
         return noticiaService.update(noticia);
     }
