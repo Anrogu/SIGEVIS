@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.Value;
 
 import java.io.Serializable;
+import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 
 /**
@@ -22,10 +23,10 @@ public class VacanteDto implements Serializable {
     Boolean estatus;
     OffsetTime fechaPublicacion;
     String requisitos;
-    String carrera;
     Long AreasDgp_idArea;
     Integer Perfiles_idPerfil;
     Integer Horarios_idHorario;
     Integer Modalidades_idModalidad;
     Long Asignaciones_idAsignacion;
+    Integer Carreras_idCarrera;
 }

@@ -453,3 +453,17 @@ body{
     letter-spacing: 1px;
     text-transform: uppercase;
 }
+.error-message {
+    background-color: #fdecea;
+    color: #a71d2a;
+    border: 1px solid #f5c6cb;
+    padding: 12px;
+    border-radius: 6px;
+    margin-bottom: 15px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.input-error {
+    border: 1px solid #dc3545 !important;
+}
