@@ -5,6 +5,24 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Cuenta de Usuario</title>
     <link rel="stylesheet" href="/css/login.css">
+
+    <!-- Estilos para errores -->
+    <style>
+        .error-message {
+            background-color: #fdecea;
+            color: #a71d2a;
+            border: 1px solid #f5c6cb;
+            padding: 12px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .input-error {
+            border: 1px solid #dc3545 !important;
+        }
+    </style>
 </head>
 <body>
 
@@ -27,7 +45,10 @@
 
         <h2>Crear Nueva Cuenta</h2>
 
-        <form th:action="@{/gob/auth/register}" method="post">
+        <!-- Mensaje de error -->
+        <div id="error-message" class="error-message" style="display:none;"></div>
+
+        <form id="registerForm">
 
             <div class="form-group">
                 <label for="nombre">Nombre:</label>
@@ -63,7 +84,8 @@
                     <option value="">Seleccione una Carrera</option>
                     <option th:each="carrera : ${carreras}"
                             th:value="${carrera.id}"
-                            th:text="${carrera.nombre}"></option>
+                            th:text="${carrera.nombre}">
+                    </option>
                 </select>
             </div>
 
@@ -84,5 +106,64 @@
         </div>
     </div>
 </div>
+<script>
+    const errorDiv = document.getElementById("error-message");
+    const emailInput = document.getElementById("email");
+
+    function mostrarError(mensaje) {
+        errorDiv.textContent = mensaje;
+        errorDiv.style.display = "block";
+        emailInput.classList.add("input-error");
+    }
+
+    function ocultarError() {
+        errorDiv.textContent = "";
+        errorDiv.style.display = "none";
+        emailInput.classList.remove("input-error");
+    }
+
+    // Limpiar error cuando el usuario escribe
+    document.querySelectorAll("#registerForm input, #registerForm select")
+        .forEach(el => el.addEventListener("input", ocultarError));
+
+    document.getElementById("registerForm").addEventListener("submit", async function (e) {
+        e.preventDefault();
+        ocultarError();
+
+        const formData = new FormData(this);
+
+        try {
+            const response = await fetch("/gob/auth/register", {
+                method: "POST",
+                body: formData
+            });
+
+            if (response.ok) {
+                // ✅ Registro exitoso
+                window.location.href = "/login?success=true";
+            } else {
+                // 👇 LEEMOS LA RESPUESTA TAL CUAL
+                const raw = await response.text();
+
+                // 👇 DETECTAMOS STACKTRACE / ERROR 500
+                const pareceStacktrace =
+                    raw.includes("java.lang.") ||
+                    raw.includes("org.apache.") ||
+                    raw.includes("\"trace\"") ||
+                    raw.includes("Internal Server Error") ||
+                    raw.length > 300;
+
+                if (pareceStacktrace) {
+                    mostrarError("Ese correo ya está registrado. Usa otro o inicia sesión.");
+                } else {
+                    mostrarError(raw);
+                }
+            }
+        } catch (err) {
+            mostrarError("Error de conexión con el servidor.");
+        }
+    });
+</script>
+
 </body>
 </html>

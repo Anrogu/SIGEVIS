@@ -204,4 +204,28 @@ footer {
         margin: 0 auto 20px auto;
         display: block;
     }
+    .success-message {
+        background: #e6f7ec;
+        color: #1e7e34;
+        border: 1px solid #b7ebc6;
+        padding: 10px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: 500;
+    }
+    .error-message {
+        background-color: #fdecea;
+        color: #a71d2a;
+        border: 1px solid #f5c6cb;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 15px;
+        text-align: center;
+        font-weight: 500;
+    }
+.input-error {
+    border-color: #dc3545;
+}
+
 }
