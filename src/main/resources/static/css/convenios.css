@@ -302,66 +302,36 @@ body {
 }
 
 .page {
+    /* Flex para centrar contenido vertical/horizontalmente */
     display: inline-flex;
     justify-content: center;
     align-items: center;
 
+    /* Tamaño fijo */
     width: 28px;
     height: 28px;
+
+    /* Estilos visuales */
     border-radius: 6px;
     border: 1px solid var(--border);
     background: #fff;
     cursor: pointer;
     font-size: 12px;
 
+    /* Reseteo de estilos de enlace */
     text-decoration: none;
     color: inherit;
     line-height: 1;
 }
 
-/* Hover suave */
 .page:hover {
     background-color: #f2f2f2;
 }
 
-/* Página Activa */
 .page--active {
     background: #f2f2f2;
     font-weight: 700;
     pointer-events: none;
-}
-
-.form label {
-    display: block;
-    font-size: 11px;
-    margin-bottom: 4px;
-}
-
-.form input,
-.form select,
-.form textarea {
-    width: 100%;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    padding: 7px 8px;
-    font-size: 11px;
-    outline: none;
-    font-family: inherit;
-}
-
-.form-row { margin-bottom: 10px; }
-
-.form-row--2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-}
-
-.form-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-top: 10px;
 }
 
 /* =========================================
@@ -424,12 +394,6 @@ body {
 {
     min-width: 90px;
     white-space: nowrap;
-}
-
-/* Resaltar el Folio */
-.table td:first-child {
-    font-weight: 700;
-    color: var(--color-vino);
 }
 
 /* --- PILLS (Etiquetas de Estatus) --- */

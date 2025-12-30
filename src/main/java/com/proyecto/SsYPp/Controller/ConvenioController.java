@@ -21,9 +21,6 @@ public class ConvenioController {
         this.escuelaRepository = escuelaRepository;
     }
 
-    // =======================================================
-    // 1. MÉTODO ÚNICO (Muestra Tabla + Formulario + Paginación)
-    // =======================================================
     @GetMapping
     public String index(@RequestParam(defaultValue = "0") int page, Model model) {
         Page<Convenio> conveniosPage = service.findAll(PageRequest.of(page, 9));

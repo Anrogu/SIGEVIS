@@ -4,13 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administrador | Vacantes</title>
-    <link rel="stylesheet" href="/css/index.css" />
+    <link rel="stylesheet" href="css/convenios.css" />
 </head>
 
 <body>
 <div class="app">
 
-    <!-- TOP BAR -->
     <header class="topbar">
         <div class="topbar__left">
             <span class="topbar__title">ADMINISTRADOR</span>
@@ -23,7 +22,6 @@
         </div>
     </header>
 
-    <!-- SUBMODULE TABS + LOGOUT -->
     <nav class="tabs">
         <div class="tabs__left">
             <a class="tab" href="/index">NOTICIAS</a>
@@ -43,7 +41,6 @@
         </div>
     </nav>
 
-    <!-- SEARCH BAR -->
     <section class="toolbar">
         <div class="search">
             <span class="search__icon">🔎</span>
@@ -52,17 +49,15 @@
         <button class="btn btn--primary" type="button" id="btnSearchVac">Buscar</button>
     </section>
 
-    <!-- CONTENT (RECORRIDO) -->
     <section class="content-grid" id="vacLayout">
 
-        <!-- IZQUIERDA: TABLA -->
         <main class="panel panel--left">
             <div class="panel__header">
                 <h2 class="panel__title">VACANTES</h2>
 
                 <div class="panel__actions">
                     <button class="btn btn--primary" type="button" id="btnNewVac">
-                        Nueva Vacante<span class="icon"></span>
+                        Nueva vacante
                     </button>
                 </div>
             </div>
@@ -81,22 +76,14 @@
                     </tr>
                     </thead>
 
-                    <!-- Se llena con JS -->
                     <tbody id="vacantesBody"></tbody>
                 </table>
             </div>
 
-            <div class="pagination">
-                <button class="page page--active" type="button">1</button>
-                <button class="page" type="button">2</button>
-                <button class="page" type="button">3</button>
-                <button class="page" type="button">4</button>
-                <button class="page" type="button">5</button>
-                <button class="page" type="button">›</button>
-            </div>
+            <div class="pagination" id="pagination"></div>
+
         </main>
 
-        <!-- DERECHA: FORMULARIO -->
         <aside id="vacFormPanel" class="panel panel--right">
             <div class="panel__header panel__header--compact">
                 <h3 class="panel__subtitle">VACANTES</h3>
@@ -167,7 +154,6 @@
 
                     <div>
                         <label>Programar Publicación</label>
-                        <!-- Tu back maneja OffsetTime; aquí dejamos date pero no lo mandamos (para evitar error) -->
                         <input id="fechaPublicacion" class="input--small" type="time" step="1" />
                     </div>
                 </div>
@@ -193,7 +179,7 @@
                 </div>
 
                 <div class="form-actions form-actions--center">
-                    <button type="submit" class="btn btn--gold">Guardar</button>
+                    <button type="submit" class="btn btn--primary">Guardar</button>
                     <button type="button" class="btn btn--wine" id="btnCancelVac">Cancelar</button>
                 </div>
             </form>
@@ -211,36 +197,124 @@
                 method: "POST",
                 credentials: "same-origin"
             });
-
             if (res.ok || res.status === 302) {
                 window.location.href = "/login?logout";
             }
-        } catch (err) {
-            console.error(err);
-        }
+        } catch (err) { console.error(err); }
     });
+
     document.addEventListener("DOMContentLoaded", () => {
         const API = "/vacantes";
 
+        // Referencias UI
         const btnNew = document.getElementById("btnNewVac");
         const btnCancel = document.getElementById("btnCancelVac");
         const layout = document.getElementById("vacLayout");
-
         const tbody = document.getElementById("vacantesBody");
         const form = document.getElementById("vacForm");
-
         const searchInput = document.getElementById("searchVac");
         const btnSearch = document.getElementById("btnSearchVac");
+        const pagination = document.getElementById("pagination"); // Contenedor de paginación
 
-        let vacantesCache = [];
-        let editing = null; // objeto en edición (sin usar GET /{id})
+        // Estado
+        let vacantesCache = []; // Todos los datos
+        let currentList = [];   // Datos filtrados actuales
+        let editing = null;
 
+        // Configuración Paginación
+        const PAGE_SIZE = 9; // Registros por página
+        let currentPage = 1;
+
+        // --- FUNCIONES DE PAGINACIÓN ---
+        function getTotalPages(list) {
+            return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+        }
+
+        function getPageSlice(list, page) {
+            const start = (page - 1) * PAGE_SIZE;
+            return list.slice(start, start + PAGE_SIZE);
+        }
+
+        function renderPagination(totalPages) {
+            if (!pagination) return;
+
+            // Si no hay datos, limpiamos paginación
+            if (currentList.length === 0) {
+                pagination.innerHTML = "";
+                return;
+            }
+
+            let html = "";
+
+            // Botón Anterior
+            if (currentPage > 1) {
+                html += `<button class="page" type="button" data-page="prev">‹</button>`;
+            } else {
+                html += `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">‹</button>`;
+            }
+
+            // Números de Página
+            for (let p = 1; p <= totalPages; p++) {
+                // Clase page--active si es la actual
+                const activeClass = p === currentPage ? "page--active" : "";
+                html += `<button class="page ${activeClass}" type="button" data-page="${p}">${p}</button>`;
+            }
+
+            // Botón Siguiente
+            if (currentPage < totalPages) {
+                html += `<button class="page" type="button" data-page="next">›</button>`;
+            } else {
+                html += `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">›</button>`;
+            }
+
+            pagination.innerHTML = html;
+        }
+
+        // Función Maestra de Renderizado
+        function renderTablaPaginada(list) {
+            currentList = list || [];
+            const totalPages = getTotalPages(currentList);
+
+            // Ajuste por seguridad
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            // 1. Obtener solo los registros de la página actual
+            const pageItems = getPageSlice(currentList, currentPage);
+
+            // 2. Renderizar tabla con esos items
+            renderVacantes(pageItems);
+
+            // 3. Renderizar botones
+            renderPagination(totalPages);
+        }
+
+        // Click en paginación
+        pagination?.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-page]");
+            if (!btn || btn.disabled) return;
+
+            const totalPages = getTotalPages(currentList);
+            const val = btn.dataset.page;
+
+            if (val === "prev" && currentPage > 1) currentPage--;
+            else if (val === "next" && currentPage < totalPages) currentPage++;
+            else {
+                const n = Number(val);
+                if (!isNaN(n)) currentPage = n;
+            }
+
+            renderTablaPaginada(currentList);
+        });
+
+        // --- FUNCIONES UI FORMULARIO ---
         function openForm(){ layout.classList.add("is-split"); }
         function closeForm(){ layout.classList.remove("is-split"); editing = null; form.reset(); }
 
         btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
         btnCancel?.addEventListener("click", closeForm);
 
+        // --- CARGA DE DATOS ---
         async function cargarVacantes() {
             const res = await fetch(`${API}/getAll`, { headers: { "Accept": "application/json" } });
             if (!res.ok) {
@@ -248,42 +322,75 @@
                 return;
             }
             vacantesCache = await res.json();
-            renderVacantes(vacantesCache);
+
+            // Al cargar nuevo, reiniciamos a la página 1
+            currentPage = 1;
+            renderTablaPaginada(vacantesCache);
         }
 
+        // --- RENDER TABLA (Recibe solo la slice) ---
         function pillEstatus(estatus) {
+            // Reutilizamos estilos de index.css / convenios.css
             return estatus === true
-                ? `<span class="pill pill--ok">Publicado</span>`
-                : `<span class="pill pill--bad">No publicado</span>`;
+                ? `<span class="pill pill--vigente">Publicado</span>` // Verde
+                : `<span class="pill pill--cancelado">No publicado</span>`; // Gris/Rojo
         }
 
         function fmtHora(hora) {
-            // puede venir "08:00:00-06:00" (OffsetTime) o "08:00:00.000000" (time(6))
             if (!hora) return "";
             const s = String(hora);
-            return s.slice(0, 8); // HH:MM:SS
+            return s.slice(0, 8);
         }
 
         function renderVacantes(lista) {
             tbody.innerHTML = "";
+
+            if (lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
+                return;
+            }
+
             lista.forEach(v => {
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-            <td>${fmtHora(v.fechaPublicacion)}</td>
-            <td>${v.nombrePuesto ?? ""}</td>
-            <td>${v.AreasDgp_idArea ?? ""}</td>
-            <td>${v.numeroPlazas ?? ""}</td>
-            <td>${v.Horarios_idHorario ?? ""}</td>
-            <td>${pillEstatus(v.estatus)}</td>
-            <td class="actions">
-              <button class="btn btn--mini" type="button" data-edit="${v.idVacantes}">Editar</button>
-              <button class="btn btn--mini btn--outline" type="button" data-del="${v.idVacantes}">Eliminar</button>
-            </td>
-          `;
+                    <td>${fmtHora(v.fechaPublicacion)}</td>
+                    <td> ${v.nombrePuesto ?? ""}</td>
+                    <td>${v.AreasDgp_idArea ?? ""}</td>
+                    <td>${v.numeroPlazas ?? ""}</td>
+                    <td>${v.Horarios_idHorario ?? ""}</td>
+                    <td>${pillEstatus(v.estatus)}</td>
+                    <td class="actions">
+                        <button class="btn btn--mini" type="button" data-edit="${v.idVacantes}">Editar</button>
+                        <button class="btn btn--mini btn--outline" type="button" data-del="${v.idVacantes}">Eliminar</button>
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
         }
 
+        // --- FILTROS ---
+        function filtrar() {
+            const q = (searchInput?.value || "").toLowerCase().trim();
+
+            let filtradas = vacantesCache;
+
+            if (q) {
+                filtradas = vacantesCache.filter(v => {
+                    const nombre = (v.nombrePuesto ?? "").toLowerCase();
+                    const carrera = (v.carrera ?? "").toLowerCase();
+                    const unidad = String(v.AreasDgp_idArea ?? "").toLowerCase();
+                    return nombre.includes(q) || carrera.includes(q) || unidad.includes(q);
+                });
+            }
+
+            currentPage = 1; // Al filtrar, volvemos a la hoja 1
+            renderTablaPaginada(filtradas);
+        }
+
+        btnSearch?.addEventListener("click", filtrar);
+        searchInput?.addEventListener("input", filtrar);
+
+        // --- EDICIÓN Y BORRADO (Delegación) ---
         tbody.addEventListener("click", async (e) => {
             const editBtn = e.target.closest("[data-edit]");
             const delBtn = e.target.closest("[data-del]");
@@ -298,17 +405,14 @@
                 document.getElementById("requisitos").value = editing.requisitos ?? "";
                 document.getElementById("carrera").value = editing.carrera ?? "";
                 document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
-
                 document.getElementById("AreasDgp_idArea").value = editing.AreasDgp_idArea ?? "";
                 document.getElementById("Perfiles_idPerfil").value = editing.Perfiles_idPerfil ?? "";
                 document.getElementById("Modalidades_idModalidad").value = editing.Modalidades_idModalidad ?? "";
                 document.getElementById("Horarios_idHorario").value = editing.Horarios_idHorario ?? "";
                 document.getElementById("Asignaciones_idAsignacion").value = editing.Asignaciones_idAsignacion ?? "";
-
                 document.getElementById("estatus").value = String(editing.estatus ?? true);
 
-                // input type="time" acepta "HH:MM" o "HH:MM:SS"
-                const hhmmss = fmtHora(editing.fechaPublicacion); // "HH:MM:SS"
+                const hhmmss = fmtHora(editing.fechaPublicacion);
                 document.getElementById("fechaPublicacion").value = hhmmss || "";
 
                 openForm();
@@ -321,24 +425,23 @@
                 const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
                 if (!res.ok) {
                     console.error("Error delete:", await res.text());
-                    alert("No se pudo eliminar. Revisa consola.");
+                    alert("No se pudo eliminar.");
                     return;
                 }
-                cargarVacantes();
+                cargarVacantes(); // Recarga y repagina
             }
         });
 
+        // --- SUBMIT ---
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
             const timeVal = document.getElementById("fechaPublicacion").value;
             const hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
-
-            // aquí usamos -06:00 (México centro)
             const timeWithOffset = hhmmss ? `${hhmmss}-06:00` : null;
 
             if (!timeWithOffset) {
-                alert("Selecciona una hora en 'Programar Publicación'.");
+                alert("Selecciona una hora.");
                 return;
             }
 
@@ -358,71 +461,32 @@
                 fechaPublicacion: timeWithOffset
             };
 
-            // Validaciones mínimas
-            if (!payloadCommon.nombrePuesto || !payloadCommon.descripcion || payloadCommon.numeroPlazas < 1) {
-                alert("Completa Título, Descripción y Número de Vacantes (mínimo 1).");
-                return;
-            }
-            if (!payloadCommon.AreasDgp_idArea || !payloadCommon.Perfiles_idPerfil || !payloadCommon.Modalidades_idModalidad ||
-                !payloadCommon.Horarios_idHorario || !payloadCommon.Asignaciones_idAsignacion) {
-                alert("Selecciona Área/Perfil/Modalidad/Horario y Asignación (ID).");
+            if (!payloadCommon.nombrePuesto || payloadCommon.numeroPlazas < 1) {
+                alert("Faltan datos obligatorios.");
                 return;
             }
 
             if (editing) {
-                // UPDATE -> tu back usa @RequestBody (JSON)
                 const res = await fetch(`${API}/update/${editing.idVacantes}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payloadCommon)
                 });
-
-                if (!res.ok) {
-                    console.error("Error update:", await res.text());
-                    alert("No se pudo actualizar. Revisa consola.");
-                    return;
-                }
-
+                if (!res.ok) { alert("Error al actualizar"); return; }
             } else {
                 const fd = new FormData();
                 Object.entries(payloadCommon).forEach(([k, v]) => {
-                    if (v === null || v === undefined) return;
-                    fd.append(k, String(v));
+                    if (v !== null && v !== undefined) fd.append(k, String(v));
                 });
-
-                const res = await fetch(`${API}/create`, {
-                    method: "POST",
-                    body: fd
-                });
-
-                if (!res.ok) {
-                    console.error("Error create:", await res.text());
-                    alert("No se pudo crear. Revisa consola.");
-                    return;
-                }
+                const res = await fetch(`${API}/create`, { method: "POST", body: fd });
+                if (!res.ok) { alert("Error al crear"); return; }
             }
 
             await cargarVacantes();
             closeForm();
         });
 
-        function filtrar() {
-            const q = (searchInput?.value || "").toLowerCase().trim();
-            if (!q) return renderVacantes(vacantesCache);
-
-            const filtradas = vacantesCache.filter(v => {
-                const nombre = (v.nombrePuesto ?? "").toLowerCase();
-                const carrera = (v.carrera ?? "").toLowerCase();
-                const unidad = String(v.AreasDgp_idArea ?? "").toLowerCase();
-                return nombre.includes(q) || carrera.includes(q) || unidad.includes(q);
-            });
-
-            renderVacantes(filtradas);
-        }
-
-        btnSearch?.addEventListener("click", filtrar);
-        searchInput?.addEventListener("input", filtrar);
-
+        // Inicial
         cargarVacantes();
     });
 </script>

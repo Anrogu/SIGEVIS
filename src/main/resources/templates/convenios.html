@@ -46,16 +46,21 @@
             <span class="search__icon">🔎</span>
             <input id="searchConvenio" class="search__input" type="text" placeholder="Buscar por Folio, Escuela..." />
         </div>
-        <button class="btn btn--primary" type="button" id="btnNewConvenio">
-            Nuevo Convenio <span class="icon">＋</span>
-        </button>
+        <button class="btn btn--primary" type="button" id="btnSearchConvenio">Buscar</button>
     </section>
 
     <section class="content-grid" id="convenioLayout">
 
         <main class="panel panel--left">
+
             <div class="panel__header">
                 <h2 class="panel__title">LISTADO DE CONVENIOS</h2>
+
+                <div class="panel__actions">
+                    <button class="btn btn--primary" type="button" id="btnNewConvenio">
+                        Nuevo convenio
+                    </button>
+                </div>
             </div>
 
             <div class="table-wrap">
@@ -80,21 +85,17 @@
 
                     <tr th:each="c : ${convenios.content}">
                         <td th:text="${c.idConvenio}"></td>
-
-                        <td th:text="${c.folio}" style="font-weight:bold; color:var(--color-vino);"></td>
-
+                        <td th:text="${c.folio}"></td>
                         <td th:text="${c.escuela != null ? c.escuela.nombre : 'Sin escuela'}"></td>
                         <td th:text="${c.tipoConvenio}"></td>
                         <td th:text="${c.fechaInicio}"></td>
                         <td th:text="${c.fechaFin}"></td>
-
                         <td>
                                 <span class="pill"
                                       th:classappend="${c.estatus == 'Activo' ? 'pill--vigente' : (c.estatus == 'Inactivo' ? 'pill--cancelado' : 'pill--por-vencer')}"
                                       th:text="${c.estatus}">
                                 </span>
                         </td>
-
                         <td class="actions">
                             <button type="button" class="btn btn--mini btn-edit"
                                     th:data-id="${c.idConvenio}"
@@ -106,7 +107,6 @@
                                     th:data-escuela="${c.escuela != null ? c.escuela.idEscuela : ''}">
                                 Editar
                             </button>
-
                             <a th:href="@{'/convenios/eliminar/' + ${c.idConvenio}}"
                                class="btn btn--mini btn--outline"
                                style="text-decoration: none; color: inherit;"
@@ -120,10 +120,11 @@
             </div>
 
             <div class="pagination" th:if="${totalPages > 0}">
-
                 <a th:if="${currentPage > 0}"
                    th:href="@{/convenios(page=${currentPage - 1})}"
                    class="page">‹</a>
+                <span th:unless="${currentPage > 0}"
+                      class="page" style="opacity:0.5; cursor:default">‹</span>
 
                 <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                    th:href="@{/convenios(page=${i})}"
@@ -135,71 +136,75 @@
                 <a th:if="${currentPage < totalPages - 1}"
                    th:href="@{/convenios(page=${currentPage + 1})}"
                    class="page">›</a>
+                <span th:unless="${currentPage < totalPages - 1}"
+                      class="page" style="opacity:0.5; cursor:default">›</span>
             </div>
 
-        </main> <aside id="convenioFormPanel" class="panel panel--right">
-        <div class="panel__header panel__header--compact">
-            <h3 class="panel__subtitle">GESTIÓN DE CONVENIO</h3>
-        </div>
+        </main>
 
-        <form class="form" id="convenioForm"
-              th:action="@{/convenios/guardar}"
-              th:object="${convenio}"
-              method="post">
+        <aside id="convenioFormPanel" class="panel panel--right">
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">GESTIÓN DE CONVENIO</h3>
+            </div>
 
-            <input type="hidden" th:field="*{idConvenio}" id="fieldIdConvenio" />
+            <form class="form" id="convenioForm"
+                  th:action="@{/convenios/guardar}"
+                  th:object="${convenio}"
+                  method="post">
 
-            <div class="form-row form-row--2">
-                <div>
-                    <label>Folio</label>
-                    <input type="text" th:field="*{folio}" id="fieldFolio" placeholder="Ej. 203/2025" required />
+                <input type="hidden" th:field="*{idConvenio}" id="fieldIdConvenio" />
+
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Folio</label>
+                        <input type="text" th:field="*{folio}" id="fieldFolio" placeholder="Ej. 203/2025" required />
+                    </div>
+                    <div>
+                        <label>Estatus</label>
+                        <select th:field="*{estatus}" id="fieldEstatus" required>
+                            <option value="Activo">Activo</option>
+                            <option value="Inactivo">Inactivo</option>
+                            <option value="Por vencer">Por vencer</option>
+                        </select>
+                    </div>
                 </div>
-                <div>
-                    <label>Estatus</label>
-                    <select th:field="*{estatus}" id="fieldEstatus" required>
-                        <option value="Activo">Activo</option>
-                        <option value="Inactivo">Inactivo</option>
-                        <option value="Por vencer">Por vencer</option>
+
+                <div class="form-row">
+                    <label>Institución / Escuela</label>
+                    <select th:field="*{escuela.idEscuela}" id="fieldEscuela" required>
+                        <option value="">Seleccione una escuela...</option>
+                        <option th:each="e : ${escuelas}"
+                                th:value="${e.idEscuela}"
+                                th:text="${e.nombre}"></option>
                     </select>
                 </div>
-            </div>
 
-            <div class="form-row">
-                <label>Institución / Escuela</label>
-                <select th:field="*{escuela.idEscuela}" id="fieldEscuela" required>
-                    <option value="">Seleccione una escuela...</option>
-                    <option th:each="e : ${escuelas}"
-                            th:value="${e.idEscuela}"
-                            th:text="${e.nombre}"></option>
-                </select>
-            </div>
-
-            <div class="form-row">
-                <label>Tipo de Convenio</label>
-                <select th:field="*{tipoConvenio}" id="fieldTipo" required>
-                    <option value="">Seleccione...</option>
-                    <option value="Servicio Social">Servicio Social</option>
-                    <option value="Prácticas Profesionales">Prácticas Profesionales</option>
-                </select>
-            </div>
-
-            <div class="form-row form-row--2">
-                <div>
-                    <label>Fecha Inicio</label>
-                    <input type="date" th:field="*{fechaInicio}" id="fieldInicio" required />
+                <div class="form-row">
+                    <label>Tipo de Convenio</label>
+                    <select th:field="*{tipoConvenio}" id="fieldTipo" required>
+                        <option value="">Seleccione...</option>
+                        <option value="Servicio Social">Servicio Social</option>
+                        <option value="Prácticas Profesionales">Prácticas Profesionales</option>
+                    </select>
                 </div>
-                <div>
-                    <label>Fecha Fin</label>
-                    <input type="date" th:field="*{fechaFin}" id="fieldFin" required />
-                </div>
-            </div>
 
-            <div class="form-actions form-actions--center">
-                <button type="submit" class="btn btn--primary">Guardar</button>
-                <button type="button" class="btn btn--outline" id="btnCancelConvenio">Cancelar</button>
-            </div>
-        </form>
-    </aside>
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Fecha Inicio</label>
+                        <input type="date" th:field="*{fechaInicio}" id="fieldInicio" required />
+                    </div>
+                    <div>
+                        <label>Fecha Fin</label>
+                        <input type="date" th:field="*{fechaFin}" id="fieldFin" required />
+                    </div>
+                </div>
+
+                <div class="form-actions form-actions--center">
+                    <button type="submit" class="btn btn--primary">Guardar</button>
+                    <button type="button" class="btn btn--outline" id="btnCancelConvenio">Cancelar</button>
+                </div>
+            </form>
+        </aside>
 
     </section>
 </div>
@@ -211,7 +216,6 @@
         const btnCancel = document.getElementById("btnCancelConvenio");
         const form = document.getElementById("convenioForm");
 
-        // Referencias a campos
         const fId = document.getElementById("fieldIdConvenio");
         const fFolio = document.getElementById("fieldFolio");
         const fEstatus = document.getElementById("fieldEstatus");
@@ -220,52 +224,33 @@
         const fInicio = document.getElementById("fieldInicio");
         const fFin = document.getElementById("fieldFin");
 
-        function openForm() {
-            layout.classList.add("is-split");
-        }
+        function openForm() { layout.classList.add("is-split"); }
 
         function closeForm() {
             layout.classList.remove("is-split");
-            setTimeout(() => {
-                form.reset();
-                fId.value = "";
-            }, 300);
+            setTimeout(() => { form.reset(); fId.value = ""; }, 300);
         }
 
         if(btnNew) {
             btnNew.addEventListener("click", () => {
-                form.reset();
-                fId.value = "";
-                openForm();
+                form.reset(); fId.value = ""; openForm();
             });
         }
 
-        if(btnCancel) {
-            btnCancel.addEventListener("click", closeForm);
-        }
+        if(btnCancel) { btnCancel.addEventListener("click", closeForm); }
 
-        // Llenar datos al Editar
         const tableBody = document.getElementById("conveniosBody");
         if(tableBody){
             tableBody.addEventListener("click", (e) => {
                 const btn = e.target.closest(".btn-edit");
                 if (btn) {
-                    const id = btn.getAttribute("data-id");
-                    const folio = btn.getAttribute("data-folio");
-                    const inicio = btn.getAttribute("data-inicio");
-                    const fin = btn.getAttribute("data-fin");
-                    const estatus = btn.getAttribute("data-estatus");
-                    const tipo = btn.getAttribute("data-tipo");
-                    const escuelaId = btn.getAttribute("data-escuela");
-
-                    fId.value = id;
-                    fFolio.value = folio;
-                    fInicio.value = inicio;
-                    fFin.value = fin;
-                    fEstatus.value = estatus;
-                    fTipo.value = tipo;
-                    fEscuela.value = escuelaId;
-
+                    fId.value = btn.getAttribute("data-id");
+                    fFolio.value = btn.getAttribute("data-folio");
+                    fInicio.value = btn.getAttribute("data-inicio");
+                    fFin.value = btn.getAttribute("data-fin");
+                    fEstatus.value = btn.getAttribute("data-estatus");
+                    fTipo.value = btn.getAttribute("data-tipo");
+                    fEscuela.value = btn.getAttribute("data-escuela");
                     openForm();
                 }
             });
