@@ -4,61 +4,77 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Acceso - Servicio Social</title>
+
+    <link rel="stylesheet" href="/css/styles.css">
     <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
 <div class="login-container">
 
-    <!-- Panel Izquierdo -->
     <div class="login-left">
         <div class="overlay">
-            <h2>¡BIENVENIDO!</h2>
+            <h2 style="font-size: 3rem; letter-spacing: 2px;">¡BIENVENIDO!</h2>
         </div>
     </div>
 
-    <!-- Panel Derecho -->
     <div class="login-right">
-        <div class="header">
-            <img th:src="@{/img/EscudosGEM.png}" alt="Gobierno" class="logo-edomex">
-        </div>
 
-        <h1>Iniciar Sesión</h1>
+        <img th:src="@{/img/EscudosGEM.png}" alt="Gobierno del Estado de México" class="logo-edomex">
 
-        <form th:action="@{/login}" method="post">
-            <label for="correo">Correo Electrónico:</label>
-            <input type="email" id="correo" name="email" placeholder="email" required>
+        <div class="login-content-wrapper">
 
-            <label for="contrasena">Contraseña:</label>
-            <div class="password-container">
-                <input type="password" id="contrasena" name="password" required>
-                <span class="toggle-password" onclick="togglePassword()">👁</span>
+            <h1>Iniciar Sesión</h1>
+
+            <form th:action="@{/login}" method="post">
+                <div>
+                    <label for="correo">Correo Electrónico</label>
+                    <input type="email" id="correo" name="email" placeholder="ejemplo@edomex.gob.mx" required>
+                </div>
+
+                <div>
+                    <label for="contrasena">Contraseña</label>
+                    <div class="password-container">
+                        <input type="password" id="contrasena" name="password" placeholder="••••••••" required>
+                        <span class="toggle-password" onclick="togglePassword()">
+                            <i class="fa-regular fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">Ingresar</button>
+            </form>
+
+            <div th:if="${param.error}" class="error-msg">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>Credenciales inválidas. Verifica tus datos.</span>
             </div>
 
-            <button type="submit" class="btn-login">Ingresar al sistema</button>
-        </form>
+            <div class="footer-links">
+                ¿No tienes cuenta? <a th:href="@{/register}">Regístrate aquí</a>
+            </div>
 
-        <!-- Mensaje de error -->
-        <p th:if="${param.error}" class="error-msg">
-            Credenciales inválidas. Por favor, inténtalo de nuevo.
-        </p>
+        </div> <div class="copyright">
+        ©2025 - Subdirección de Desarrollo Tecnológico
+    </div>
 
-        <!-- Link de registro -->
-        <p style="margin-top: 20px;">
-            ¿No tienes cuenta? <a th:href="@{/register}">Regístrate aquí</a>
-        </p>
-
-        <!-- Footer -->
-        <div class="text-center mt-3">
-            <p>©2025 - Subdirección de Desarrollo Tecnológico</p>
-        </div>
     </div>
 </div>
 
 <script>
     function togglePassword() {
         const input = document.getElementById("contrasena");
-        input.type = input.type === "password" ? "text" : "password";
+        // Si usas FontAwesome, puedes cambiar el icono
+        const icon = document.querySelector(".toggle-password i");
+
+        if (input.type === "password") {
+            input.type = "text";
+            if(icon) icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            input.type = "password";
+            if(icon) icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
     }
 </script>
 

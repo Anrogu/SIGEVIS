@@ -1,66 +1,37 @@
-:root {
-    /* Letra */
-    --font-family: 'Poppins', sans-serif;
-
-    /* Paleta de Colores */
-    --color-vino: #7b1e3d;
-    --color-dorado: #B59560;
-    --color-dorado-claro: #B88E55;
-    --color-negro: #010101;
-    --color-gris: #CCCCCC;
-    --color-crema: #F5E0C7;
-
-    --color-verde: #7EF5FC;
-    --color-rojo: #FDECEA;
-    --color-naranja: #FFF4E5;
-
-    --color-Texto-verde: #517D32;
-    --color-Texto-rojo: #C84141;
-    --color-Texto-naranja: #C77700;
-
-    /* Variables de UI */
-    --texto-oscuro: #333333;
-    --texto-claro: #ffffff;
-    --borde-input: #CCCCCC;
-
-    /* VARIABLES DE IMÁGENES */
-    --img-fondo-login: url('/img/Fondo_1.png');
-    --img-degradado: url('/img/Degradado.png');
-    --logo-mixto: url('/img/EscudosGEM.png');
-}
-
 /* === General === */
 body {
     font-family: var(--font-family);
     background-color: var(--texto-claro);
     margin: 0;
     padding: 0;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .login-container {
     display: flex;
-    width: 90%;
-    max-width: 1100px;
-    margin: 5% auto;
+    width: 100%;
+    height: 100vh;
+    margin: 0;
     background-color: var(--texto-claro);
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
-    border-radius: 12px;
-    overflow: hidden;
 }
 
 /* === Panel Izquierdo === */
 .login-left {
-    flex: 1;
+    flex: 0.7;
     background-image: var(--img-fondo-login);
     background-size: cover;
     background-position: center;
     display: flex;
     justify-content: center;
     align-items: center;
+    position: relative;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+    z-index: 10;
 }
 
 .login-left .overlay {
-    background: rgba(123, 30, 61, 0.9);
+    background: rgba(123, 30, 61, 0.92);
     width: 100%;
     height: 100%;
     display: flex;
@@ -70,57 +41,76 @@ body {
 
 .login-left h2 {
     color: var(--texto-claro);
-    font-size: 2.8rem;
-    font-weight: bold;
+    font-size: 3rem;
+    font-weight: 700;
     text-align: center;
+    padding: 0 20px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
 }
 
 /* === Panel Derecho === */
 .login-right {
-    flex: 1.2;
+    flex: 1.3; /* Ocupa el 60% aprox */
     background-image: var(--img-degradado);
-    padding: 50px 60px;
+    background-size: cover;
+    padding: 40px;
+
     display: flex;
     flex-direction: column;
     justify-content: center;
+    align-items: center;
     position: relative;
 }
 
-/* Logo arriba a la derecha */
 .logo-edomex {
-    width: 220px;
     position: absolute;
-    top: 25px;
-    right: 25px;
+    top: 30px;
+    right: 40px;
+    width: 250px;
+    height: auto;
+}
+
+.login-content-wrapper {
+    width: 100%;
+    max-width: 400px;
+    padding: 20px;
 }
 
 h1 {
     color: var(--color-negro);
-    font-size: 1.8rem;
-    margin-bottom: 25px;
+    font-size: 2.2rem;
+    margin-bottom: 40px;
+    font-weight: 600;
+    text-align: left;
+    color: var(--texto-oscuro);
 }
 
 label {
     font-weight: 500;
-    margin-top: 10px;
+    margin-top: 20px;
     display: block;
-    color: var(--texto-oscuro);
+    color: var(--muted);
+    font-size: 0.9rem;
+    margin-bottom: 8px;
 }
 
-input, select {
+input {
     width: 100%;
-    padding: 12px;
+    padding: 12px 15px;
     border: 1px solid var(--borde-input);
-    border-radius: 8px;
-    margin-top: 5px;
+    border-radius: 6px;
     font-size: 1rem;
     outline: none;
-    transition: border-color 0.3s;
-    box-sizing: border-box;
+    transition: all 0.3s ease;
+    background: #fdfdfd;
+    font-family: var(--font-family), serif;
 }
 
-input:focus, select:focus {
+input:focus {
     border-color: var(--color-vino);
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(123, 30, 61, 0.1);
 }
 
 .password-container {
@@ -129,103 +119,91 @@ input:focus, select:focus {
 
 .toggle-password {
     position: absolute;
-    right: 12px;
-    top: 35%;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
     cursor: pointer;
-    font-size: 1rem;
-    color: var(--texto-oscuro);
+    font-size: 1.1rem;
+    color: var(--color-gris);
+    transition: color 0.3s;
+}
+
+.toggle-password:hover {
+    color: var(--color-vino);
 }
 
 /* === Botón === */
 .btn-login {
-    width: 100%;
+    width: 220px;
+    margin: 40px auto 0 auto;
+    display: block;
     background-color: var(--color-vino);
     color: var(--texto-claro);
     border: none;
     padding: 14px;
-    border-radius: 8px;
+    border-radius: 6px;
     font-size: 1rem;
+    font-weight: 500;
     cursor: pointer;
-    font-weight: bold;
-    margin-top: 25px;
-    transition: background-color 0.3s;
+    transition: background-color 0.3s, transform 0.2s;
+    letter-spacing: 0.5px;
 }
 
 .btn-login:hover {
     background-color: #5e152e;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px rgba(123, 30, 61, 0.3);
 }
 
-/* === Línea decorativa === */
-.decorative-line {
-    width: 100%;
-    height: 5px;
-    background: repeating-linear-gradient(
-            90deg,
-            var(--color-dorado),
-            var(--color-dorado) 20px,
-            transparent 20px,
-            transparent 40px
-    );
-    margin: 25px 0;
-}
-
-/* === Footer === */
-footer {
-    font-size: 0.85rem;
-    color: #555;
+.footer-links {
+    margin-top: 25px;
     text-align: center;
+    font-size: 0.9rem;
+    color: var(--muted);
+}
+
+.footer-links a {
+    color: var(--color-vino);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 5px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+.copyright {
+    position: absolute;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #999;
 }
 
 /* === Error === */
 .error-msg {
     color: var(--color-Texto-rojo);
-    text-align: center;
+    background-color: #fdecea;
+    padding: 12px;
+    border-radius: 6px;
+    text-align: left;
     font-weight: 500;
+    font-size: 0.9rem;
+    margin-top: 25px;
+    border-left: 4px solid var(--color-Texto-rojo);
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 /* === Responsive === */
-@media (max-width: 768px) {
-    .login-container {
-        flex-direction: column;
-        width: 90%;
-    }
-
-    .login-left {
-        display: none;
-    }
-
-    .login-right {
-        padding: 30px;
-    }
-
-    /* En móviles, el logo puede regresar al centro o mantenerse arriba si prefieres */
-    .logo-edomex {
-        position: static;
-        margin: 0 auto 20px auto;
-        display: block;
-    }
-    .success-message {
-        background: #e6f7ec;
-        color: #1e7e34;
-        border: 1px solid #b7ebc6;
-        padding: 10px;
-        border-radius: 6px;
-        margin-bottom: 15px;
-        text-align: center;
-        font-weight: 500;
-    }
-    .error-message {
-        background-color: #fdecea;
-        color: #a71d2a;
-        border: 1px solid #f5c6cb;
-        padding: 12px;
-        border-radius: 6px;
-        margin-bottom: 15px;
-        text-align: center;
-        font-weight: 500;
-    }
-.input-error {
-    border-color: #dc3545;
-}
-
+@media (max-width: 900px) {
+    .login-container { flex-direction: column; overflow-y: auto; }
+    .login-left { display: none; }
+    .login-right { flex: 1; padding: 30px; }
+    .logo-edomex { position: static; margin: 0 auto 30px auto; width: 180px; }
+    h1 { text-align: center; }
+    .copyright { position: relative; margin-top: 40px; }
 }

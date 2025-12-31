@@ -1,10 +1,4 @@
 :root{
-    --bg: #ffffff;
-    --border: #cfcfcf;
-    --border-2: #b9b9b9;
-    --text: #1f1f1f;
-    --muted: #666;
-    --color-vino: #7b1e3d;
     --shadow: 0 2px 10px rgba(0,0,0,.08);
 }
 
@@ -12,7 +6,7 @@
 
 body{
     margin: 0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; /* Usamos la fuente del diseño que te gustó */
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text);
     background: #f6f6f6;
 }
@@ -247,16 +241,15 @@ body{
     vertical-align: middle;
 }
 
-/* 1. EL ENCABEZADO (TH) */
+/* 1. ENCABEZADO (TH) */
 .th-actions {
-    /* Le damos un ancho fijo generoso para que quepan los dos botones */
     width: 160px !important;
     min-width: 160px !important;
     max-width: 160px !important;
     text-align: center !important;
 }
 
-/* 2. LA CELDA DEL CUERPO (TD) */
+/* 2. CELDA DEL CUERPO (TD) */
 .actions {
     display: flex !important;
     justify-content: center !important;
@@ -351,7 +344,7 @@ body{
     .panel--right{ display: block; }
 }
 
-/* ====== DISEÑO INFERIOR (ESTILO VIEJO) ====== */
+/* ====== DISEÑO INFERIOR ====== */
 
 .divider {
     border: 0;
@@ -359,7 +352,7 @@ body{
     margin: 30px 0;
 }
 
-/* Preview Estático (Estilo antiguo) */
+/* Preview Estático */
 .preview-container-static {
     display: flex;
     flex-wrap: wrap;

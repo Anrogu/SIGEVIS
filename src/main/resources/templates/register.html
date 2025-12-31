@@ -3,24 +3,101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Cuenta de Usuario</title>
-    <link rel="stylesheet" href="/css/login.css">
+    <title>Crear Cuenta - Servicio Social</title>
 
-    <!-- Estilos para errores -->
+    <link rel="stylesheet" href="/css/styles.css">
+    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
     <style>
-        .error-message {
-            background-color: #fdecea;
-            color: #a71d2a;
-            border: 1px solid #f5c6cb;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 15px;
-            text-align: center;
-            font-weight: 500;
+        .login-content-wrapper {
+            width: 100%;
+            max-width: 450px;
+            padding: 0 20px;
         }
 
-        .input-error {
-            border: 1px solid #dc3545 !important;
+        h1 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .form-compact input,
+        .form-compact select {
+            width: 100%;
+            height: 35px;
+            padding: 0 10px;
+            font-size: 0.9rem;
+            margin-top: 2px;
+            background-color: #fff;
+            border: 1px solid var(--borde-input);
+            border-radius: 5px;
+            box-sizing: border-box;
+            color: #333;
+        }
+
+        .form-compact select:invalid {
+            color: #757575;
+        }
+
+        .form-compact select option {
+            color: #333;
+        }
+
+        .form-compact input:focus,
+        .form-compact select:focus {
+            border-color: var(--color-vino);
+            box-shadow: 0 0 0 3px rgba(123, 30, 61, 0.1);
+        }
+
+        /* Etiquetas */
+        .form-compact label {
+            margin-top: 8px;
+            margin-bottom: 0;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #555;
+            display: block;
+        }
+
+        /* Flecha del Select */
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23333' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            background-size: 12px;
+        }
+
+        /* Password */
+        .password-container {
+            position: relative;
+            width: 100%;
+        }
+
+        .toggle-password {
+            top: 50%;
+            transform: translateY(-50%);
+            right: 10px;
+            font-size: 0.85rem;
+            color: #777;
+        }
+
+        /* Botón */
+        .btn-register {
+            width: 100%;
+            margin-top: 20px;
+            padding: 10px;
+            font-size: 1rem;
+            border-radius: 6px;
+        }
+
+        /* Footer Links */
+        .footer-mini {
+            text-align: center;
+            font-size: 0.8rem;
+            margin-top: 15px;
+            color: #777;
         }
     </style>
 </head>
@@ -30,137 +107,129 @@
 
     <div class="login-left">
         <div class="overlay">
-            <h2>¡BIENVENIDO!</h2>
-            <p style="font-size: 0.9em; margin-top: 15px;">
-                Complete el formulario para crear su cuenta y acceder a la plataforma.
-            </p>
+            <h2 style="font-size: 3rem; letter-spacing: 2px;">¡BIENVENIDO!</h2>
         </div>
     </div>
 
     <div class="login-right">
 
-        <div class="header">
-            <img src="/img/EscudoGEM.png" alt="Gobierno" class="logo-edomex">
+        <img th:src="@{/img/EscudosGEM.png}" alt="Gobierno" class="logo-edomex">
+
+        <div class="login-content-wrapper">
+
+            <h1>Crear Nueva Cuenta</h1>
+
+            <div id="error-message" class="error-msg" style="display:none; margin-bottom: 15px;"></div>
+
+            <form id="registerForm" class="form-compact">
+
+                <div>
+                    <label for="nombre">Nombre(s)</label>
+                    <input type="text" id="nombre" name="nombre" placeholder="Ej. Juan Carlos" required>
+                </div>
+
+                <div>
+                    <label for="primerapellido">Primer Apellido</label>
+                    <input type="text" id="primerapellido" name="primerapellido" placeholder="Ej. Pérez" required>
+                </div>
+
+                <div>
+                    <label for="segundoapellido">Segundo Apellido</label>
+                    <input type="text" id="segundoapellido" name="segundoapellido" placeholder="Ej. López">
+                </div>
+
+                <div>
+                    <label for="carrerasIdcarrera">Carrera</label>
+                    <select id="carrerasIdcarrera" name="carrerasIdcarrera" required>
+                        <option value="" disabled selected hidden>Seleccione una Carrera...</option>
+                        <option th:each="carrera : ${carreras}"
+                                th:value="${carrera.id}"
+                                th:text="${carrera.nombre}">
+                        </option>
+                    </select>
+                </div>
+
+                <div>
+                    <label for="email">Correo Electrónico</label>
+                    <input type="email" id="email" name="email" placeholder="ejemplo@edomex.gob.mx" required>
+                </div>
+
+                <div>
+                    <label for="password">Contraseña</label>
+                    <div class="password-container">
+                        <input type="password" id="password" name="password" placeholder="••••••••" required>
+                        <span class="toggle-password" onclick="togglePassword()">
+                            <i class="fa-regular fa-eye"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <input type="hidden" name="idrol" value="2" />
+                <input type="hidden" name="status" value="1" />
+
+                <button type="submit" class="btn-login btn-register">Registrarse</button>
+
+            </form>
+
+            <div class="footer-mini">
+                ¿Ya tienes una cuenta? <a th:href="@{/login}" style="font-weight:bold; color:var(--color-vino);">Iniciar Sesión</a>
+            </div>
+
         </div>
 
-        <h2>Crear Nueva Cuenta</h2>
-
-        <!-- Mensaje de error -->
-        <div id="error-message" class="error-message" style="display:none;"></div>
-
-        <form id="registerForm">
-
-            <div class="form-group">
-                <label for="nombre">Nombre:</label>
-                <input type="text" id="nombre" name="nombre" required />
-            </div>
-
-            <div class="form-group">
-                <label for="primerapellido">Primer Apellido:</label>
-                <input type="text" id="primerapellido" name="primerapellido" required />
-            </div>
-
-            <div class="form-group">
-                <label for="segundoapellido">Segundo Apellido:</label>
-                <input type="text" id="segundoapellido" name="segundoapellido" />
-            </div>
-
-            <div class="form-group">
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" required />
-            </div>
-
-            <div class="form-group">
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" name="password" required />
-            </div>
-
-            <input type="hidden" name="idrol" value="2" />
-            <input type="hidden" name="status" value="1" />
-
-            <div class="form-group">
-                <label for="carrerasIdcarrera">Carrera:</label>
-                <select id="carrerasIdcarrera" name="carrerasIdcarrera" required>
-                    <option value="">Seleccione una Carrera</option>
-                    <option th:each="carrera : ${carreras}"
-                            th:value="${carrera.id}"
-                            th:text="${carrera.nombre}">
-                    </option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <input type="submit" value="Registrarse" class="btn-login" />
-            </div>
-
-        </form>
-
-        <div class="decorative-line"></div>
-
-        <div class="login-link">
-            ¿Ya tienes una cuenta? <a th:href="@{/login}">Iniciar Sesión</a>
+        <div class="copyright">
+            ©2025 - Subdirección de Desarrollo Tecnológico
         </div>
 
-        <div class="text-center mt-3 footer-text">
-            <p>©2025 - Subdirección de Desarrollo Tecnológico...</p>
-        </div>
     </div>
 </div>
+
 <script>
+    function togglePassword() {
+        const input = document.getElementById("password");
+        const icon = document.querySelector(".toggle-password i");
+        if (input.type === "password") {
+            input.type = "text";
+            if(icon) icon.classList.replace("fa-eye", "fa-eye-slash");
+        } else {
+            input.type = "password";
+            if(icon) icon.classList.replace("fa-eye-slash", "fa-eye");
+        }
+    }
+
     const errorDiv = document.getElementById("error-message");
-    const emailInput = document.getElementById("email");
 
     function mostrarError(mensaje) {
-        errorDiv.textContent = mensaje;
-        errorDiv.style.display = "block";
-        emailInput.classList.add("input-error");
+        errorDiv.innerHTML = `<i class="fa-solid fa-circle-exclamation"></i> <span>${mensaje}</span>`;
+        errorDiv.style.display = "flex";
+        errorDiv.style.alignItems = "center";
+        errorDiv.style.gap = "10px";
     }
 
     function ocultarError() {
-        errorDiv.textContent = "";
         errorDiv.style.display = "none";
-        emailInput.classList.remove("input-error");
     }
 
-    // Limpiar error cuando el usuario escribe
-    document.querySelectorAll("#registerForm input, #registerForm select")
-        .forEach(el => el.addEventListener("input", ocultarError));
+    document.getElementById("registerForm").addEventListener("input", ocultarError);
 
     document.getElementById("registerForm").addEventListener("submit", async function (e) {
         e.preventDefault();
         ocultarError();
-
         const formData = new FormData(this);
-
         try {
-            const response = await fetch("/gob/auth/register", {
-                method: "POST",
-                body: formData
-            });
-
+            const response = await fetch("/gob/auth/register", { method: "POST", body: formData });
             if (response.ok) {
-                // ✅ Registro exitoso
                 window.location.href = "/login?success=true";
             } else {
-                // 👇 LEEMOS LA RESPUESTA TAL CUAL
                 const raw = await response.text();
-
-                // 👇 DETECTAMOS STACKTRACE / ERROR 500
-                const pareceStacktrace =
-                    raw.includes("java.lang.") ||
-                    raw.includes("org.apache.") ||
-                    raw.includes("\"trace\"") ||
-                    raw.includes("Internal Server Error") ||
-                    raw.length > 300;
-
-                if (pareceStacktrace) {
-                    mostrarError("Ese correo ya está registrado. Usa otro o inicia sesión.");
+                if (raw.length > 200 || raw.includes("Exception")) {
+                    mostrarError("Error técnico. Verifica tus datos.");
                 } else {
                     mostrarError(raw);
                 }
             }
         } catch (err) {
-            mostrarError("Error de conexión con el servidor.");
+            mostrarError("Error de conexión.");
         }
     });
 </script>
