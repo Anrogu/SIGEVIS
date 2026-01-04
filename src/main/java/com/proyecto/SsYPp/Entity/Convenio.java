@@ -28,5 +28,4 @@ public class Convenio {
 
     @OneToMany(mappedBy = "conveniosIdconvenio")
     private Set<ConvenioCarrera> convenioCarreras = new LinkedHashSet<>();
-
 }

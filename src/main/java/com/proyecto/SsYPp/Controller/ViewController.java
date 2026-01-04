@@ -33,11 +33,6 @@ public class ViewController {
         return "asignaciones";
     }
 
-    @GetMapping("/usuarios")
-    public String mostrarUsuarios() {
-        return "usuarios";
-    }
-
     @GetMapping("/auditorias")
     public String mostrarAuditorias() {
         return "auditorias";

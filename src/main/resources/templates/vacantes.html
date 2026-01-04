@@ -25,20 +25,17 @@
 
     <nav class="tabs">
         <div class="tabs__left">
-            <a class="tab" href="/index">NOTICIAS</a>
-            <a class="tab tab--active" href="/vacantes.html">VACANTES</a>
-            <a class="tab" href="/asignaciones.html">ASIGNACIONES</a>
-            <a class="tab" href="/actividades.html">ACTIVIDADES Y EVIDENCIAS</a>
-            <a class="tab" href="/convenios.html">CONVENIOS</a>
-            <a class="tab" href="/catalogos.html">CATÁLOGOS</a>
-            <a class="tab" href="/usuarios.html">USUARIOS Y ROLES</a>
-            <a class="tab" href="/auditorias.html">AUDITORÍA</a>
+            <a class="tab" th:href="@{/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/asignaciones}">ASIGNACIONES</a>
+            <a class="tab" th:href="@{/actividades}">ACTIVIDADES</a>
+            <a class="tab" th:href="@{/convenios}">CONVENIOS</a>
+            <a class="tab" th:href="@{/catalogos}">CATÁLOGOS</a>
+            <a class="tab" th:href="@{/usuarios}">USUARIOS Y ROLES</a>
+            <a class="tab" th:href="@{/auditorias}">AUDITORÍA</a>
         </div>
-
         <div class="tabs__right">
-            <button class="btn btn--outline btn--logout" type="button" id="btnLogout">
-                CERRAR SESIÓN
-            </button>
+            <button class="btn btn--outline btn--logout">CERRAR SESION</button>
         </div>
     </nav>
 

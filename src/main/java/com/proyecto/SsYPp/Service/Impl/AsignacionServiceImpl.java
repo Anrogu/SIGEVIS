@@ -67,7 +67,7 @@ public class AsignacionServiceImpl implements AsignacionService {
 
     }
     public Asignacion convertirDTOAEntidad(AsignacionDto dto) {
-        Usuario usuario= usuarioRepository.findById(dto.getUsuariosIdusuario())
+        Usuario usuario = usuarioRepository.findById(Long.valueOf(dto.getUsuariosIdusuario()))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
         Postulacion postulacion= postulacionRepository.findById(Long.valueOf(dto.getPostulacionesIdpostulacion()))
                 .orElseThrow(() -> new RuntimeException("Postulacion no encontrada"));

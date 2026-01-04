@@ -18,6 +18,7 @@ import java.io.Serializable;
 @Setter
 @NoArgsConstructor
 public class UsuarioDto implements Serializable {
+    private Integer idusuario;
     @NotNull
     @Size(max = 255)
     String nombre;

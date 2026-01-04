@@ -69,7 +69,7 @@ public class NoticiaServiceImpl implements NoticiaService {
         return noticiaDto;
     }
     private Noticia convertirDTOAEntidad(NoticiaDto dto) {
-        Usuario usuario = usuarioRepository.findById(dto.getAutoridIdusuario())
+        Usuario usuario = usuarioRepository.findById(Long.valueOf(dto.getAutoridIdusuario()))
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado con ID: " + dto.getAutoridIdusuario()));
         Noticia noticia = new Noticia();
         noticia.setId(dto.getId());
