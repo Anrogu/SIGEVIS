@@ -215,8 +215,8 @@
         const pagination = document.getElementById("pagination"); // Contenedor de paginación
 
         // Estado
-        let vacantesCache = []; // Todos los datos
-        let currentList = [];   // Datos filtrados actuales
+        let vacantesCache = [];
+        let currentList = [];
         let editing = null;
 
         // Configuración Paginación
@@ -236,7 +236,6 @@
         function renderPagination(totalPages) {
             if (!pagination) return;
 
-            // Si no hay datos, limpiamos paginación
             if (currentList.length === 0) {
                 pagination.innerHTML = "";
                 return;
