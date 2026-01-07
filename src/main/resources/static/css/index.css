@@ -460,3 +460,82 @@ body{
 .input-error {
     border: 1px solid #dc3545 !important;
 }
+
+/* --------------------------------------------------- */
+
+.gob-modal{
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+
+  /* ✅ CENTRAR SIEMPRE */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 16px;
+}
+
+    .gob-modal__backdrop{
+      position:absolute; inset:0;
+      background: rgba(0,0,0,.45);
+      backdrop-filter: blur(2px);
+    }
+    .gob-modal__card{
+      position: relative;
+      width: min(560px, 100%);
+      background: #fff;
+      border: 2px solid var(--border);
+      border-radius: 10px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+       margin: 0 !important;
+    }
+
+    .gob-modal__header{
+      display:flex; gap:12px; align-items:flex-start;
+      padding: 12px 12px 10px;
+      border-bottom: 1px solid var(--border);
+      background: #f3f3f3;
+    }
+    .gob-modal__icon{
+      width: 34px; height: 34px;
+      border-radius: 8px;
+      display:grid; place-items:center;
+      flex: 0 0 auto;
+      border: 1px solid var(--border);
+      background: #fff;
+      color: var(--color-vino);
+      font-size: 14px;
+    }
+    .gob-modal__titles{ flex:1; min-width:0; }
+    .gob-modal__title{ margin:0; font-size: 12px; font-weight: 800; color: var(--text); }
+    .gob-modal__subtitle{ margin: 3px 0 0; font-size: 11px; color: var(--muted); }
+    .gob-modal__x{
+      border: 1px solid var(--border);
+      background: #fff;
+      width: 28px; height: 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 18px;
+      line-height: 1;
+      color: var(--muted);
+    }
+    .gob-modal__body{
+      padding: 12px;
+      font-size: 11px;
+      color: var(--text);
+      line-height: 1.5;
+      white-space: pre-wrap;
+    }
+    .gob-modal__footer{
+      display:flex; justify-content:flex-end; gap:10px;
+      padding: 10px 12px 12px;
+      border-top: 1px solid #eee;
+    }
+
+    /* Estados usando tu paleta */
+    .gob-modal--info .gob-modal__icon{ background:#fff; color: var(--color-vino); }
+    .gob-modal--success .gob-modal__icon{ background: var(--color-verde); color: var(--color-Texto-verde); border-color:#bfe5cc; }
+    .gob-modal--warning .gob-modal__icon{ background: var(--color-naranja); color: var(--color-Texto-naranja); border-color:#f0d08a; }
+    .gob-modal--danger  .gob-modal__icon{ background: var(--color-rojo); color: var(--color-Texto-rojo); border-color:#f5c6cb; }
