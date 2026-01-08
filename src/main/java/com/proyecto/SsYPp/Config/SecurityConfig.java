@@ -10,6 +10,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.authentication.DisabledException;
+
 
 @Configuration
 @EnableWebSecurity
@@ -53,10 +55,24 @@ public class SecurityConfig {
                         // 3. Cualquier otra ruta requiere estar autenticado
                         .anyRequest().authenticated()
                 )
+                //---------------------------------------------------------------
+                .authenticationProvider(authenticationProvider())
+
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")
                         .successHandler(customSuccessHandler)
+
+                        // AHORA: si el usuario está desactivado -> /login?disabled=true
+                        // (y si es otro error -> /login?error=true)
+                        .failureHandler((request, response, exception) -> {
+                            if (exception instanceof DisabledException) {
+                                response.sendRedirect("/login?disabled=true");
+                            } else {
+                                response.sendRedirect("/login?error=true");
+                            }
+                        })
+                        // ---------------------------------------------------------------------------------
                         .permitAll()
                 )
                 .logout(logout -> logout

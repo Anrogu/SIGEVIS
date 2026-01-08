@@ -67,6 +67,9 @@ public class UsuarioImpl implements UsuarioService {
         if (existsByEmail(usuarioDto.getEmail())) {
             throw new IllegalArgumentException("El correo electrónico " + usuarioDto.getEmail() + " ya está registrado.");
         }
+        if (usuarioDto.getStatus() == null) {
+            usuarioDto.setStatus(true);
+        }
 
         // Encriptar contraseña nueva
         String rawPassword = usuarioDto.getPassword();
@@ -120,6 +123,26 @@ public class UsuarioImpl implements UsuarioService {
         // 6. Guardar el usuario existente actualizado
         Usuario actualizado = usuarioRepository.save(usuarioExistente);
         return convertirEntidadADTO(actualizado);
+    }
+    // ✅ NUEVO METODO (para Activar/Desactivar desde el Controller)
+    @Override
+    public boolean toggleStatus(Integer id) {
+
+        // ANTES: el controller solo redireccionaba y no se actualizaba BD.
+        // ✅ Ahora: alternamos status y devolvemos el valor final.
+
+        Long idLong = Long.valueOf(id);
+
+        Usuario usuario = usuarioRepository.findById(idLong)
+                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con ID: " + id));
+
+        // Alterna: true->false, false->true
+        boolean nuevoStatus = (usuario.getStatus() == null) ? true : !usuario.getStatus();
+        usuario.setStatus(nuevoStatus);
+
+        usuarioRepository.save(usuario);
+
+        return nuevoStatus;
     }
 
     // --- MÉTODOS AUXILIARES ---

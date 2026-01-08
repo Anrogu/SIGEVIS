@@ -17,4 +17,6 @@ public interface UsuarioService {
     public UsuarioDto create(UsuarioDto usuario);
     public UsuarioDto update(UsuarioDto usuario);
 
+    // ✅ NUEVO: activar/desactivar
+    boolean toggleStatus(Integer id);
 }

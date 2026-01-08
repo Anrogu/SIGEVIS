@@ -6,20 +6,18 @@
     <title>Usuarios y Roles</title>
 
     <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/index.css" /> <!-- ✅ Modal GOV (mismo que Noticias/Vacantes) -->
     <link rel="stylesheet" href="css/convenios.css" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
         .th-actions { width: 190px; text-align: center; }
 
-        .actions-cell {
-            display: flex;
-            justify-content: center;
-            gap: 6px;
+        .actions-cell{
+            display:flex;
+            justify-content:center;
+            gap:6px;
         }
-
-        /* Estilos de botones pequeños (idénticos a convenios/vacantes) */
-        /* Ya vienen en convenios.css si usaste btn--mini, pero reforzamos alineación */
     </style>
 </head>
 
@@ -37,15 +35,14 @@
         <div class="tabs__left">
             <a class="tab" th:href="@{/index}">NOTICIAS</a>
             <a class="tab" th:href="@{/vacantes}">VACANTES</a>
-            <a class="tab" th:href="@{/asignaciones}">ASIGNACIONES</a>
-            <a class="tab" th:href="@{/actividades}">ACTIVIDADES</a>
+            <a class="tab" th:href="@{/postulaciones}">POSTULACIONES</a>
+            <a class="tab" th:href="@{/actividades}">ACTIVIDADES Y EVIDENCIAS</a>
             <a class="tab" th:href="@{/convenios}">CONVENIOS</a>
             <a class="tab" th:href="@{/catalogos}">CATÁLOGOS</a>
-            <a class="tab" th:href="@{/usuarios}">USUARIOS Y ROLES</a>
-            <a class="tab" th:href="@{/auditorias}">AUDITORÍA</a>
+            <a class="tab tab--active" th:href="@{/usuarios}">USUARIOS Y ROLES</a>
         </div>
         <div class="tabs__right">
-            <button class="btn btn--outline btn--logout">CERRAR SESION</button>
+            <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESION</button>
         </div>
     </nav>
 
@@ -54,7 +51,7 @@
             <span class="search__icon">🔎</span>
             <input id="searchUsuario" class="search__input" type="text" placeholder="Buscar usuario..." />
         </div>
-        <button class="btn btn--primary">Buscar</button>
+        <button class="btn btn--primary" type="button" id="btnSearchUsuario">Buscar</button>
     </section>
 
     <section class="content-grid" id="usuarioLayout">
@@ -101,25 +98,28 @@
                             </span>
                         </td>
 
-                        <td class="actions-cell">
+                        <td class="actions">
+                            <div class="actions-cell">
+                                <button type="button" class="btn btn--mini btn-edit"
+                                        th:data-id="${u.idusuario}"
+                                        th:data-nombre="${u.nombre}"
+                                        th:data-app1="${u.primerapellido}"
+                                        th:data-app2="${u.segundoapellido}"
+                                        th:data-email="${u.email}"
+                                        th:data-rol="${u.idrol}"
+                                        th:data-status="${u.status}">
+                                    Editar
+                                </button>
 
-                            <button type="button" class="btn btn--mini btn-edit"
-                                    th:data-id="${u.idusuario}"
-                                    th:data-nombre="${u.nombre}"
-                                    th:data-app1="${u.primerapellido}"
-                                    th:data-app2="${u.segundoapellido}"
-                                    th:data-email="${u.email}"
-                                    th:data-rol="${u.idrol}"
-                                    th:data-status="${u.status}">
-                                Editar
-                            </button>
-
-                            <a th:href="@{'/usuarios/cambiar-status/' + ${u.idusuario}}"
-                               class="btn btn--mini btn--outline"
-                               style="text-decoration: none; color: inherit;"
-                               th:text="${u.status ? 'Desactivar' : 'Activar'}">
-                            </a>
-
+                                <!-- ✅ Activar/Desactivar con Modal GOV -->
+                                <button type="button"
+                                        class="btn btn--mini btn--outline btn-toggle"
+                                        th:data-id="${u.idusuario}"
+                                        th:data-status="${u.status}"
+                                        th:data-nombre="${u.nombre + ' ' + u.primerapellido}">
+                                    <span th:text="${u.status ? 'Desactivar' : 'Activar'}"></span>
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
@@ -156,8 +156,7 @@
             <form class="form" id="usuarioForm"
                   th:action="@{/usuarios/guardar}"
                   th:object="${usuario}"
-                  method="post"
-                  onsubmit="return confirm('¿Seguro que deseas guardar los cambios realizados en este usuario?');">
+                  method="post">
 
                 <input type="hidden" th:field="*{idusuario}" id="fieldIdUsuario" />
 
@@ -165,6 +164,7 @@
                     <label>Nombre(s)</label>
                     <input type="text" th:field="*{nombre}" id="fieldNombre" required />
                 </div>
+
                 <div class="form-row form-row--2">
                     <div>
                         <label>Primer Apellido</label>
@@ -175,6 +175,7 @@
                         <input type="text" th:field="*{segundoapellido}" id="fieldApp2" />
                     </div>
                 </div>
+
                 <div class="form-row">
                     <label>Correo</label>
                     <input type="email" th:field="*{email}" id="fieldEmail" required />
@@ -194,7 +195,7 @@
                         <label>Rol</label>
                         <select th:field="*{idrol}" id="fieldRol" required>
                             <option value="">Seleccione...</option>
-                            <option value="1">Administrador</option>
+                            <option value="1" id="optAdmin">Administrador</option>
                             <option value="2">Prestador</option>
                             <option value="3">Tutor</option>
                         </select>
@@ -218,8 +219,115 @@
     </section>
 </div>
 
+<!-- ======================================================
+     MODAL GOV (mismo estilo que Noticias/Vacantes, definido en index.css)
+====================================================== -->
+<div id="gobModal" class="gob-modal gob-modal--danger" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card" role="dialog" aria-modal="true" aria-labelledby="gobModalTitle">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">!</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Título</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle">Subtítulo</p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body">
+            Contenido
+        </div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cancelar</button>
+            <button id="gobModalOk" type="button" class="btn btn--primary">Aceptar</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // ================= Logout =================
+    const btnLogout = document.getElementById("btnLogout");
+    btnLogout?.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/logout", { method: "POST", credentials: "same-origin" });
+            if (res.ok || res.status === 302) window.location.href = "/login?logout";
+        } catch (err) { console.error(err); }
+    });
+
     document.addEventListener("DOMContentLoaded", () => {
+
+        // ================= MODAL GOV (igual estilo Noticias/Vacantes) =================
+        const gobModal = document.getElementById("gobModal");
+        const gobModalTitle = document.getElementById("gobModalTitle");
+        const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+        const gobModalBody = document.getElementById("gobModalBody");
+        const gobModalOk = document.getElementById("gobModalOk");
+        const gobModalCancel = document.getElementById("gobModalCancel");
+        let modalOnOk = null;
+
+        function openGobModal({type="info", title="Aviso", subtitle="", body="", okText="Aceptar", cancelText="Cancelar", onOk=null, hideCancel=false}) {
+            if (!gobModal) return;
+
+            gobModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
+            gobModal.classList.add(`gob-modal--${type}`);
+
+            gobModalTitle.textContent = title;
+            gobModalSubtitle.textContent = subtitle;
+            gobModalBody.textContent = body;
+
+            gobModalOk.textContent = okText;
+            gobModalCancel.textContent = cancelText;
+
+            gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+
+            modalOnOk = onOk;
+            gobModal.style.display = "flex";
+        }
+
+        function closeGobModal() {
+            if (!gobModal) return;
+            gobModal.style.display = "none";
+            modalOnOk = null;
+        }
+
+        gobModal?.addEventListener("click", (e) => {
+            const close = e.target.closest("[data-close='1']");
+            if (close) closeGobModal();
+        });
+
+        gobModalCancel?.addEventListener("click", closeGobModal);
+
+        gobModalOk?.addEventListener("click", async () => {
+            if (typeof modalOnOk === "function") await modalOnOk();
+            closeGobModal();
+        });
+
+        function showSuccess(message) {
+            openGobModal({
+                type: "success",
+                title: "Listo",
+                subtitle: "",
+                body: message,
+                okText: "OK",
+                hideCancel: true
+            });
+        }
+
+        function showError(message) {
+            openGobModal({
+                type: "danger",
+                title: "Ocurrió un error",
+                subtitle: "",
+                body: message,
+                okText: "Entendido",
+                hideCancel: true
+            });
+        }
+        // ============================================================================
+
+        // ============== Split layout (form) ==============
         const layout = document.getElementById("usuarioLayout");
         const btnNew = document.getElementById("btnNewUsuario");
         const btnCancel = document.getElementById("btnCancelUsuario");
@@ -234,61 +342,165 @@
         const fRol = document.getElementById("fieldRol");
         const fStatus = document.getElementById("fieldStatus");
 
-        function openForm() { layout.classList.add("is-split"); }
-        function closeForm() {
-            layout.classList.remove("is-split");
-            setTimeout(() => { form.reset(); fId.value = ""; }, 300);
+        const optAdmin = document.getElementById("optAdmin");
+
+        function setMode(isEdit) {
+            if (optAdmin) {
+                optAdmin.hidden = !isEdit;
+                optAdmin.disabled = !isEdit;
+                if (!isEdit && fRol.value === "1") fRol.value = "";
+            }
         }
 
-        if(btnNew) btnNew.addEventListener("click", () => {
-            form.reset();
-            fId.value = "";
+        function openForm() { layout?.classList.add("is-split"); }
+
+        function closeForm() {
+            layout?.classList.remove("is-split");
+            setTimeout(() => {
+                form?.reset();
+                if (fId) fId.value = "";
+                setMode(false);
+            }, 300);
+        }
+
+        btnNew?.addEventListener("click", () => {
+            form?.reset();
+            if (fId) fId.value = "";
+            setMode(false); // Nuevo -> ocultar Admin
             openForm();
         });
 
-        if(btnCancel) btnCancel.addEventListener("click", closeForm);
+        btnCancel?.addEventListener("click", closeForm);
 
-        // Lógica de Editar
-        const tableBody = document.getElementById("usuariosBody");
-        if(tableBody){
-            tableBody.addEventListener("click", (e) => {
-                const btn = e.target.closest(".btn-edit");
-                if (btn) {
-                    fId.value = btn.getAttribute("data-id");
-                    fNombre.value = btn.getAttribute("data-nombre");
-                    fApp1.value = btn.getAttribute("data-app1");
-                    fApp2.value = btn.getAttribute("data-app2");
-                    fEmail.value = btn.getAttribute("data-email");
-                    fRol.value = btn.getAttribute("data-rol");
+        // ============== Buscar (front) ==============
+        const searchInput = document.getElementById("searchUsuario");
+        const btnSearch = document.getElementById("btnSearchUsuario");
+        const tbody = document.getElementById("usuariosBody");
 
-                    fPass.value = "";
+        function norm(s){ return String(s ?? "").toLowerCase().trim(); }
 
-                    const statusVal = btn.getAttribute("data-status");
-                    fStatus.value = (statusVal === "true") ? "true" : "false";
+        function filtrarTabla() {
+            const q = norm(searchInput?.value);
+            if (!tbody) return;
 
-                    openForm();
-                }
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+            rows.forEach(tr => {
+                if (tr.querySelector("td[colspan]")) return; // fila "no hay usuarios"
+                const nombre = norm(tr.children[0]?.textContent);
+                const correo = norm(tr.children[1]?.textContent);
+                const rol = norm(tr.children[2]?.textContent);
+                const match = !q || nombre.includes(q) || correo.includes(q) || rol.includes(q);
+                tr.style.display = match ? "" : "none";
             });
         }
-    });
-</script>
 
-<script>
-    document.addEventListener("DOMContentLoaded", () => {
+        btnSearch?.addEventListener("click", filtrarTabla);
+        searchInput?.addEventListener("input", filtrarTabla);
 
+        // ============== Editar / Activar-Desactivar ==============
+        tbody?.addEventListener("click", (e) => {
+            const btnEdit = e.target.closest(".btn-edit");
+            const btnToggle = e.target.closest(".btn-toggle");
+
+            if (btnEdit) {
+                if (fId) fId.value = btnEdit.getAttribute("data-id") || "";
+                if (fNombre) fNombre.value = btnEdit.getAttribute("data-nombre") || "";
+                if (fApp1) fApp1.value = btnEdit.getAttribute("data-app1") || "";
+                if (fApp2) fApp2.value = btnEdit.getAttribute("data-app2") || "";
+                if (fEmail) fEmail.value = btnEdit.getAttribute("data-email") || "";
+                if (fRol) fRol.value = btnEdit.getAttribute("data-rol") || "";
+
+                if (fPass) fPass.value = "";
+
+                const statusVal = btnEdit.getAttribute("data-status");
+                if (fStatus) fStatus.value = (statusVal === "true") ? "true" : "false";
+
+                setMode(true); // Editar -> permitir Admin
+                openForm();
+                return;
+            }
+
+            if (btnToggle) {
+                const id = btnToggle.getAttribute("data-id");
+                const statusVal = btnToggle.getAttribute("data-status"); // "true" o "false"
+                const nombre = btnToggle.getAttribute("data-nombre") || "este usuario";
+                const isActivo = (statusVal === "true");
+
+                const accionTxt = isActivo ? "desactivar" : "activar";
+                const titulo = isActivo ? "Desactivar usuario" : "Activar usuario";
+                const tipo = isActivo ? "warning" : "success";
+
+                openGobModal({
+                    type: tipo,
+                    title: titulo,
+                    subtitle: "Confirma la acción",
+                    body: `¿Seguro que deseas ${accionTxt} a ${nombre}?`,
+                    okText: isActivo ? "Desactivar" : "Activar",
+                    cancelText: "Cancelar",
+                    onOk: async () => {
+                        try {
+                            // Mantengo tu endpoint original (MVC)
+                            const res = await fetch(`/usuarios/cambiar-status/${id}`, {
+                                method: "GET",
+                                credentials: "same-origin"
+                            });
+
+                            if (res.ok || res.redirected) {
+                                showSuccess(`Usuario ${isActivo ? "desactivado" : "activado"} correctamente.`);
+                                setTimeout(() => window.location.reload(), 450);
+                            } else {
+                                const t = await res.text();
+                                console.error("Error cambiar-status:", t);
+                                showError("No se pudo cambiar el estado del usuario.");
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            showError("No se pudo cambiar el estado del usuario.");
+                        }
+                    }
+                });
+            }
+        });
+
+        // ✅ Estado inicial
+        setMode(false);
+
+        // ============== Mensajes backend (si vienen) ==============
+        // Reemplaza tus alert() por el Modal GOV
         const errorMsg = "[[${mensajeError}]]";
         const successMsg = "[[${mensajeExito}]]";
 
-        if (errorMsg && errorMsg !== 'null' && errorMsg !== '') {
-            alert("⚠️ ERROR:\n" + errorMsg);
+        if (errorMsg && errorMsg !== "null" && errorMsg !== "") {
+            showError(errorMsg);
         }
 
-        if (successMsg && successMsg !== 'null' && successMsg !== '') {
-
+        if (successMsg && successMsg !== "null" && successMsg !== "") {
+            showSuccess(successMsg);
         }
 
-        const layout = document.getElementById("usuarioLayout");
-        const btnNew = document.getElementById("btnNewUsuario");
+        // (Opcional) Soporte si mandas params ?ok=... o ?err=...
+        const params = new URLSearchParams(window.location.search);
+        const ok = params.get("ok");
+        const err = params.get("err");
+        if (ok) showSuccess(ok);
+        if (err) showError(err);
+
+        // (Opcional) Si quieres confirmación antes de guardar:
+        form?.addEventListener("submit", (ev) => {
+            // Si quieres bloquear el submit y confirmar con modal, descomenta:
+            /*
+            ev.preventDefault();
+            openGobModal({
+                type: "warning",
+                title: "Guardar cambios",
+                subtitle: "Confirma la operación",
+                body: "¿Seguro que deseas guardar los cambios realizados en este usuario?",
+                okText: "Guardar",
+                cancelText: "Cancelar",
+                onOk: async () => form.submit()
+            });
+            */
+        });
     });
 </script>
 

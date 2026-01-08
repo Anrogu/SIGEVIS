@@ -54,7 +54,33 @@ public class UsuarioController {
     }
 
     @GetMapping("/cambiar-status/{id}")
-    public String cambiarStatus(@PathVariable Integer id) {
+    public String cambiarStatus(@PathVariable Integer id,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            // NUEVO:
+            // Cambia el estado (activo ↔ inactivo) y devuelve el nuevo valor
+            boolean nuevoStatus = usuarioService.toggleStatus(id);
+
+            redirectAttributes.addFlashAttribute(
+                    "mensajeExito",
+                    nuevoStatus
+                            ? "Usuario ACTIVADO correctamente."
+                            : "Usuario DESACTIVADO correctamente."
+            );
+
+        } catch (IllegalArgumentException e) {
+
+            // Usuario no encontrado u otro error controlado
+            redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
+
+        } catch (Exception e) {
+
+            // Error no esperado
+            redirectAttributes.addFlashAttribute(
+                    "mensajeError",
+                    "No se pudo cambiar el estado del usuario."
+            );
+        }
         return "redirect:/usuarios";
     }
 }

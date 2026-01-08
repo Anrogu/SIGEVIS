@@ -6,7 +6,13 @@
     <title>Administrador | Convenios</title>
 
     <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/index.css" /> <!-- ✅ Modal GOV (mismo que Noticias/Vacantes) -->
     <link rel="stylesheet" href="css/convenios.css" />
+
+    <style>
+        .th-actions { width: 190px; text-align: center; }
+        .actions-cell { display: flex; justify-content: center; gap: 6px; }
+    </style>
 </head>
 
 <body>
@@ -27,15 +33,14 @@
         <div class="tabs__left">
             <a class="tab" th:href="@{/index}">NOTICIAS</a>
             <a class="tab" th:href="@{/vacantes}">VACANTES</a>
-            <a class="tab" th:href="@{/asignaciones}">ASIGNACIONES</a>
-            <a class="tab" th:href="@{/actividades}">ACTIVIDADES</a>
-            <a class="tab" th:href="@{/convenios}">CONVENIOS</a>
+            <a class="tab" th:href="@{/postulaciones}">POSTULACIONES</a>
+            <a class="tab" th:href="@{/actividades}">ACTIVIDADES Y EVIDENCIA</a>
+            <a class="tab tab--active" th:href="@{/convenios}">CONVENIOS</a>
             <a class="tab" th:href="@{/catalogos}">CATÁLOGOS</a>
             <a class="tab" th:href="@{/usuarios}">USUARIOS Y ROLES</a>
-            <a class="tab" th:href="@{/auditorias}">AUDITORÍA</a>
         </div>
         <div class="tabs__right">
-            <button class="btn btn--outline btn--logout">CERRAR SESION</button>
+            <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESION</button>
         </div>
     </nav>
 
@@ -66,7 +71,6 @@
                     <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Folio</th>
                         <th>Escuela</th>
                         <th>Tipo</th>
                         <th>Inicio</th>
@@ -78,39 +82,41 @@
 
                     <tbody id="conveniosBody">
                     <tr th:if="${#lists.isEmpty(convenios.content)}">
-                        <td colspan="8" style="text-align:center; padding: 20px;">No hay convenios registrados.</td>
+                        <td colspan="7" style="text-align:center; padding: 20px;">No hay convenios registrados.</td>
                     </tr>
 
                     <tr th:each="c : ${convenios.content}">
                         <td th:text="${c.idConvenio}"></td>
-                        <td th:text="${c.folio}"></td>
                         <td th:text="${c.escuela != null ? c.escuela.nombre : 'Sin escuela'}"></td>
                         <td th:text="${c.tipoConvenio}"></td>
                         <td th:text="${c.fechaInicio}"></td>
                         <td th:text="${c.fechaFin}"></td>
                         <td>
-                                <span class="pill"
-                                      th:classappend="${c.estatus == 'Activo' ? 'pill--vigente' : (c.estatus == 'Inactivo' ? 'pill--cancelado' : 'pill--por-vencer')}"
-                                      th:text="${c.estatus}">
-                                </span>
+                            <span class="pill"
+                                  th:classappend="${c.estatus == 'Activo' ? 'pill--vigente' : (c.estatus == 'Inactivo' ? 'pill--cancelado' : 'pill--por-vencer')}"
+                                  th:text="${c.estatus}">
+                            </span>
                         </td>
+
                         <td class="actions">
-                            <button type="button" class="btn btn--mini btn-edit"
-                                    th:data-id="${c.idConvenio}"
-                                    th:data-folio="${c.folio}"
-                                    th:data-inicio="${c.fechaInicio}"
-                                    th:data-fin="${c.fechaFin}"
-                                    th:data-estatus="${c.estatus}"
-                                    th:data-tipo="${c.tipoConvenio}"
-                                    th:data-escuela="${c.escuela != null ? c.escuela.idEscuela : ''}">
-                                Editar
-                            </button>
-                            <a th:href="@{'/convenios/eliminar/' + ${c.idConvenio}}"
-                               class="btn btn--mini btn--outline"
-                               style="text-decoration: none; color: inherit;"
-                               onclick="return confirm('¿Seguro que deseas eliminar este convenio?');">
-                                Borrar
-                            </a>
+                            <div class="actions-cell">
+                                <button type="button" class="btn btn--mini btn-edit"
+                                        th:data-id="${c.idConvenio}"
+                                        th:data-inicio="${c.fechaInicio}"
+                                        th:data-fin="${c.fechaFin}"
+                                        th:data-estatus="${c.estatus}"
+                                        th:data-tipo="${c.tipoConvenio}"
+                                        th:data-escuela="${c.escuela != null ? c.escuela.idEscuela : ''}">
+                                    Editar
+                                </button>
+
+                                <!-- ✅ Borrar con MODAL GOV (reemplaza confirm()) -->
+                                <button type="button"
+                                        class="btn btn--mini btn--outline btn-del"
+                                        th:data-id="${c.idConvenio}">
+                                    Borrar
+                                </button>
+                            </div>
                         </td>
                     </tr>
                     </tbody>
@@ -152,19 +158,13 @@
 
                 <input type="hidden" th:field="*{idConvenio}" id="fieldIdConvenio" />
 
-                <div class="form-row form-row--2">
-                    <div>
-                        <label>Folio</label>
-                        <input type="text" th:field="*{folio}" id="fieldFolio" placeholder="Ej. 203/2025" required />
-                    </div>
-                    <div>
-                        <label>Estatus</label>
-                        <select th:field="*{estatus}" id="fieldEstatus" required>
-                            <option value="Activo">Activo</option>
-                            <option value="Inactivo">Inactivo</option>
-                            <option value="Por vencer">Por vencer</option>
-                        </select>
-                    </div>
+                <div class="form-row">
+                    <label>Estatus</label>
+                    <select th:field="*{estatus}" id="fieldEstatus" required>
+                        <option value="Activo">Activo</option>
+                        <option value="Inactivo">Inactivo</option>
+                        <option value="Por vencer">Por vencer</option>
+                    </select>
                 </div>
 
                 <div class="form-row">
@@ -207,52 +207,241 @@
     </section>
 </div>
 
+<!-- ======================================================
+     MODAL GOV (mismo estilo que Noticias/Vacantes, definido en index.css)
+====================================================== -->
+<div id="gobModal" class="gob-modal gob-modal--danger" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card" role="dialog" aria-modal="true" aria-labelledby="gobModalTitle">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">!</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Título</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle">Subtítulo</p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body">
+            Contenido
+        </div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cancelar</button>
+            <button id="gobModalOk" type="button" class="btn btn--primary">Aceptar</button>
+        </div>
+    </div>
+</div>
+
 <script>
+    // ================= Logout =================
+    const btnLogout = document.getElementById("btnLogout");
+    btnLogout?.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/logout", { method: "POST", credentials: "same-origin" });
+            if (res.ok || res.status === 302) window.location.href = "/login?logout";
+        } catch (err) { console.error(err); }
+    });
+
     document.addEventListener("DOMContentLoaded", () => {
+
+        // ================= MODAL GOV (igual estilo Noticias/Vacantes) =================
+        const gobModal = document.getElementById("gobModal");
+        const gobModalTitle = document.getElementById("gobModalTitle");
+        const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+        const gobModalBody = document.getElementById("gobModalBody");
+        const gobModalOk = document.getElementById("gobModalOk");
+        const gobModalCancel = document.getElementById("gobModalCancel");
+        let modalOnOk = null;
+
+        function openGobModal({type="info", title="Aviso", subtitle="", body="", okText="Aceptar", cancelText="Cancelar", onOk=null, hideCancel=false}) {
+            if (!gobModal) return;
+
+            gobModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
+            gobModal.classList.add(`gob-modal--${type}`);
+
+            gobModalTitle.textContent = title;
+            gobModalSubtitle.textContent = subtitle;
+            gobModalBody.textContent = body;
+
+            gobModalOk.textContent = okText;
+            gobModalCancel.textContent = cancelText;
+
+            gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+
+            modalOnOk = onOk;
+            gobModal.style.display = "flex";
+        }
+
+        function closeGobModal() {
+            if (!gobModal) return;
+            gobModal.style.display = "none";
+            modalOnOk = null;
+        }
+
+        gobModal?.addEventListener("click", (e) => {
+            const close = e.target.closest("[data-close='1']");
+            if (close) closeGobModal();
+        });
+
+        gobModalCancel?.addEventListener("click", closeGobModal);
+
+        gobModalOk?.addEventListener("click", async () => {
+            if (typeof modalOnOk === "function") await modalOnOk();
+            closeGobModal();
+        });
+
+        function showSuccess(message) {
+            openGobModal({
+                type: "success",
+                title: "Listo",
+                subtitle: "",
+                body: message,
+                okText: "OK",
+                hideCancel: true
+            });
+        }
+
+        function showError(message) {
+            openGobModal({
+                type: "danger",
+                title: "Ocurrió un error",
+                subtitle: "",
+                body: message,
+                okText: "Entendido",
+                hideCancel: true
+            });
+        }
+        // ============================================================================
+
+        // ============== Split layout (form) ==============
         const layout = document.getElementById("convenioLayout");
         const btnNew = document.getElementById("btnNewConvenio");
         const btnCancel = document.getElementById("btnCancelConvenio");
         const form = document.getElementById("convenioForm");
 
         const fId = document.getElementById("fieldIdConvenio");
-        const fFolio = document.getElementById("fieldFolio");
         const fEstatus = document.getElementById("fieldEstatus");
         const fEscuela = document.getElementById("fieldEscuela");
         const fTipo = document.getElementById("fieldTipo");
         const fInicio = document.getElementById("fieldInicio");
         const fFin = document.getElementById("fieldFin");
 
-        function openForm() { layout.classList.add("is-split"); }
+        function openForm() { layout?.classList.add("is-split"); }
 
         function closeForm() {
-            layout.classList.remove("is-split");
-            setTimeout(() => { form.reset(); fId.value = ""; }, 300);
+            layout?.classList.remove("is-split");
+            setTimeout(() => { form?.reset(); if (fId) fId.value = ""; }, 300);
         }
 
-        if(btnNew) {
-            btnNew.addEventListener("click", () => {
-                form.reset(); fId.value = ""; openForm();
+        btnNew?.addEventListener("click", () => {
+            form?.reset();
+            if (fId) fId.value = "";
+            openForm();
+        });
+
+        btnCancel?.addEventListener("click", closeForm);
+
+        // ============== Buscar (front) ==============
+        const searchInput = document.getElementById("searchConvenio");
+        const btnSearch = document.getElementById("btnSearchConvenio");
+        const tbody = document.getElementById("conveniosBody");
+
+        function norm(s){ return String(s ?? "").toLowerCase().trim(); }
+
+        function filtrarTabla() {
+            const q = norm(searchInput?.value);
+            if (!tbody) return;
+
+            const rows = Array.from(tbody.querySelectorAll("tr"));
+            rows.forEach(tr => {
+                // no ocultar el mensaje "No hay convenios..."
+                if (tr.querySelector("td[colspan]")) return;
+
+                // Columnas ahora: 0 ID, 1 Escuela, 2 Tipo, 3 Inicio, 4 Fin, 5 Estatus, 6 Acciones
+                const escuela = norm(tr.children[1]?.textContent);
+                const tipo = norm(tr.children[2]?.textContent);
+
+                const match = !q || escuela.includes(q) || tipo.includes(q);
+                tr.style.display = match ? "" : "none";
             });
         }
 
-        if(btnCancel) { btnCancel.addEventListener("click", closeForm); }
+        btnSearch?.addEventListener("click", filtrarTabla);
+        searchInput?.addEventListener("input", filtrarTabla);
 
-        const tableBody = document.getElementById("conveniosBody");
-        if(tableBody){
-            tableBody.addEventListener("click", (e) => {
-                const btn = e.target.closest(".btn-edit");
-                if (btn) {
-                    fId.value = btn.getAttribute("data-id");
-                    fFolio.value = btn.getAttribute("data-folio");
-                    fInicio.value = btn.getAttribute("data-inicio");
-                    fFin.value = btn.getAttribute("data-fin");
-                    fEstatus.value = btn.getAttribute("data-estatus");
-                    fTipo.value = btn.getAttribute("data-tipo");
-                    fEscuela.value = btn.getAttribute("data-escuela");
-                    openForm();
-                }
-            });
-        }
+        // ============== Editar / Eliminar ==============
+        tbody?.addEventListener("click", (e) => {
+            const btnEdit = e.target.closest(".btn-edit");
+            const btnDel = e.target.closest(".btn-del");
+
+            if (btnEdit) {
+                if (fId) fId.value = btnEdit.getAttribute("data-id") || "";
+                if (fInicio) fInicio.value = btnEdit.getAttribute("data-inicio") || "";
+                if (fFin) fFin.value = btnEdit.getAttribute("data-fin") || "";
+                if (fEstatus) fEstatus.value = btnEdit.getAttribute("data-estatus") || "";
+                if (fTipo) fTipo.value = btnEdit.getAttribute("data-tipo") || "";
+                if (fEscuela) fEscuela.value = btnEdit.getAttribute("data-escuela") || "";
+                openForm();
+                return;
+            }
+
+            if (btnDel) {
+                const id = btnDel.getAttribute("data-id");
+
+                openGobModal({
+                    type: "danger",
+                    title: "Eliminar convenio",
+                    subtitle: "Esta acción no se puede deshacer",
+                    body: "¿Seguro que deseas eliminar este convenio?",
+                    okText: "Eliminar",
+                    cancelText: "Cancelar",
+                    onOk: async () => {
+                        try {
+                            // ✅ Mantengo tu endpoint original
+                            const res = await fetch(`/convenios/eliminar/${id}`, {
+                                method: "GET",
+                                credentials: "same-origin"
+                            });
+
+                            // En MVC normalmente responde 200 y/o redirige.
+                            if (res.ok || res.redirected) {
+                                showSuccess("Convenio eliminado correctamente.");
+                                // refrescar pantalla
+                                setTimeout(() => window.location.reload(), 450);
+                            } else {
+                                const t = await res.text();
+                                console.error("Error eliminar:", t);
+                                showError("No se pudo eliminar el convenio.");
+                            }
+                        } catch (err) {
+                            console.error(err);
+                            showError("No se pudo eliminar el convenio.");
+                        }
+                    }
+                });
+            }
+        });
+
+        // ============== Mensaje al Guardar (crear/editar) ==============
+        // Nota: como este form hace POST tradicional (no fetch),
+        // el "mensaje" se muestra después del redirect si mandas un query param.
+        // Aun así, aquí dejamos un fallback: si el backend marca data-* en el body,
+        // o si vienes con ?ok=1 / ?err=1, lo capturamos.
+
+        const params = new URLSearchParams(window.location.search);
+        const ok = params.get("ok");
+        const err = params.get("err");
+
+        if (ok) showSuccess(ok);
+        if (err) showError(err);
+
+        // También puedes disparar al enviar (solo validación de UI)
+        form?.addEventListener("submit", () => {
+            // aquí no bloqueamos (se manda normal), pero podrías mostrar un modal info si quieres
+            // openGobModal({ type:"info", title:"Guardando...", body:"Espera un momento...", hideCancel:true });
+        });
     });
 </script>
 

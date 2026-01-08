@@ -10,9 +10,9 @@ public class AdminController {
         return "vacantes"; // Busca templates/vacantes.html
     }
 
-    @GetMapping("/asignaciones.html")
-    public String asignaciones() {
-        return "asignaciones"; // Busca templates/asignaciones.html
+    @GetMapping("/postulaciones.html")
+    public String postulaciones() {
+        return "postulaciones"; // Busca templates/postulaciones.html
     }
 
     @GetMapping("/convenios.html")
@@ -23,11 +23,6 @@ public class AdminController {
     @GetMapping("/usuarios.html")
     public String usuarios() {
         return "usuarios"; // Busca templates/usuarios.html
-    }
-
-    @GetMapping("/auditorias.html")
-    public String auditorias() {
-        return "auditorias"; // Busca templates/auditorias.html
     }
 
     @GetMapping("/catalogos.html")
