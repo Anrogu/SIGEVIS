@@ -60,11 +60,13 @@
             <div class="panel__header">
                 <h2 class="panel__title">USUARIOS Y ROLES</h2>
 
+                <!--
                 <div class="panel__actions">
                     <button class="btn btn--primary" type="button" id="btnNewUsuario">
                         Nuevo usuario
                     </button>
                 </div>
+                -->
             </div>
 
             <div class="table-wrap">
@@ -195,7 +197,6 @@
                         <label>Rol</label>
                         <select th:field="*{idrol}" id="fieldRol" required>
                             <option value="">Seleccione...</option>
-                            <option value="1" id="optAdmin">Administrador</option>
                             <option value="2">Prestador</option>
                             <option value="3">Tutor</option>
                         </select>
