@@ -1,15 +1,20 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Administrador | Vacantes</title>
     <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/index.css" /> <!-- ✅ Para el modal GOV como Noticias -->
     <link rel="stylesheet" href="css/convenios.css" />
 </head>
 
 <body>
 <div class="app">
+
+    <!-- ✅ Usuario actual (para “creado por”) -->
+    <input type="hidden" id="currentUser"
+           th:value="${#authentication != null ? #authentication.name : ''}" />
 
     <header class="topbar">
         <div class="topbar__left">
@@ -35,14 +40,15 @@
             <a class="tab" th:href="@{/auditorias}">AUDITORÍA</a>
         </div>
         <div class="tabs__right">
-            <button class="btn btn--outline btn--logout">CERRAR SESION</button>
+            <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESION</button>
         </div>
     </nav>
 
     <section class="toolbar">
         <div class="search">
             <span class="search__icon">🔎</span>
-            <input id="searchVac" class="search__input" type="text" placeholder="Buscar Vacante por Nombre, Unidad..." />
+            <input id="searchVac" class="search__input" type="text"
+                   placeholder="Buscar por nombre de vacante o unidad..." />
         </div>
         <button class="btn btn--primary" type="button" id="btnSearchVac">Buscar</button>
     </section>
@@ -64,11 +70,11 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Fecha</th>
-                        <th>Nombre de la Vacante</th>
+                        <!-- ✅ Solo estas columnas -->
+                        <th>Título</th>
                         <th>Unidad</th>
                         <th>No. Vacantes</th>
-                        <th>Horario</th>
+                        <th>Creado por</th>
                         <th>Estado</th>
                         <th class="th-actions">Acciones</th>
                     </tr>
@@ -79,6 +85,20 @@
             </div>
 
             <div class="pagination" id="pagination"></div>
+
+            <!-- ✅ DETALLE (abajo, como Noticias) -->
+            <div id="vacDetailsWrap" style="display:none; margin-top:14px;">
+                <div class="panel" style="border:1px solid var(--border, #ddd); background:#fff;">
+                    <div class="panel__header panel__header--compact" style="display:flex; align-items:center; justify-content:space-between;">
+                        <h3 class="panel__subtitle" style="margin:0;">DETALLE DE VACANTE</h3>
+                        <button type="button" id="btnCloseDetails" class="btn btn--outline btn--mini">Cerrar</button>
+                    </div>
+
+                    <div id="vacDetails" style="padding:14px;">
+                        <!-- JS llena aquí -->
+                    </div>
+                </div>
+            </div>
 
         </main>
 
@@ -110,8 +130,8 @@
                     </div>
 
                     <div>
-                        <label>Perfil requerido</label>
-                        <select id="Perfiles_idPerfil">
+                        <label>Carrera / Estudiante que curse</label>
+                        <select id="Carreras_idCarerra">
                             <option value="1">Ingeniero en Sistemas</option>
                             <option value="2">Administrador</option>
                             <option value="3">Contador</option>
@@ -158,22 +178,13 @@
 
                 <div class="form-row form-row--2">
                     <div>
-                        <label>Carrera</label>
-                        <input id="carrera" type="text" placeholder="Ej. Sistemas, Administración..." />
-                    </div>
-
-                    <div>
                         <label>Estatus</label>
                         <select id="estatus">
                             <option value="true">Publicado</option>
                             <option value="false">No publicado</option>
                         </select>
                     </div>
-                </div>
-
-                <div class="form-row">
-                    <label>Asignación (ID)</label>
-                    <input id="Asignaciones_idAsignacion" type="number" min="1" placeholder="Ej. 1" />
+                    <div></div>
                 </div>
 
                 <div class="form-actions form-actions--center">
@@ -184,6 +195,33 @@
         </aside>
 
     </section>
+</div>
+
+<!-- ======================================================
+     MODAL GOV (mismo estilo que Noticias, definido en index.css)
+====================================================== -->
+<div id="gobModal" class="gob-modal gob-modal--danger" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card" role="dialog" aria-modal="true" aria-labelledby="gobModalTitle">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">!</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Título</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle">Subtítulo</p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body">
+            Contenido
+        </div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cancelar</button>
+            <button id="gobModalOk" type="button" class="btn btn--primary">Aceptar</button>
+        </div>
+    </div>
 </div>
 
 <script>
@@ -204,6 +242,74 @@
     document.addEventListener("DOMContentLoaded", () => {
         const API = "/vacantes";
 
+        // ================= MODAL (igual estilo Noticias) =================
+        const gobModal = document.getElementById("gobModal");
+        const gobModalTitle = document.getElementById("gobModalTitle");
+        const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+        const gobModalBody = document.getElementById("gobModalBody");
+        const gobModalOk = document.getElementById("gobModalOk");
+        const gobModalCancel = document.getElementById("gobModalCancel");
+        let modalOnOk = null;
+
+        function openGobModal({type="info", title="Aviso", subtitle="", body="", okText="Aceptar", cancelText="Cancelar", onOk=null, hideCancel=false}) {
+            gobModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
+            gobModal.classList.add(`gob-modal--${type}`);
+
+            gobModalTitle.textContent = title;
+            gobModalSubtitle.textContent = subtitle;
+            gobModalBody.textContent = body;
+
+            gobModalOk.textContent = okText;
+            gobModalCancel.textContent = cancelText;
+
+            gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+
+            modalOnOk = onOk;
+            gobModal.style.display = "flex";
+        }
+
+        function closeGobModal() {
+            gobModal.style.display = "none";
+            modalOnOk = null;
+        }
+
+        gobModal.addEventListener("click", (e) => {
+            const close = e.target.closest("[data-close='1']");
+            if (close) closeGobModal();
+        });
+
+        gobModalCancel.addEventListener("click", closeGobModal);
+
+        gobModalOk.addEventListener("click", async () => {
+            if (typeof modalOnOk === "function") {
+                await modalOnOk();
+            }
+            closeGobModal();
+        });
+
+        function showSuccess(message) {
+            openGobModal({
+                type: "success",
+                title: "Listo",
+                subtitle: "",
+                body: message,
+                okText: "OK",
+                hideCancel: true
+            });
+        }
+
+        function showError(message) {
+            openGobModal({
+                type: "danger",
+                title: "Ocurrió un error",
+                subtitle: "",
+                body: message,
+                okText: "Entendido",
+                hideCancel: true
+            });
+        }
+        // ================================================================
+
         // Referencias UI
         const btnNew = document.getElementById("btnNewVac");
         const btnCancel = document.getElementById("btnCancelVac");
@@ -212,18 +318,51 @@
         const form = document.getElementById("vacForm");
         const searchInput = document.getElementById("searchVac");
         const btnSearch = document.getElementById("btnSearchVac");
-        const pagination = document.getElementById("pagination"); // Contenedor de paginación
+        const pagination = document.getElementById("pagination");
+
+        // Detalle
+        const vacDetailsWrap = document.getElementById("vacDetailsWrap");
+        const vacDetails = document.getElementById("vacDetails");
+        const btnCloseDetails = document.getElementById("btnCloseDetails");
+
+        // Usuario actual
+        const currentUser = (document.getElementById("currentUser")?.value || "").trim();
 
         // Estado
         let vacantesCache = [];
         let currentList = [];
         let editing = null;
+        let selectedId = null;
 
         // Configuración Paginación
-        const PAGE_SIZE = 9; // Registros por página
+        const PAGE_SIZE = 9;
         let currentPage = 1;
 
-        // --- FUNCIONES DE PAGINACIÓN ---
+        // --- Helpers: obtener texto visible de selects ---
+        function getSelectText(selectId, value) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return String(value ?? "");
+            const opt = sel.querySelector(`option[value="${value}"]`);
+            return opt ? opt.textContent.trim() : String(value ?? "");
+        }
+        const areaName = (id) => getSelectText("AreasDgp_idArea", id);
+        const carreraName = (id) => getSelectText("Carreras_idCarerra", id);
+        const modalidadName = (id) => getSelectText("Modalidades_idModalidad", id);
+        const horarioName = (id) => getSelectText("Horarios_idHorario", id);
+
+        function pillEstatus(estatus) {
+            return estatus === true
+                ? `<span class="pill pill--vigente">Publicado</span>`
+                : `<span class="pill pill--cancelado">No publicado</span>`;
+        }
+
+        function fmtHora(hora) {
+            if (!hora) return "";
+            const s = String(hora);
+            return s.slice(0, 8);
+        }
+
+        // --- Paginación ---
         function getTotalPages(list) {
             return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
         }
@@ -243,50 +382,33 @@
 
             let html = "";
 
-            // Botón Anterior
-            if (currentPage > 1) {
-                html += `<button class="page" type="button" data-page="prev">‹</button>`;
-            } else {
-                html += `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">‹</button>`;
-            }
+            if (currentPage > 1) html += `<button class="page" type="button" data-page="prev">‹</button>`;
+            else html += `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">‹</button>`;
 
-            // Números de Página
             for (let p = 1; p <= totalPages; p++) {
-                // Clase page--active si es la actual
                 const activeClass = p === currentPage ? "page--active" : "";
                 html += `<button class="page ${activeClass}" type="button" data-page="${p}">${p}</button>`;
             }
 
-            // Botón Siguiente
-            if (currentPage < totalPages) {
-                html += `<button class="page" type="button" data-page="next">›</button>`;
-            } else {
-                html += `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">›</button>`;
-            }
+            if (currentPage < totalPages) html += `<button class="page" type="button" data-page="next">›</button>`;
+            else html += `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">›</button>`;
 
             pagination.innerHTML = html;
         }
 
-        // Función Maestra de Renderizado
         function renderTablaPaginada(list) {
             currentList = list || [];
             const totalPages = getTotalPages(currentList);
 
-            // Ajuste por seguridad
             if (currentPage > totalPages) currentPage = totalPages;
             if (currentPage < 1) currentPage = 1;
 
-            // 1. Obtener solo los registros de la página actual
             const pageItems = getPageSlice(currentList, currentPage);
 
-            // 2. Renderizar tabla con esos items
             renderVacantes(pageItems);
-
-            // 3. Renderizar botones
             renderPagination(totalPages);
         }
 
-        // Click en paginación
         pagination?.addEventListener("click", (e) => {
             const btn = e.target.closest("button[data-page]");
             if (!btn || btn.disabled) return;
@@ -304,68 +426,142 @@
             renderTablaPaginada(currentList);
         });
 
-        // --- FUNCIONES UI FORMULARIO ---
+        // --- UI Formulario ---
         function openForm(){ layout.classList.add("is-split"); }
         function closeForm(){ layout.classList.remove("is-split"); editing = null; form.reset(); }
 
         btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
         btnCancel?.addEventListener("click", closeForm);
 
-        // --- CARGA DE DATOS ---
+        // --- Detalle (abajo) ---
+        function getCreatorName(v) {
+            return (
+                v.creadoPorNombre ||
+                v.nombreCreador ||
+                v.usuarioCreador?.nombre ||
+                v.usuarioCreador?.username ||
+                v.creadoPor ||
+                v.createdBy ||
+                "—"
+            );
+        }
+
+        function openDetails(v) {
+            if (!v) return;
+            selectedId = Number(v.idVacantes);
+
+            const unidadTxt = areaName(v.AreasDgp_idArea);
+            const carreraTxt = carreraName(v.Carreras_idCarerra);
+            const modalidadTxt = modalidadName(v.Modalidades_idModalidad);
+            const horarioTxt = horarioName(v.Horarios_idHorario);
+            const creadorTxt = getCreatorName(v);
+            const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
+
+            const horaPub = fmtHora(v.fechaPublicacion);
+
+            vacDetails.innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div><strong>Título:</strong><br>${v.nombrePuesto ?? ""}</div>
+                    <div><strong>Unidad:</strong><br>${unidadTxt}</div>
+
+                    <div><strong>No. Vacantes:</strong><br>${v.numeroPlazas ?? ""}</div>
+                    <div><strong>Estado:</strong><br>${estadoTxt}</div>
+
+                    <div><strong>Creado por:</strong><br>${creadorTxt}</div>
+                    <div><strong>Publicación:</strong><br>${horaPub || "—"}</div>
+
+                    <div><strong>Modalidad:</strong><br>${modalidadTxt}</div>
+                    <div><strong>Horario:</strong><br>${horarioTxt}</div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Carrera:</strong><br>${carreraTxt}
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Descripción:</strong><br>
+                        <span style="white-space:pre-wrap;">${v.descripcion ?? ""}</span>
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Requisitos:</strong><br>
+                        <span style="white-space:pre-wrap;">${v.requisitos ?? ""}</span>
+                    </div>
+                </div>
+            `;
+
+            vacDetailsWrap.style.display = "block";
+            // Re-render tabla para marcar seleccionado
+            renderTablaPaginada(currentList);
+            // Scroll suave al detalle
+            vacDetailsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function closeDetails() {
+            selectedId = null;
+            vacDetailsWrap.style.display = "none";
+            renderTablaPaginada(currentList);
+        }
+
+        btnCloseDetails?.addEventListener("click", closeDetails);
+
+        // --- Cargar ---
         async function cargarVacantes() {
             const res = await fetch(`${API}/getAll`, { headers: { "Accept": "application/json" } });
             if (!res.ok) {
                 console.error("Error getAll:", await res.text());
+                showError("No se pudieron cargar las vacantes.");
                 return;
             }
             vacantesCache = await res.json();
-
-            // Al cargar nuevo, reiniciamos a la página 1
             currentPage = 1;
             renderTablaPaginada(vacantesCache);
+
+            // Si había un seleccionado, re-abrir detalle con datos frescos
+            if (selectedId != null) {
+                const fresh = vacantesCache.find(x => Number(x.idVacantes) === Number(selectedId));
+                if (fresh) openDetails(fresh);
+            }
         }
 
-        // --- RENDER TABLA (Recibe solo la slice) ---
-        function pillEstatus(estatus) {
-            // Reutilizamos estilos de index.css / convenios.css
-            return estatus === true
-                ? `<span class="pill pill--vigente">Publicado</span>` // Verde
-                : `<span class="pill pill--cancelado">No publicado</span>`; // Gris/Rojo
-        }
-
-        function fmtHora(hora) {
-            if (!hora) return "";
-            const s = String(hora);
-            return s.slice(0, 8);
-        }
-
+        // --- Render tabla (SOLO columnas pedidas) ---
         function renderVacantes(lista) {
             tbody.innerHTML = "";
 
-            if (lista.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
                 return;
             }
 
             lista.forEach(v => {
+                const id = Number(v.idVacantes);
+                const unidadTxt = areaName(v.AreasDgp_idArea);
+                const creadorTxt = getCreatorName(v);
+
                 const tr = document.createElement("tr");
+                tr.setAttribute("data-row", String(id));
+
+                // “seleccionado” visual sin depender de CSS
+                if (selectedId != null && id === Number(selectedId)) {
+                    tr.style.outline = "2px solid rgba(122,15,26,.35)";
+                    tr.style.background = "rgba(122,15,26,.04)";
+                }
+
                 tr.innerHTML = `
-                    <td>${fmtHora(v.fechaPublicacion)}</td>
-                    <td> ${v.nombrePuesto ?? ""}</td>
-                    <td>${v.AreasDgp_idArea ?? ""}</td>
+                    <td>${v.nombrePuesto ?? ""}</td>
+                    <td>${unidadTxt}</td>
                     <td>${v.numeroPlazas ?? ""}</td>
-                    <td>${v.Horarios_idHorario ?? ""}</td>
+                    <td>${creadorTxt}</td>
                     <td>${pillEstatus(v.estatus)}</td>
                     <td class="actions">
-                        <button class="btn btn--mini" type="button" data-edit="${v.idVacantes}">Editar</button>
-                        <button class="btn btn--mini btn--outline" type="button" data-del="${v.idVacantes}">Eliminar</button>
+                        <button class="btn btn--mini" type="button" data-edit="${id}">Editar</button>
+                        <button class="btn btn--mini btn--outline" type="button" data-del="${id}">Eliminar</button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        // --- FILTROS ---
+        // --- Filtros: nombre o unidad (por texto) ---
         function filtrar() {
             const q = (searchInput?.value || "").toLowerCase().trim();
 
@@ -374,20 +570,19 @@
             if (q) {
                 filtradas = vacantesCache.filter(v => {
                     const nombre = (v.nombrePuesto ?? "").toLowerCase();
-                    const carrera = (v.carrera ?? "").toLowerCase();
-                    const unidad = String(v.AreasDgp_idArea ?? "").toLowerCase();
-                    return nombre.includes(q) || carrera.includes(q) || unidad.includes(q);
+                    const unidadTxt = areaName(v.AreasDgp_idArea).toLowerCase();
+                    return nombre.includes(q) || unidadTxt.includes(q);
                 });
             }
 
-            currentPage = 1; // Al filtrar, volvemos a la hoja 1
+            currentPage = 1;
             renderTablaPaginada(filtradas);
         }
 
         btnSearch?.addEventListener("click", filtrar);
         searchInput?.addEventListener("input", filtrar);
 
-        // --- EDICIÓN Y BORRADO (Delegación) ---
+        // --- Click en tabla: Ver detalle / Editar / Eliminar ---
         tbody.addEventListener("click", async (e) => {
             const editBtn = e.target.closest("[data-edit]");
             const delBtn = e.target.closest("[data-del]");
@@ -400,32 +595,54 @@
                 document.getElementById("nombrePuesto").value = editing.nombrePuesto ?? "";
                 document.getElementById("descripcion").value = editing.descripcion ?? "";
                 document.getElementById("requisitos").value = editing.requisitos ?? "";
-                document.getElementById("carrera").value = editing.carrera ?? "";
                 document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
                 document.getElementById("AreasDgp_idArea").value = editing.AreasDgp_idArea ?? "";
-                document.getElementById("Perfiles_idPerfil").value = editing.Perfiles_idPerfil ?? "";
+                document.getElementById("Carreras_idCarerra").value = editing.Carreras_idCarerra ?? "";
                 document.getElementById("Modalidades_idModalidad").value = editing.Modalidades_idModalidad ?? "";
                 document.getElementById("Horarios_idHorario").value = editing.Horarios_idHorario ?? "";
-                document.getElementById("Asignaciones_idAsignacion").value = editing.Asignaciones_idAsignacion ?? "";
                 document.getElementById("estatus").value = String(editing.estatus ?? true);
 
                 const hhmmss = fmtHora(editing.fechaPublicacion);
                 document.getElementById("fechaPublicacion").value = hhmmss || "";
 
                 openForm();
+                return;
             }
 
             if (delBtn) {
                 const id = delBtn.getAttribute("data-del");
-                if (!confirm("¿Eliminar esta vacante?")) return;
 
-                const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
-                if (!res.ok) {
-                    console.error("Error delete:", await res.text());
-                    alert("No se pudo eliminar.");
-                    return;
-                }
-                cargarVacantes(); // Recarga y repagina
+                openGobModal({
+                    type: "danger",
+                    title: "Eliminar vacante",
+                    subtitle: "Esta acción no se puede deshacer",
+                    body: "¿Seguro que deseas eliminar esta vacante?",
+                    okText: "Eliminar",
+                    cancelText: "Cancelar",
+                    onOk: async () => {
+                        const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
+                        if (!res.ok) {
+                            console.error("Error delete:", await res.text());
+                            showError("No se pudo eliminar la vacante.");
+                            return;
+                        }
+                        // Si borraste la seleccionada, cerramos detalle
+                        if (selectedId != null && Number(selectedId) === Number(id)) {
+                            closeDetails();
+                        }
+                        await cargarVacantes();
+                        showSuccess("Vacante eliminada correctamente.");
+                    }
+                });
+                return;
+            }
+
+            // ✅ Si no fue click en botones, abrimos detalle por fila
+            const row = e.target.closest("tr[data-row]");
+            if (row) {
+                const id = Number(row.getAttribute("data-row"));
+                const v = vacantesCache.find(x => Number(x.idVacantes) === id);
+                if (v) openDetails(v);
             }
         });
 
@@ -438,7 +655,7 @@
             const timeWithOffset = hhmmss ? `${hhmmss}-06:00` : null;
 
             if (!timeWithOffset) {
-                alert("Selecciona una hora.");
+                showError("Selecciona una hora.");
                 return;
             }
 
@@ -447,19 +664,20 @@
                 nombrePuesto: document.getElementById("nombrePuesto").value.trim(),
                 descripcion: document.getElementById("descripcion").value.trim(),
                 requisitos: document.getElementById("requisitos").value.trim(),
-                carrera: document.getElementById("carrera").value.trim(),
                 numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
                 estatus: document.getElementById("estatus").value === "true",
                 AreasDgp_idArea: Number(document.getElementById("AreasDgp_idArea").value || 0),
-                Perfiles_idPerfil: Number(document.getElementById("Perfiles_idPerfil").value || 0),
+                Carreras_idCarerra: Number(document.getElementById("Carreras_idCarerra").value || 0),
                 Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
                 Horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
-                Asignaciones_idAsignacion: Number(document.getElementById("Asignaciones_idAsignacion").value || 0),
-                fechaPublicacion: timeWithOffset
+                fechaPublicacion: timeWithOffset,
+
+                // ✅ Para “Creado por” (si tu backend lo acepta/guarda)
+                creadoPorNombre: currentUser || null
             };
 
             if (!payloadCommon.nombrePuesto || payloadCommon.numeroPlazas < 1) {
-                alert("Faltan datos obligatorios.");
+                showError("Faltan datos obligatorios.");
                 return;
             }
 
@@ -469,18 +687,44 @@
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payloadCommon)
                 });
-                if (!res.ok) { alert("Error al actualizar"); return; }
+                if (!res.ok) {
+                    console.error("Error update:", await res.text());
+                    showError("Error al actualizar la vacante.");
+                    return;
+                }
+
+                await cargarVacantes();
+                closeForm();
+                showSuccess("Vacante actualizada correctamente.");
+
+                // ✅ Abrir detalle de la actualizada
+                const fresh = vacantesCache.find(x => Number(x.idVacantes) === Number(editing.idVacantes));
+                if (fresh) openDetails(fresh);
+
             } else {
                 const fd = new FormData();
                 Object.entries(payloadCommon).forEach(([k, v]) => {
                     if (v !== null && v !== undefined) fd.append(k, String(v));
                 });
-                const res = await fetch(`${API}/create`, { method: "POST", body: fd });
-                if (!res.ok) { alert("Error al crear"); return; }
-            }
 
-            await cargarVacantes();
-            closeForm();
+                const res = await fetch(`${API}/create`, { method: "POST", body: fd });
+                if (!res.ok) {
+                    console.error("Error create:", await res.text());
+                    showError("Error al crear la vacante.");
+                    return;
+                }
+
+                // ✅ refrescar lista para que se refleje en tabla
+                await cargarVacantes();
+                closeForm();
+                showSuccess("Vacante creada correctamente.");
+
+                // ✅ Si tu API regresa el objeto creado, puedes abrirlo directo.
+                // Si no, abrimos el “más reciente” por heurística (el último del arreglo).
+                // Ajusta si tu backend ordena distinto.
+                const last = vacantesCache[vacantesCache.length - 1];
+                if (last) openDetails(last);
+            }
         });
 
         // Inicial
