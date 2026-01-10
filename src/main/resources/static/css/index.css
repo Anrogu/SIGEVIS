@@ -539,3 +539,91 @@ body{
     .gob-modal--success .gob-modal__icon{ background: var(--color-verde); color: var(--color-Texto-verde); border-color:#bfe5cc; }
     .gob-modal--warning .gob-modal__icon{ background: var(--color-naranja); color: var(--color-Texto-naranja); border-color:#f0d08a; }
     .gob-modal--danger  .gob-modal__icon{ background: var(--color-rojo); color: var(--color-Texto-rojo); border-color:#f5c6cb; }
+/* =========================
+   HEADER PÚBLICO (como imagen)
+   ========================= */
+.public-header{
+  background: #fff;
+  border-bottom: 2px solid var(--border);
+  padding: 6px 14px 0;
+}
+
+/* Fila 1: titulo centrado + logos derecha */
+.public-header__row1{
+  display: grid;
+  grid-template-columns: 1fr auto 1fr; /* izquierda (vacío) | título | logos */
+  align-items: center;
+  gap: 12px;
+  padding: 4px 0 2px;
+}
+
+.public-header__title{
+  font-weight: 700;
+  letter-spacing: .4px;
+  font-size: 12px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+.public-header__logos{
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Reutiliza tu tamaño de logo; si quieres igualito al screenshot, solo ajusta height */
+.public-header__logos .logo-img{
+  height: 26px;
+}
+
+/* Fila 2: menú + botones derecha */
+.public-header__row2{
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 6px 0 8px;
+}
+
+.public-nav{
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+/* Links tipo "tab", pero con estilo de la imagen */
+.public-nav__link{
+  text-decoration: none;
+  color: var(--text);
+  font-size: 11px;
+  padding: 6px 14px;
+  border: 1px solid transparent;
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.public-nav__link--active{
+  border-color: var(--border);
+  background: #fff;
+  box-shadow: 0 1px 0 rgba(0,0,0,.12);
+}
+
+/* Botón dorado para "Iniciar sesión" (usa tu variable) */
+.btn--gold{
+  background: var(--color-dorado);
+  border-color: var(--color-dorado);
+  color: #111;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+}
+
+/* Opcional: deja los botones más “pastilla” como la imagen */
+.public-actions .btn{
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 11px;
+}

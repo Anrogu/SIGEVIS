@@ -23,6 +23,11 @@ public class NoticiaController {
     public List<NoticiaDto> getNoticias(){
         return noticiaService.getAll();
     }
+    @GetMapping("/publicadas")
+    public List<NoticiaDto> getNoticiasPublicadas() {
+        return noticiaService.getPublicadas();
+    }
+
     @DeleteMapping("/delete/{id}")
     public String deleteNoticia(@PathVariable Long id){ // Parameter changed from 'usuario' to 'id'
         noticiaService.delete(id);

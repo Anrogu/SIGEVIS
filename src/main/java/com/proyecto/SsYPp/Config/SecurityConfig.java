@@ -42,15 +42,28 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 1. Rutas públicas
-                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/img/**", "/gob/auth/register").permitAll()
+                        // =========================
+                        // 1) RUTAS PÚBLICAS (SIN LOGIN)
+                        // =========================
+                        .requestMatchers(
+                                "/",
+                                "/public/**",
+                                "/css/**", "/js/**", "/img/**",
+                                "/login",
+                                "/registro",
+                                "/register",
 
-                        // 2. REGLAS ESTRICTAS
-                        // Solo quien tenga ROLE_1 puede ver el index
+                                // ✅ APIs públicas para el perfil sin login
+                                "/noticias/publicadas",
+                                "/noticias/*"
+                        ).permitAll()
+
+                        // =========================
+                        // 2) REGLAS POR ROL (TU SISTEMA PRIVADO)
+                        // =========================
                         .requestMatchers("/index", "/index.html").hasAuthority("ROLE_1")
+                        .requestMatchers("/vacantes", "/vacantes.html").hasAnyAuthority("ROLE_2", "ROLE_1")
 
-                        // Solo quien tenga ROLE_2 puede ver vacantes
-                        .requestMatchers("/vacantes", "/vacantes.html").hasAnyAuthority("ROLE_2","ROLE_1")
 
                         // 3. Cualquier otra ruta requiere estar autenticado
                         .anyRequest().authenticated()

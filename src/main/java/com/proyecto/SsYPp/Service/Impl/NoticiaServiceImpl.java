@@ -56,6 +56,17 @@ public class NoticiaServiceImpl implements NoticiaService {
         return convertirEntidadADTO(actualizada);
     }
 
+    @Override
+    public List<NoticiaDto> getPublicadas() {
+        List<Noticia> noticias = noticiaRepository
+                .findByEstatusIgnoreCaseOrderByFechaPublicacionDesc("Publicada");
+
+        return noticias.stream()
+                .map(this::convertirEntidadADTO)
+                .collect(Collectors.toList());
+    }
+
+
     private NoticiaDto convertirEntidadADTO(Noticia noticia) {
         NoticiaDto noticiaDto = new NoticiaDto();
         noticiaDto.setId(noticia.getId());

@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class ViewController {
 
-    @GetMapping("/login")
+    /*@GetMapping("/login")
     public String showLoginPage() {
         return "login";
-    }
+    }*/
 
     @GetMapping("/index")
     public String showIndexPage() {

@@ -13,4 +13,7 @@ public interface NoticiaService {
     public NoticiaDto get(Long id);
     public void delete (Long id);
     public NoticiaDto update(NoticiaDto noticia);
+
+    // ✅ NUEVO: traer solo noticias publicadas (para perfil sin login)
+    List<NoticiaDto> getPublicadas();
 }
