@@ -130,11 +130,10 @@
 
                     <div>
                         <label>Carrera / Estudiante que curse</label>
-                        <select id="Carreras_idCarerra">
-                            <option value="1">Ingeniero en Sistemas</option>
-                            <option value="2">Administrador</option>
-                            <option value="3">Contador</option>
+                        <select id="Carreras_idCarrera">
+                            <option value="">Cargando carreras...</option>
                         </select>
+
                     </div>
                 </div>
 
@@ -240,6 +239,39 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const API = "/vacantes";
+        // =================== CARGAR CARRERAS (SELECT) ===================
+const API_CARRERAS = "/Carreras/getAll";
+const carrerasSelect = document.getElementById("Carreras_idCarrera");
+
+async function cargarCarrerasSelect() {
+    if (!carrerasSelect) return;
+
+    try {
+        const res = await fetch(API_CARRERAS, { headers: { "Accept": "application/json" } });
+        if (!res.ok) {
+            console.error("Error carreras:", await res.text());
+            carrerasSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
+            return;
+        }
+
+        const carreras = await res.json();
+
+        if (!Array.isArray(carreras) || carreras.length === 0) {
+            carrerasSelect.innerHTML = `<option value="">(Sin carreras)</option>`;
+            return;
+        }
+
+        carrerasSelect.innerHTML =
+            `<option value="">Selecciona una carrera...</option>` +
+            carreras.map(c => `<option value="${c.id}">${c.nombre}</option>`).join("");
+
+    } catch (err) {
+        console.error(err);
+        carrerasSelect.innerHTML = `<option value="">(Error cargando)</option>`;
+    }
+}
+// ================================================================
+
 
         // ================= MODAL (igual estilo Noticias) =================
         const gobModal = document.getElementById("gobModal");
@@ -345,7 +377,7 @@
             return opt ? opt.textContent.trim() : String(value ?? "");
         }
         const areaName = (id) => getSelectText("AreasDgp_idArea", id);
-        const carreraName = (id) => getSelectText("Carreras_idCarerra", id);
+        const carreraName = (id) => getSelectText("Carreras_idCarrera", id);
         const modalidadName = (id) => getSelectText("Modalidades_idModalidad", id);
         const horarioName = (id) => getSelectText("Horarios_idHorario", id);
 
@@ -442,9 +474,7 @@ function getCreatorName(v) {
         function openDetails(v) {
             if (!v) return;
 
-            const unidadTxt = v.areasDgp_idArea
-            ? areaName(v.areasDgp_idArea)
-            : "—";
+           const unidadTxt = v.areaNombre ?? "—";
 
             // 🔧 FIX FRONT: nombres según el JSON real del backend
             const carreraTxt   = carreraName(v.carreras_idCarrera);
@@ -530,9 +560,7 @@ function getCreatorName(v) {
 
             lista.forEach(v => {
                 const id = Number(v.idVacantes);
-                const unidadTxt = v.areasDgp_idArea
-                ? areaName(v.areasDgp_idArea)
-                : "—";
+               const unidadTxt = (v.areaNombre ?? "").toLowerCase();
                 const creadorTxt = getCreatorName(v);
 
                 const tr = document.createElement("tr");
@@ -600,7 +628,7 @@ function getCreatorName(v) {
                 document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
                 // 🔧 FIX FRONT: IDs según el JSON real del backend
                 document.getElementById("AreasDgp_idArea").value = editing.areasDgp_idArea ?? "";
-                document.getElementById("Carreras_idCarerra").value = editing.carreras_idCarrera ?? "";
+               document.getElementById("Carreras_idCarrera").value = editing.carreras_idCarrera ?? "";
                 document.getElementById("Modalidades_idModalidad").value = editing.modalidades_idModalidad ?? "";
                 document.getElementById("Horarios_idHorario").value = editing.horarios_idHorario ?? "";
                 document.getElementById("estatus").value = String(editing.estatus ?? true);
@@ -670,7 +698,7 @@ function getCreatorName(v) {
                 numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
                 estatus: document.getElementById("estatus").value === "true",
                 AreasDgp_idArea: Number(document.getElementById("AreasDgp_idArea").value || 0),
-                Carreras_idCarerra: Number(document.getElementById("Carreras_idCarerra").value || 0),
+                Carreras_idCarerra: Number(document.getElementById("Carreras_idCarrera").value || 0),
                 Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
                 Horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
                 fechaPublicacion: timeWithOffset,
@@ -731,7 +759,9 @@ function getCreatorName(v) {
         });
 
         // Inicial
+        cargarCarrerasSelect();
         cargarVacantes();
+
     });
 </script>
 

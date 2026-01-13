@@ -35,4 +35,6 @@ public class VacanteDto implements Serializable {
 
     // Nombre completo del creador (para mostrar en la tabla "Creado por")
     String creadoPorNombre;
+    String areaNombre;
+
 }

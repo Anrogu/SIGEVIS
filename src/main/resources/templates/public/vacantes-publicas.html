@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Público | Vacantes</title>
+    <!-- Reusa tus estilos -->
+    <link rel="stylesheet" href="/css/styles.css" />
+    <link rel="stylesheet" href="/css/convenios.css" />
+    <link rel="stylesheet" href="/css/index.css" /> <!-- modal GOV -->
+
+</head>
+
+<body>
+<div class="app">
+
+    <!-- HEADER PÚBLICO (igual que Noticias) -->
+    <header class="public-header">
+
+        <div class="public-header__row1">
+            <div></div>
+
+            <div class="public-header__title">PLATAFORMA SERVICIO SOCIAL</div>
+
+            <div class="public-header__logos">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
+            </div>
+        </div>
+
+        <div class="public-header__row2">
+            <nav class="public-nav">
+                <a class="public-nav__link" href="/public/noticias">Noticias</a>
+                <a class="public-nav__link" href="/public/requisitos">Requisitos</a>
+                <a class="public-nav__link" href="/public/convenios">Convenios</a>
+                <a class="public-nav__link public-nav__link--active" href="/public/vacantes">Vacantes</a>
+                <a class="public-nav__link" href="/public/horarios">Horarios</a>
+                <a class="public-nav__link" href="/public/programas">Programas</a>
+                <a class="public-nav__link" href="/public/contactos">Contactos</a>
+            </nav>
+
+            <div class="public-actions" style="display:flex; gap:10px; align-items:center;">
+                <a class="btn btn--gold" th:href="@{/login}" style="text-decoration:none;">Iniciar Sesión</a>
+                <a class="btn btn--primary" th:href="@{/registro}" style="text-decoration:none;">Registrarse</a>
+            </div>
+        </div>
+
+    </header>
+
+
+    <!-- TOOLBAR -->
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="searchVac" class="search__input" type="text"
+                   placeholder="Buscar por nombre de vacante o unidad..." />
+        </div>
+        <button class="btn btn--primary" type="button" id="btnSearchVac">Buscar</button>
+    </section>
+
+    <!-- CONTENIDO -->
+    <section class="content-grid" id="vacLayout">
+
+        <!-- LISTA -->
+        <main class="panel panel--left">
+            <div class="panel__header">
+                <h2 class="panel__title">VACANTES DISPONIBLES</h2>
+
+                <!-- sin botón Nueva vacante -->
+                <div class="panel__actions"></div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Unidad</th>
+                        <th>No. Vacantes</th>
+                        <th>Estado</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="vacantesBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+
+            <!-- DETALLE (abajo, como admin) -->
+            <div id="vacDetailsWrap" style="display:none; margin-top:14px;">
+                <div class="panel" style="border:1px solid var(--border, #ddd); background:#fff;">
+                    <div class="panel__header panel__header--compact" style="display:flex; align-items:center; justify-content:space-between;">
+                        <h3 class="panel__subtitle" style="margin:0;">DETALLE DE VACANTE</h3>
+                        <button type="button" id="btnCloseDetails" class="btn btn--outline btn--mini">Cerrar</button>
+                    </div>
+
+                    <div id="vacDetails" style="padding:14px;">
+                        <!-- JS llena aquí -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- DERECHA: aquí NO HAY FORM, solo una tarjeta informativa -->
+        <aside class="panel panel--right">
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">¿CÓMO POSTULARME?</h3>
+            </div>
+
+            <div style="padding:14px; color:#111827;">
+                <p style="margin-top:0;">
+                    Para postularte a una vacante debes tener una cuenta.
+                </p>
+                <ol style="margin:0; padding-left:18px;">
+                    <li>Da clic en <strong>POSTULARME</strong>.</li>
+                    <li>Si no has iniciado sesión, el sistema te llevará al login.</li>
+                </ol>
+
+            </div>
+        </aside>
+
+    </section>
+</div>
+
+<!-- ======================================================
+     MODAL GOV (reusa index.css)
+====================================================== -->
+<div id="gobModal" class="gob-modal gob-modal--danger" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card" role="dialog" aria-modal="true" aria-labelledby="gobModalTitle">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">!</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Título</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle">Subtítulo</p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body">Contenido</div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cancelar</button>
+            <button id="gobModalOk" type="button" class="btn btn--primary">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        // ====== ENDPOINTS (públicos) ======
+        // OJO: estos endpoints deben estar permitidos en SecurityConfig
+        const API_LIST = "/public/vacantes/getAll"; // <-- recomendado (público)
+        // const API_LIST = "/vacantes/getAll";     // <-- si lo dejas, normalmente te redirige a login
+
+        // ====== MODAL (igual que admin) ======
+        const gobModal = document.getElementById("gobModal");
+        const gobModalTitle = document.getElementById("gobModalTitle");
+        const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+        const gobModalBody = document.getElementById("gobModalBody");
+        const gobModalOk = document.getElementById("gobModalOk");
+        const gobModalCancel = document.getElementById("gobModalCancel");
+        let modalOnOk = null;
+
+        function openGobModal({type="info", title="Aviso", subtitle="", body="", okText="Aceptar", cancelText="Cancelar", onOk=null, hideCancel=false}) {
+            gobModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
+            gobModal.classList.add(`gob-modal--${type}`);
+
+            gobModalTitle.textContent = title;
+            gobModalSubtitle.textContent = subtitle;
+            gobModalBody.textContent = body;
+
+            gobModalOk.textContent = okText;
+            gobModalCancel.textContent = cancelText;
+            gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+
+            modalOnOk = onOk;
+            gobModal.style.display = "flex";
+        }
+
+        function closeGobModal() {
+            gobModal.style.display = "none";
+            modalOnOk = null;
+        }
+
+        gobModal.addEventListener("click", (e) => {
+            const close = e.target.closest("[data-close='1']");
+            if (close) closeGobModal();
+        });
+        gobModalCancel.addEventListener("click", closeGobModal);
+        gobModalOk.addEventListener("click", async () => {
+            if (typeof modalOnOk === "function") await modalOnOk();
+            closeGobModal();
+        });
+
+        function showError(message) {
+            openGobModal({
+                type: "danger",
+                title: "Ocurrió un error",
+                subtitle: "",
+                body: message,
+                okText: "Entendido",
+                hideCancel: true
+            });
+        }
+
+        function showInfo(message, onOk=null) {
+            openGobModal({
+                type: "info",
+                title: "Aviso",
+                subtitle: "",
+                body: message,
+                okText: "OK",
+                hideCancel: true,
+                onOk
+            });
+        }
+
+        // ====== UI refs ======
+        const tbody = document.getElementById("vacantesBody");
+        const searchInput = document.getElementById("searchVac");
+        const btnSearch = document.getElementById("btnSearchVac");
+        const pagination = document.getElementById("pagination");
+
+        const vacDetailsWrap = document.getElementById("vacDetailsWrap");
+        const vacDetails = document.getElementById("vacDetails");
+        const btnCloseDetails = document.getElementById("btnCloseDetails");
+
+        // ====== Estado ======
+        let vacantesCache = [];
+        let currentList = [];
+        let selectedId = null;
+
+        // ====== Paginación ======
+        const PAGE_SIZE = 9;
+        let currentPage = 1;
+
+        function pillEstatus(estatus) {
+            return estatus === true
+                ? `<span class="pill pill--vigente">Publicado</span>`
+                : `<span class="pill pill--cancelado">No publicado</span>`;
+        }
+
+        function getTotalPages(list) {
+            return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+        }
+        function getPageSlice(list, page) {
+            const start = (page - 1) * PAGE_SIZE;
+            return list.slice(start, start + PAGE_SIZE);
+        }
+
+        function renderPagination(totalPages) {
+            if (!pagination) return;
+
+            if (currentList.length === 0) {
+                pagination.innerHTML = "";
+                return;
+            }
+
+            let html = "";
+            html += `<button class="page" type="button" data-page="prev" ${currentPage<=1 ? "disabled style='opacity:.5;cursor:default'" : ""}>‹</button>`;
+
+            for (let p = 1; p <= totalPages; p++) {
+                const activeClass = p === currentPage ? "page--active" : "";
+                html += `<button class="page ${activeClass}" type="button" data-page="${p}">${p}</button>`;
+            }
+
+            html += `<button class="page" type="button" data-page="next" ${currentPage>=totalPages ? "disabled style='opacity:.5;cursor:default'" : ""}>›</button>`;
+            pagination.innerHTML = html;
+        }
+
+        function renderTablaPaginada(list) {
+            currentList = list || [];
+            const totalPages = getTotalPages(currentList);
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const pageItems = getPageSlice(currentList, currentPage);
+            renderVacantes(pageItems);
+            renderPagination(totalPages);
+        }
+
+        pagination?.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-page]");
+            if (!btn || btn.disabled) return;
+
+            const totalPages = getTotalPages(currentList);
+            const val = btn.dataset.page;
+
+            if (val === "prev" && currentPage > 1) currentPage--;
+            else if (val === "next" && currentPage < totalPages) currentPage++;
+            else {
+                const n = Number(val);
+                if (!isNaN(n)) currentPage = n;
+            }
+            renderTablaPaginada(currentList);
+        });
+
+        // ====== Detalle ======
+        function openDetails(v) {
+            if (!v) return;
+
+            selectedId = Number(v.idVacantes);
+
+            const horaPub = (v.fechaPublicacion ? String(v.fechaPublicacion).slice(0,8) : "—");
+            const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
+
+            vacDetails.innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div><strong>Título:</strong><br>${v.nombrePuesto ?? ""}</div>
+                    <div><strong>Unidad:</strong><br>${v.areaNombre ?? "—"}</div>
+                    <div><strong>No. Vacantes:</strong><br>${v.numeroPlazas ?? ""}</div>
+                    <div><strong>Estado:</strong><br>${estadoTxt}</div>
+
+                    <div><strong>Publicación:</strong><br>${horaPub}</div>
+                    <div><strong>Carrera (ID):</strong><br>${v.carreras_idCarrera ?? "—"}</div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Descripción:</strong><br>
+                        <span style="white-space:pre-wrap;">${v.descripcion ?? ""}</span>
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Requisitos:</strong><br>
+                        <span style="white-space:pre-wrap;">${v.requisitos ?? ""}</span>
+                    </div>
+                </div>
+            `;
+
+            vacDetailsWrap.style.display = "block";
+            vacDetailsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+            renderTablaPaginada(currentList);
+        }
+
+        function closeDetails() {
+            selectedId = null;
+            vacDetailsWrap.style.display = "none";
+            renderTablaPaginada(currentList);
+        }
+
+        btnCloseDetails?.addEventListener("click", closeDetails);
+
+        // ====== Render tabla ======
+        function renderVacantes(lista) {
+            tbody.innerHTML = "";
+
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(v => {
+                const id = Number(v.idVacantes);
+
+                const tr = document.createElement("tr");
+                tr.setAttribute("data-row", String(id));
+
+                if (selectedId != null && id === Number(selectedId)) {
+                    tr.style.outline = "2px solid rgba(122,15,26,.35)";
+                    tr.style.background = "rgba(122,15,26,.04)";
+                }
+
+                tr.innerHTML = `
+                    <td>${v.nombrePuesto ?? ""}</td>
+                    <td>${v.areaNombre ?? "—"}</td>
+                    <td>${v.numeroPlazas ?? ""}</td>
+                    <td>${pillEstatus(v.estatus)}</td>
+                    <td class="actions">
+                        <button class="btn btn--mini btn--outline" type="button" data-view="${id}">Ver</button>
+                        <button class="btn btn--mini btn--primary" type="button" data-postular="${id}">Postularme</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // ====== Filtro ======
+        function filtrar() {
+            const q = (searchInput?.value || "").toLowerCase().trim();
+            let filtradas = vacantesCache;
+
+            if (q) {
+                filtradas = vacantesCache.filter(v => {
+                    const nombre = (v.nombrePuesto ?? "").toLowerCase();
+                    const unidad = String(v.areasDgp_idArea ?? "").toLowerCase();
+                    return nombre.includes(q) || unidad.includes(q);
+                });
+            }
+
+            currentPage = 1;
+            renderTablaPaginada(filtradas);
+        }
+
+        btnSearch?.addEventListener("click", filtrar);
+        searchInput?.addEventListener("input", filtrar);
+
+        // ====== Click acciones ======
+        tbody.addEventListener("click", (e) => {
+            const viewBtn = e.target.closest("[data-view]");
+            const postBtn = e.target.closest("[data-postular]");
+            const row = e.target.closest("tr[data-row]");
+
+            if (viewBtn) {
+                const id = Number(viewBtn.getAttribute("data-view"));
+                const v = vacantesCache.find(x => Number(x.idVacantes) === id);
+                if (v) openDetails(v);
+                return;
+            }
+
+            if (postBtn) {
+                const id = Number(postBtn.getAttribute("data-postular"));
+
+                // Sin login: lo mandamos al login y “guardamos” id en query para regresar luego
+                showInfo(
+                    "Para postularte necesitas iniciar sesión.",
+                    () => window.location.href = `/login?redirect=/public/vacantes&idVacante=${id}`
+                );
+                return;
+            }
+
+            // click en fila = abre detalle
+            if (row) {
+                const id = Number(row.getAttribute("data-row"));
+                const v = vacantesCache.find(x => Number(x.idVacantes) === id);
+                if (v) openDetails(v);
+            }
+        });
+
+        // ====== Cargar vacantes ======
+        async function cargarVacantes() {
+            try {
+                const res = await fetch(API_LIST, { headers: { "Accept": "application/json" } });
+
+                if (!res.ok) {
+                    const t = await res.text();
+                    console.error("Error getAll:", t);
+                    showError("No se pudieron cargar las vacantes públicas. (Revisa que exista el endpoint público)");
+                    return;
+                }
+
+                const data = await res.json();
+                vacantesCache = Array.isArray(data) ? data : [];
+
+                currentPage = 1;
+                renderTablaPaginada(vacantesCache);
+
+            } catch (err) {
+                console.error(err);
+                showError("Error de red cargando vacantes.");
+            }
+        }
+
+        // init
+        cargarVacantes();
+    });
+</script>
+
+</body>
+</html>

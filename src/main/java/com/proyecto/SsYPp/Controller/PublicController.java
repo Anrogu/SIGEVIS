@@ -3,24 +3,32 @@ package com.proyecto.SsYPp.Controller;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 
-
 @Controller
 public class PublicController {
 
-    // Página principal pública (sin login)
+    // Noticias públicas
     @GetMapping("/public/noticias")
     public String noticiasPublicas() {
         return "public/noticias-publicas";
-        // busca: templates/public/noticias-publicas.html
+    }
+    @GetMapping("/public/perfil")
+    public String perfilPublico() {
+        return "public/noticias-publicas";
+    }
+    @GetMapping("/public/vacantes")
+    public String vacantesPublicas() {
+        return "public/vacantes-publicas";
     }
 
-        @GetMapping("/login")
-        public String login() {
-            return "login"; // templates/login.html
-        }
+    // Login
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 
+    // Registro
     @GetMapping("/registro")
     public String registro() {
         return "register";
-        }
     }
+}

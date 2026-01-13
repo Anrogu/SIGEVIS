@@ -79,11 +79,17 @@ public class VacanteServiceImpl implements VacanteService {
         vacanteDto.setNombrePuesto(vacante.getNombrePuesto());
         vacanteDto.setAsignaciones_idAsignacion(vacante.getAsignacionesIdasignacion().getId());
         vacanteDto.setAreasDgp_idArea(vacante.getAreasdgpIdarea().getId());
+        // ✅ Nombre del área/unidad (texto en lugar del ID)
+        vacanteDto.setAreaNombre(
+                vacante.getAreasdgpIdarea() != null
+                        ? vacante.getAreasdgpIdarea().getNombre()
+                        : null
+        );
         vacanteDto.setModalidades_idModalidad(vacante.getModalidadesIdmodalidad().getId());
         vacanteDto.setPerfiles_idPerfil(vacante.getPerfilesIdperfil().getId());
         vacanteDto.setHorarios_idHorario(vacante.getHorariosIdhorario().getId());
 
-        // ✅ NUEVO: enviar "Creado por" al frontend usando la relación Vacante -> Usuario
+        //  NUEVO: enviar "Creado por" al frontend usando la relación Vacante -> Usuario
         // Esto permite que en la tabla se muestre el nombre del usuario creador.
         if (vacante.getCreadoPor() != null) {
             Usuario u = vacante.getCreadoPor();
