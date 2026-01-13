@@ -52,6 +52,7 @@ public class SecurityConfig {
                                 "/login",
                                 "/registro",
                                 "/register",
+                                "/public",
 
                                 // ✅ APIs públicas para el perfil sin login
                                 "/noticias/publicadas",

@@ -29,4 +29,10 @@ public class VacanteDto implements Serializable {
     Integer Modalidades_idModalidad;
     Long Asignaciones_idAsignacion;
     Integer Carreras_idCarrera;
+
+    // FK: Vacantes.Usuarios_idUsuario
+    Long usuariosIdUsuario;
+
+    // Nombre completo del creador (para mostrar en la tabla "Creado por")
+    String creadoPorNombre;
 }

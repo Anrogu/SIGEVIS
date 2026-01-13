@@ -431,28 +431,25 @@
 
         btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
         btnCancel?.addEventListener("click", closeForm);
-
         // --- Detalle (abajo) ---
-        function getCreatorName(v) {
-            return (
-                v.creadoPorNombre ||
-                v.nombreCreador ||
-                v.usuarioCreador?.nombre ||
-                v.usuarioCreador?.username ||
-                v.creadoPor ||
-                v.createdBy ||
-                "—"
-            );
-        }
+// ✅ "Creado por": el backend ya manda creadoPorNombre
+function getCreatorName(v) {
+    return (v.creadoPorNombre && v.creadoPorNombre.trim())
+        ? v.creadoPorNombre
+        : "—";
+}
 
         function openDetails(v) {
             if (!v) return;
-            selectedId = Number(v.idVacantes);
 
-            const unidadTxt = areaName(v.AreasDgp_idArea);
-            const carreraTxt = carreraName(v.Carreras_idCarerra);
-            const modalidadTxt = modalidadName(v.Modalidades_idModalidad);
-            const horarioTxt = horarioName(v.Horarios_idHorario);
+            const unidadTxt = v.areasDgp_idArea
+            ? areaName(v.areasDgp_idArea)
+            : "—";
+
+            // 🔧 FIX FRONT: nombres según el JSON real del backend
+            const carreraTxt   = carreraName(v.carreras_idCarrera);
+            const modalidadTxt = modalidadName(v.modalidades_idModalidad);
+            const horarioTxt   = horarioName(v.horarios_idHorario);
             const creadorTxt = getCreatorName(v);
             const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
 
@@ -533,7 +530,9 @@
 
             lista.forEach(v => {
                 const id = Number(v.idVacantes);
-                const unidadTxt = areaName(v.AreasDgp_idArea);
+                const unidadTxt = v.areasDgp_idArea
+                ? areaName(v.areasDgp_idArea)
+                : "—";
                 const creadorTxt = getCreatorName(v);
 
                 const tr = document.createElement("tr");
@@ -569,7 +568,11 @@
             if (q) {
                 filtradas = vacantesCache.filter(v => {
                     const nombre = (v.nombrePuesto ?? "").toLowerCase();
-                    const unidadTxt = areaName(v.AreasDgp_idArea).toLowerCase();
+                    // 🔧 FIX FRONT: el backend manda areasDgp_idArea
+                    const unidadTxt = v.areasDgp_idArea
+                    ? areaName(v.areasDgp_idArea).toLowerCase()
+                    : "";
+
                     return nombre.includes(q) || unidadTxt.includes(q);
                 });
             }
@@ -595,10 +598,11 @@
                 document.getElementById("descripcion").value = editing.descripcion ?? "";
                 document.getElementById("requisitos").value = editing.requisitos ?? "";
                 document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
-                document.getElementById("AreasDgp_idArea").value = editing.AreasDgp_idArea ?? "";
-                document.getElementById("Carreras_idCarerra").value = editing.Carreras_idCarerra ?? "";
-                document.getElementById("Modalidades_idModalidad").value = editing.Modalidades_idModalidad ?? "";
-                document.getElementById("Horarios_idHorario").value = editing.Horarios_idHorario ?? "";
+                // 🔧 FIX FRONT: IDs según el JSON real del backend
+                document.getElementById("AreasDgp_idArea").value = editing.areasDgp_idArea ?? "";
+                document.getElementById("Carreras_idCarerra").value = editing.carreras_idCarrera ?? "";
+                document.getElementById("Modalidades_idModalidad").value = editing.modalidades_idModalidad ?? "";
+                document.getElementById("Horarios_idHorario").value = editing.horarios_idHorario ?? "";
                 document.getElementById("estatus").value = String(editing.estatus ?? true);
 
                 const hhmmss = fmtHora(editing.fechaPublicacion);

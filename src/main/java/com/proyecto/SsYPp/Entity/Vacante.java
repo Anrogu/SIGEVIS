@@ -73,4 +73,10 @@ public class Vacante {
     @JoinColumn(name = "\"Carreras_idCarerra\"", nullable = false)
     private Carrera carrerasIdcarerra;
 
+    // ===============================
+    // Usuario que creó la vacante
+    // ===============================
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "\"Usuarios_idUsuario\"", nullable = false)
+    private Usuario creadoPor;
 }

@@ -8,7 +8,7 @@ import com.proyecto.SsYPp.Repository.*;
 import com.proyecto.SsYPp.Service.VacanteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 import java.time.ZoneOffset;
@@ -40,7 +40,8 @@ public class VacanteServiceImpl implements VacanteService {
     }
 
     @Override
-    public List<VacanteDto> getAll() {
+    @Transactional(readOnly = true)
+    public List<VacanteDto> getAll(){
         List<Vacante> vacantes = vacanteRepository.findAll();
         return vacantes.stream()
                 .map(this::convertirEntidadADTO)
@@ -64,6 +65,7 @@ public class VacanteServiceImpl implements VacanteService {
         Vacante vacante = convertirDTOAEntidad(vacanteDto);
         Vacante actualizada = vacanteRepository.save(vacante);
         return convertirEntidadADTO(actualizada);
+
     }
     private VacanteDto convertirEntidadADTO(Vacante vacante) {
         VacanteDto vacanteDto = new VacanteDto();
@@ -80,6 +82,21 @@ public class VacanteServiceImpl implements VacanteService {
         vacanteDto.setModalidades_idModalidad(vacante.getModalidadesIdmodalidad().getId());
         vacanteDto.setPerfiles_idPerfil(vacante.getPerfilesIdperfil().getId());
         vacanteDto.setHorarios_idHorario(vacante.getHorariosIdhorario().getId());
+
+        // ✅ NUEVO: enviar "Creado por" al frontend usando la relación Vacante -> Usuario
+        // Esto permite que en la tabla se muestre el nombre del usuario creador.
+        if (vacante.getCreadoPor() != null) {
+            Usuario u = vacante.getCreadoPor();
+
+            // 1) Mandar el ID del creador (por si lo ocupas)
+            // NOTA: este setter debe existir en VacanteDto (paso 2).
+            vacanteDto.setUsuariosIdUsuario(u.getId());
+
+
+            // 2) Mandar el nombre completo (lo que se verá en "Creado por")
+            String nombreCompleto = (u.getNombre() + " " + u.getPrimerapellido() + " " + u.getSegundoapellido()).trim();
+            vacanteDto.setCreadoPorNombre(nombreCompleto);
+        }
 
         return vacanteDto;
     }
