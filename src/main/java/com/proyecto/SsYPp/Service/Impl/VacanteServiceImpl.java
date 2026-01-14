@@ -1,58 +1,44 @@
 package com.proyecto.SsYPp.Service.Impl;
 
-import com.fasterxml.jackson.databind.annotation.JsonAppend;
-import com.proyecto.SsYPp.Dto.UsuarioDto;
 import com.proyecto.SsYPp.Dto.VacanteDto;
 import com.proyecto.SsYPp.Entity.*;
 import com.proyecto.SsYPp.Repository.*;
 import com.proyecto.SsYPp.Service.VacanteService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import java.time.OffsetDateTime;
-import java.time.OffsetTime;
-import java.time.ZoneOffset;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
 public class VacanteServiceImpl implements VacanteService {
-    @Autowired
-    VacanteRepository vacanteRepository;
-    @Autowired
-    AreaDgpRepository areaDgpRepository;
-    @Autowired
-    AsignacionRepository asignacionRepository;
-    @Autowired
-    PerfilRepository perfilRepository;
-    @Autowired
-    ModalidadRepository modalidadRepository;
-    @Autowired
-    HorarioRepository horarioRepository;
-    @Autowired
-    CarreraRepository carreraRepository;
+
+    @Autowired private VacanteRepository vacanteRepository;
+    @Autowired private AreaDgpRepository areaDgpRepository;
+    @Autowired private ModalidadRepository modalidadRepository;
+    @Autowired private HorarioRepository horarioRepository;
+    @Autowired private CarreraRepository carreraRepository;
+    @Autowired private UsuarioRepository usuarioRepository;
 
     @Override
-    public VacanteDto create(VacanteDto vacanteDto) {
-        Vacante vacante = convertirDTOAEntidad(vacanteDto);
-        Vacante guardada = vacanteRepository.save(vacante);
-        return convertirEntidadADTO(guardada);
+    public VacanteDto create(VacanteDto dto) {
+        Vacante v = convertirDTOAEntidad(dto);
+        return convertirEntidadADTO(vacanteRepository.save(v));
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<VacanteDto> getAll(){
-        List<Vacante> vacantes = vacanteRepository.findAll();
-        return vacantes.stream()
-                .map(this::convertirEntidadADTO)
+    public List<VacanteDto> getAll() {
+        return vacanteRepository.findAll()
+                .stream().map(this::convertirEntidadADTO)
                 .collect(Collectors.toList());
     }
 
     @Override
     public VacanteDto get(Long id) {
-        Vacante vacante = vacanteRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("vacante no encontrada"));
-        return convertirEntidadADTO(vacante);
+        return convertirEntidadADTO(
+                vacanteRepository.findById(id)
+                        .orElseThrow(() -> new RuntimeException("Vacante no encontrada"))
+        );
     }
 
     @Override
@@ -61,81 +47,96 @@ public class VacanteServiceImpl implements VacanteService {
     }
 
     @Override
-    public VacanteDto update(VacanteDto vacanteDto) {
-        Vacante vacante = convertirDTOAEntidad(vacanteDto);
-        Vacante actualizada = vacanteRepository.save(vacante);
-        return convertirEntidadADTO(actualizada);
+    public VacanteDto update(VacanteDto dto) {
 
+        Vacante existente = vacanteRepository.findById(dto.getIdVacantes())
+                .orElseThrow(() -> new RuntimeException("Vacante no encontrada"));
+
+        Modalidad modalidad = modalidadRepository.findById(dto.getModalidadesIdModalidad())
+                .orElseThrow(() -> new RuntimeException("Modalidad no encontrada"));
+
+        AreaDgp area = areaDgpRepository.findById(dto.getAreasDgpIdArea())
+                .orElseThrow(() -> new RuntimeException("Área no encontrada"));
+
+        Horario horario = horarioRepository.findById(dto.getHorariosIdHorario())
+                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+
+        Carrera carrera = carreraRepository.findById(dto.getCarrerasIdCarrera().intValue())
+                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+
+        existente.setNombrePuesto(dto.getNombrePuesto());
+        existente.setDescripcion(dto.getDescripcion());
+        existente.setNumeroPlazas(dto.getNumeroPlazas());
+        existente.setEstatus(dto.getEstatus());
+        existente.setFechaPublicacion(dto.getFechaPublicacion());
+        existente.setRequisitos(dto.getRequisitos());
+
+        existente.setAreasdgpIdarea(area);
+        existente.setModalidadesIdmodalidad(modalidad);
+        existente.setHorariosIdhorario(horario);
+        existente.setCarrerasIdcarerra(carrera);
+
+
+        Vacante guardada = vacanteRepository.save(existente);
+
+        return convertirEntidadADTO(guardada);
     }
-    private VacanteDto convertirEntidadADTO(Vacante vacante) {
-        VacanteDto vacanteDto = new VacanteDto();
-        vacanteDto.setIdVacantes(vacante.getId());
-        vacanteDto.setCarreras_idCarrera(vacante.getCarrerasIdcarerra().getId().intValue());
-        vacanteDto.setEstatus(vacante.getEstatus());
-        vacanteDto.setDescripcion(vacante.getDescripcion());
-        vacanteDto.setNumeroPlazas(vacante.getNumeroPlazas());
-        vacanteDto.setFechaPublicacion(vacante.getFechaPublicacion().atOffset(ZoneOffset.UTC));
-        vacanteDto.setRequisitos(vacante.getRequisitos());
-        vacanteDto.setNombrePuesto(vacante.getNombrePuesto());
-        vacanteDto.setAsignaciones_idAsignacion(vacante.getAsignacionesIdasignacion().getId());
-        vacanteDto.setAreasDgp_idArea(vacante.getAreasdgpIdarea().getId());
-        // ✅ Nombre del área/unidad (texto en lugar del ID)
-        vacanteDto.setAreaNombre(
-                vacante.getAreasdgpIdarea() != null
-                        ? vacante.getAreasdgpIdarea().getNombre()
-                        : null
-        );
-        vacanteDto.setModalidades_idModalidad(vacante.getModalidadesIdmodalidad().getId());
-        vacanteDto.setPerfiles_idPerfil(vacante.getPerfilesIdperfil().getId());
-        vacanteDto.setHorarios_idHorario(vacante.getHorariosIdhorario().getId());
-
-        //  NUEVO: enviar "Creado por" al frontend usando la relación Vacante -> Usuario
-        // Esto permite que en la tabla se muestre el nombre del usuario creador.
-        if (vacante.getCreadoPor() != null) {
-            Usuario u = vacante.getCreadoPor();
-
-            // 1) Mandar el ID del creador (por si lo ocupas)
-            // NOTA: este setter debe existir en VacanteDto (paso 2).
-            vacanteDto.setUsuariosIdUsuario(u.getId());
 
 
-            // 2) Mandar el nombre completo (lo que se verá en "Creado por")
-            String nombreCompleto = (u.getNombre() + " " + u.getPrimerapellido() + " " + u.getSegundoapellido()).trim();
-            vacanteDto.setCreadoPorNombre(nombreCompleto);
+    private VacanteDto convertirEntidadADTO(Vacante v) {
+        VacanteDto dto = new VacanteDto();
+
+        dto.setIdVacantes(v.getId());
+        dto.setNombrePuesto(v.getNombrePuesto());
+        dto.setDescripcion(v.getDescripcion());
+        dto.setNumeroPlazas(v.getNumeroPlazas());
+        dto.setEstatus(v.getEstatus());
+        dto.setFechaPublicacion(v.getFechaPublicacion());
+        dto.setRequisitos(v.getRequisitos());
+
+        dto.setAreasDgpIdArea(v.getAreasdgpIdarea().getId());
+        dto.setModalidadesIdModalidad(Long.valueOf(v.getModalidadesIdmodalidad().getId()));
+        dto.setHorariosIdHorario(Long.valueOf(v.getHorariosIdhorario().getId()));
+        dto.setCarrerasIdCarrera((long) v.getCarrerasIdcarerra().getId());
+
+        if (v.getCreadoPor() != null) {
+            Usuario u = v.getCreadoPor();
+            dto.setUsuariosIdUsuario(u.getId());
+            dto.setCreadoPorNombre(u.getNombre() + " " + u.getPrimerapellido() + " " + u.getSegundoapellido());
         }
 
-        return vacanteDto;
+        dto.setAreaNombre(v.getAreasdgpIdarea().getNombre());
+        return dto;
     }
 
-    // Metodo Dto a Entidad
     private Vacante convertirDTOAEntidad(VacanteDto dto) {
-        Asignacion asignacion = asignacionRepository.findById(dto.getAsignaciones_idAsignacion())
-                .orElseThrow(() -> new RuntimeException("Asignacion con ID " + dto.getAsignaciones_idAsignacion() + " no existe."));
-        Perfil perfil = perfilRepository.findById(Long.valueOf(dto.getPerfiles_idPerfil()))
-                .orElseThrow(() -> new RuntimeException("perfil no encontrado"));
-        Modalidad modalidad = modalidadRepository.findById(Long.valueOf(dto.getModalidades_idModalidad()))
-                .orElseThrow(() -> new RuntimeException("modalidad no encontrada"));
-        AreaDgp areaDgp = areaDgpRepository.findById(Long.valueOf(dto.getAreasDgp_idArea()))
-                .orElseThrow(() -> new RuntimeException("areaDgp no encontrada"));
-        Horario horario= horarioRepository.findById(Long.valueOf(dto.getHorarios_idHorario()))
-                .orElseThrow(() -> new RuntimeException("perfil no encontrado"));
-        Carrera carrera=carreraRepository.findById(dto.getCarreras_idCarrera())
-                .orElseThrow(()-> new RuntimeException("carrera no encontrada"));
 
-        Vacante vacante = new Vacante();
-        vacante.setId(dto.getIdVacantes());
-        vacante.setEstatus(dto.getEstatus());
-        vacante.setNombrePuesto(dto.getNombrePuesto());
-        vacante.setDescripcion(dto.getDescripcion());
-        vacante.setNumeroPlazas(dto.getNumeroPlazas());
-        vacante.setFechaPublicacion(dto.getFechaPublicacion().toLocalTime());
-        vacante.setRequisitos(dto.getRequisitos());
-        vacante.setCarrerasIdcarerra(carrera);
-        vacante.setAsignacionesIdasignacion(asignacion);
-        vacante.setAreasdgpIdarea(areaDgp);
-        vacante.setModalidadesIdmodalidad(modalidad);
-        vacante.setPerfilesIdperfil(perfil);
-        vacante.setHorariosIdhorario(horario);
-        return vacante;
+        Modalidad modalidad = modalidadRepository.findById(dto.getModalidadesIdModalidad())
+                .orElseThrow(() -> new RuntimeException("Modalidad no encontrada"));
+
+        AreaDgp area = areaDgpRepository.findById(dto.getAreasDgpIdArea())
+                .orElseThrow(() -> new RuntimeException("Área no encontrada"));
+
+        Horario horario = horarioRepository.findById(dto.getHorariosIdHorario())
+                .orElseThrow(() -> new RuntimeException("Horario no encontrado"));
+
+        Carrera carrera = carreraRepository.findById(dto.getCarrerasIdCarrera().intValue())
+                .orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
+        Usuario usuario = usuarioRepository.findById(dto.getUsuariosIdUsuario())
+                .orElseThrow(() -> new RuntimeException("usuario no encontrada"));
+        Vacante v = new Vacante();
+        v.setId(dto.getIdVacantes());
+        v.setNombrePuesto(dto.getNombrePuesto());
+        v.setDescripcion(dto.getDescripcion());
+        v.setNumeroPlazas(dto.getNumeroPlazas());
+        v.setEstatus(dto.getEstatus());
+        v.setFechaPublicacion(dto.getFechaPublicacion());
+        v.setRequisitos(dto.getRequisitos());
+        v.setAreasdgpIdarea(area);
+        v.setModalidadesIdmodalidad(modalidad);
+        v.setHorariosIdhorario(horario);
+        v.setCarrerasIdcarerra(carrera);
+        v.setCreadoPor(usuario);
+        return v;
     }
 }

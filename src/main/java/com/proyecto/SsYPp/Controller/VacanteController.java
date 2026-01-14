@@ -9,36 +9,40 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
 @RestController
 @RequestMapping("/vacantes")
-
 public class VacanteController {
+
     @Autowired
-    VacanteService vacanteService;
-    @GetMapping("/{vacantes}")
-    public VacanteDto getVacante(@PathVariable Long vacantes){
-        return vacanteService.get(vacantes);
+    private VacanteService vacanteService;
+
+    @GetMapping("/{id}")
+    public VacanteDto getVacante(@PathVariable Long id){
+        return vacanteService.get(id);
     }
+
     @GetMapping("/getAll")
     public List<VacanteDto> getVacantes(){
         return vacanteService.getAll();
     }
+
     @DeleteMapping("/delete/{id}")
     public String deleteVacante(@PathVariable Long id){
         vacanteService.delete(id);
-        return "se ha borrado la vacante con exito";
+        return "Se ha borrado la vacante con éxito";
     }
 
     @PutMapping("/update/{id}")
-    public VacanteDto updateVacante(
-            @PathVariable Long id,
-            @Valid @RequestBody VacanteDto vacante) {
+    public VacanteDto updateVacante(@PathVariable Long id,
+                                    @Valid @RequestBody VacanteDto vacante) {
+        vacante.setIdVacantes(id);
         return vacanteService.update(vacante);
     }
-    @PostMapping("/create")
-    public ResponseEntity<VacanteDto> registerVacante(@Valid @ModelAttribute VacanteDto vacante) {
-        VacanteDto nuevaVacante = vacanteService.create(vacante);
 
+    @PostMapping("/create")
+    public ResponseEntity<VacanteDto> registerVacante(@Valid @RequestBody VacanteDto vacante) {
+        VacanteDto nuevaVacante = vacanteService.create(vacante);
         return new ResponseEntity<>(nuevaVacante, HttpStatus.CREATED);
     }
 }

@@ -13,18 +13,19 @@ import java.time.LocalTime;
 @Entity
 @Table(name = "\"Vacantes\"")
 public class Vacante {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "\"idVacantes\"", nullable = false)
     private Long id;
 
-    @Size(max = 255)
     @NotNull
+    @Size(max = 255)
     @Column(name = "\"nombrePuesto\"", nullable = false)
     private String nombrePuesto;
 
     @NotNull
-    @Column(name = "descripcion", nullable = false, length = Integer.MAX_VALUE)
+    @Column(name = "descripcion", nullable = false)
     private String descripcion;
 
     @NotNull
@@ -33,50 +34,32 @@ public class Vacante {
 
     @NotNull
     @Column(name = "estatus", nullable = false)
-    private Boolean estatus = false;
+    private Boolean estatus;
 
     @NotNull
     @Column(name = "\"fechaPublicacion\"", nullable = false)
     private LocalTime fechaPublicacion;
 
-    @Size(max = 255)
     @Column(name = "requisitos")
     private String requisitos;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"Perfiles_idPerfil\"", nullable = false)
-    private Perfil perfilesIdperfil;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"AreasDgp_idArea\"", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "\"AreasDgp_idArea\"")
     private AreaDgp areasdgpIdarea;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"Horarios_idHorario\"", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "\"Horarios_idHorario\"")
     private Horario horariosIdhorario;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"Modalidades_idModalidad\"", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "\"Modalidades_idModalidad\"")
     private Modalidad modalidadesIdmodalidad;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"Asignaciones_idAsignacion\"", nullable = false)
-    private Asignacion asignacionesIdasignacion;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"Carreras_idCarerra\"", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "\"Carreras_idCarerra\"")
     private Carrera carrerasIdcarerra;
 
-    // ===============================
-    // Usuario que creó la vacante
-    // ===============================
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"Usuarios_idUsuario\"", nullable = false)
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "\"Usuarios_idUsuario\"")
     private Usuario creadoPor;
 }

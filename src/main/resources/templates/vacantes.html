@@ -130,7 +130,7 @@
 
                     <div>
                         <label>Carrera / Estudiante que curse</label>
-                        <select id="Carreras_idCarrera">
+                        <select id="carreras_idCarrera">
                             <option value="">Cargando carreras...</option>
                         </select>
 
@@ -241,7 +241,7 @@
         const API = "/vacantes";
         // =================== CARGAR CARRERAS (SELECT) ===================
 const API_CARRERAS = "/Carreras/getAll";
-const carrerasSelect = document.getElementById("Carreras_idCarrera");
+const carrerasSelect = document.getElementById("carreras_idCarrera");
 
 async function cargarCarrerasSelect() {
     if (!carrerasSelect) return;
@@ -377,7 +377,7 @@ async function cargarCarrerasSelect() {
             return opt ? opt.textContent.trim() : String(value ?? "");
         }
         const areaName = (id) => getSelectText("AreasDgp_idArea", id);
-        const carreraName = (id) => getSelectText("Carreras_idCarrera", id);
+        const carreraName = (id) => getSelectText("carreras_idCarrera", id);
         const modalidadName = (id) => getSelectText("Modalidades_idModalidad", id);
         const horarioName = (id) => getSelectText("Horarios_idHorario", id);
 
@@ -628,7 +628,7 @@ function getCreatorName(v) {
                 document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
                 // 🔧 FIX FRONT: IDs según el JSON real del backend
                 document.getElementById("AreasDgp_idArea").value = editing.areasDgp_idArea ?? "";
-               document.getElementById("Carreras_idCarrera").value = editing.carreras_idCarrera ?? "";
+               document.getElementById("carreras_idCarrera").value = editing.carreras_idCarrera ?? "";
                 document.getElementById("Modalidades_idModalidad").value = editing.modalidades_idModalidad ?? "";
                 document.getElementById("Horarios_idHorario").value = editing.horarios_idHorario ?? "";
                 document.getElementById("estatus").value = String(editing.estatus ?? true);
@@ -698,7 +698,7 @@ function getCreatorName(v) {
                 numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
                 estatus: document.getElementById("estatus").value === "true",
                 AreasDgp_idArea: Number(document.getElementById("AreasDgp_idArea").value || 0),
-                Carreras_idCarerra: Number(document.getElementById("Carreras_idCarrera").value || 0),
+                Carreras_idCarerra: Number(document.getElementById("carreras_idCarrera").value || 0),
                 Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
                 Horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
                 fechaPublicacion: timeWithOffset,
@@ -733,12 +733,12 @@ function getCreatorName(v) {
                 if (fresh) openDetails(fresh);
 
             } else {
-                const fd = new FormData();
-                Object.entries(payloadCommon).forEach(([k, v]) => {
-                    if (v !== null && v !== undefined) fd.append(k, String(v));
+                const res = await fetch(`${API}/create`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payloadCommon)
                 });
 
-                const res = await fetch(`${API}/create`, { method: "POST", body: fd });
                 if (!res.ok) {
                     console.error("Error create:", await res.text());
                     showError("Error al crear la vacante.");
