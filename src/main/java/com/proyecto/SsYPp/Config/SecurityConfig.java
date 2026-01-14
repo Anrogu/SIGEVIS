@@ -62,8 +62,9 @@ public class SecurityConfig {
                         // =========================
                         // 2) REGLAS POR ROL (TU SISTEMA PRIVADO)
                         // =========================
-                        .requestMatchers("/index", "/index.html").hasAuthority("ROLE_1")
-                        .requestMatchers("/vacantes", "/vacantes.html").hasAnyAuthority("ROLE_2", "ROLE_1")
+                        .requestMatchers("/usuarios", "/usuarios.html").hasAuthority("ROLE_1")
+                        .requestMatchers("/index", "/index.html").hasAnyAuthority("ROLE_3", "ROLE_1")
+                        .requestMatchers("/vacantes", "/vacantes.html").hasAnyAuthority("ROLE_3","ROLE_2", "ROLE_1")
 
 
                         // 3. Cualquier otra ruta requiere estar autenticado

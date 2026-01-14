@@ -23,10 +23,6 @@ public class Postulacion {
     @Column(name = "\"fechaPostulacion\"", nullable = false)
     private OffsetTime fechaPostulacion;
 
-    @NotNull
-    @Column(name = "estatus", nullable = false, length = Integer.MAX_VALUE)
-    private String estatus;
-
     @Column(name = "comentarios", length = Integer.MAX_VALUE)
     private String comentarios;
 
@@ -35,7 +31,12 @@ public class Postulacion {
     @JoinColumn(name = "\"Usuarios_idUsuario\"", nullable = false)
     private Usuario usuariosIdusuario;
 
-    @OneToMany(mappedBy = "postulacionesIdpostulacion")
-    private Set<Asignacion> asignaciones = new LinkedHashSet<>();
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "\"Estatus_IdEstatus\"")
+    private StatusPostulacion estatusIdestatus;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "postulacionesIdpostulacion")
+    private Asignacion asignaciones;
 
 }

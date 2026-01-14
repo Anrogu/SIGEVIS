@@ -6,6 +6,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.OffsetTime;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Getter
 @Setter
@@ -26,17 +28,15 @@ public class Asignacion {
     private OffsetTime fechaFin;
 
     @NotNull
-    @Column(name = "estatus", nullable = false)
-    private Boolean estatus = false;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"Usuarios_idUsuario\"", nullable = false)
-    private Usuario usuariosIdusuario;
-
-    @NotNull
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "\"Postulaciones_idPostulacion\"", nullable = false)
     private Postulacion postulacionesIdpostulacion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "\"Vacantes_idVacante\"")
+    private Vacante vacantesIdvacante;
+
+    @OneToMany(mappedBy = "idAsignacion")
+    private Set<Actividad> actividades = new LinkedHashSet<>();
 
 }

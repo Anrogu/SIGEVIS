@@ -50,4 +50,9 @@ public class Actividad {
     @JoinColumn(name = "\"IdAsignacion\"", nullable = false)
     private Asignacion idAsignacion;
 
+    @NotNull
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "\"IdAsignacion\"", nullable = false)
+    private Asignacion idAsignacion1;
+
 }
