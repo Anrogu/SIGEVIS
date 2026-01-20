@@ -25,9 +25,9 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
                 .orElse("");
 
         String redirectURL = switch (role) {
-            case "ROLE_1" -> "/index";
-            case "ROLE_2" -> "/usuarios";
-            case "ROLE_3" -> "/vacantes";
+            case "ADMIN" -> "/admin/index";
+            case "USUARIO" -> "/usuario/usuarios";
+            case "COORDINADOR" -> "/vacantes";
             default       -> "/login?error=true";
         };
 

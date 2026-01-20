@@ -1,32 +1,18 @@
 package com.proyecto.SsYPp.Controller;
 
+import com.proyecto.SsYPp.Dto.NoticiaDto;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 
+@Controller
+@RequestMapping("/admin")
 public class AdminController {
-    // El return "nombreArchivo" busca: src/main/resources/templates/nombreArchivo.html
 
-    @GetMapping("/vacantes.html")
-    public String vacantes() {
-        return "vacantes"; // Busca templates/vacantes.html
-    }
-
-    @GetMapping("/postulaciones.html")
-    public String postulaciones() {
-        return "postulaciones"; // Busca templates/postulaciones.html
-    }
-
-    @GetMapping("/convenios.html")
-    public String convenios() {
-        return "convenios"; // Busca templates/convenios.html
-    }
-
-    @GetMapping("/usuarios.html")
-    public String usuarios() {
-        return "usuarios"; // Busca templates/usuarios.html
-    }
-
-    @GetMapping("/catalogos.html")
-    public String catalogos() {
-        return "catalogos"; // Busca templates/catalogos.html
+    @GetMapping("/index")
+    public String index(Model model) {
+        model.addAttribute("noticia", new NoticiaDto());
+        return "admin/index";
     }
 }

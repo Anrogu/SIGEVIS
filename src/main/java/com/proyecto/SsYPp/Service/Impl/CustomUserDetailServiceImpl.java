@@ -26,23 +26,15 @@ public class CustomUserDetailServiceImpl implements UserDetailsService {
         Usuario usuario = usuarioRepository.findByEmail(email);
         if (usuario == null) throw new UsernameNotFoundException("Usuario no encontrado");
 
-        // Mapeamos el ID numérico de tu tabla al formato ROLE_X
-        String authority = "ROLE_" + usuario.getIdrol().getId();
+        String authority = usuario.getIdrol().getNombre();
 
-        // Aquí es donde se aplica el bloqueo por status.
-        // Si status = false -> disabled(true) -> Spring lanza DisabledException al intentar login.
         boolean deshabilitado = (usuario.getStatus() == null) ? true : !usuario.getStatus();
-
 
         return User.builder()
                 .username(usuario.getEmail())
                 .password(usuario.getPassword())
-                .authorities(authority)
-
-                // ✅ NUEVO:
-                // ANTES no había validación de status, por eso entraban aunque estuvieran desactivados.
+                .authorities(authority) // Pasa "ADMIN", "USUARIO" o "COORDINADOR"
                 .disabled(deshabilitado)
-
                 .build();
     }
 }

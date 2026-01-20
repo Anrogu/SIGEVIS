@@ -2,42 +2,58 @@ package com.proyecto.SsYPp.Controller;
 
 import com.proyecto.SsYPp.Dto.AsignacionDto;
 import com.proyecto.SsYPp.Service.AsignacionService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-@RestController
-@RequestMapping("/asignaciones")
+@Controller // 1. Ahora es un Controlador de Vistas
+@RequestMapping("/admin/asignaciones") // 2. Ruta protegida bajo Admin
 public class AsignacionesController {
+
     @Autowired
-    AsignacionService asignacionService;
-    @GetMapping("/{asignaciones}")
-    public AsignacionDto getAsignacion(@PathVariable Long asignaciones){
-        return asignacionService.get(asignaciones);
-    }
-    @GetMapping("/getAll")
-    public List<AsignacionDto> getAsignaciones(){
-        return asignacionService.getAll();
-    }
-    @DeleteMapping("/delete/{id}")
-    public String deleteAsignacion(@PathVariable Long id){
-        asignacionService.delete(id);
-        return "se ha borrado la Asignacion con exito";
+    private AsignacionService asignacionService;
+
+    // --- LISTAR (Vista Principal) ---
+    @GetMapping
+    public String index(Model model) {
+        List<AsignacionDto> listaAsignaciones = asignacionService.getAll();
+        model.addAttribute("asignaciones", listaAsignaciones);
+        model.addAttribute("asignacion", new AsignacionDto());
+        return "admin/asignaciones";
     }
 
-    @PutMapping("/update/{id}")
-    public AsignacionDto updateAsignacion(
-            @PathVariable Long id,
-            @Valid @RequestBody AsignacionDto asignacion) {
-        return asignacionService.update(asignacion);
+    // --- GUARDAR (Crear o Editar) ---
+    @PostMapping("/guardar")
+    public String guardar(@ModelAttribute AsignacionDto asignacionDto, RedirectAttributes redirectAttributes) {
+        try {
+            if (asignacionDto.getId() != null) {
+                asignacionService.update(asignacionDto);
+                redirectAttributes.addFlashAttribute("mensajeExito", "Asignación actualizada correctamente.");
+            } else {
+                asignacionService.create(asignacionDto);
+                redirectAttributes.addFlashAttribute("mensajeExito", "Asignación creada correctamente.");
+            }
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "Error al guardar: " + e.getMessage());
+        }
+
+        // Redirige a la misma página para recargar la tabla
+        return "redirect:/admin/asignaciones";
     }
-    @PostMapping("/create")
-    public ResponseEntity<AsignacionDto> registerAsignacion(@Valid @RequestBody AsignacionDto asignacion) {
-        AsignacionDto nuevaAsignacion = asignacionService.create(asignacion);
-        return new ResponseEntity<>(nuevaAsignacion, HttpStatus.CREATED);
+
+    // --- ELIMINAR ---
+    @GetMapping("/eliminar/{id}")
+    public String deleteAsignacion(@PathVariable Long id, RedirectAttributes redirectAttributes) {
+        try {
+            asignacionService.delete(id);
+            redirectAttributes.addFlashAttribute("mensajeExito", "Se ha borrado la asignación con éxito.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No se pudo eliminar la asignación.");
+        }
+        return "redirect:/admin/asignaciones";
     }
 }

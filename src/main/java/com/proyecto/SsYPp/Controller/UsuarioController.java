@@ -3,84 +3,70 @@ package com.proyecto.SsYPp.Controller;
 import com.proyecto.SsYPp.Dto.UsuarioDto;
 import com.proyecto.SsYPp.Service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model; // ✅ NECESARIO OTRA VEZ
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
-@RequestMapping("/usuarios")
+@RequestMapping("/admin/usuarios")
 public class UsuarioController {
 
     @Autowired
     private UsuarioService usuarioService;
 
+    // 1. VISTA: Agregamos el modelo vacío para que Thymeleaf no falle
     @GetMapping
-    public String index(@RequestParam(defaultValue = "0") int page, Model model) {
-        Page<UsuarioDto> usuariosPage = usuarioService.getAll(PageRequest.of(page, 9));
-        model.addAttribute("usuarios", usuariosPage.getContent());
-        model.addAttribute("currentPage", page);
-        model.addAttribute("totalPages", usuariosPage.getTotalPages());
-        model.addAttribute("usuario", new UsuarioDto());
+    public String index(Model model) {
+        model.addAttribute("usuario", new UsuarioDto()); // ✅ ESTO ARREGLA EL ERROR
+        return "admin/usuarios";
+    }
 
-        return "usuarios";
+    // --- API JSON (Igual que antes) ---
+    @GetMapping("/getAll")
+    @ResponseBody
+    public List<UsuarioDto> getAll() {
+        return usuarioService.getAll(PageRequest.of(0, 1000)).getContent();
     }
 
     @PostMapping("/guardar")
-    public String guardar(@ModelAttribute UsuarioDto usuarioDto, RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<?> guardar(@RequestBody UsuarioDto usuarioDto) {
         try {
             if (usuarioDto.getIdusuario() != null && usuarioDto.getIdusuario() > 0) {
                 usuarioService.update(usuarioDto);
-                redirectAttributes.addFlashAttribute("mensajeExito", "Usuario actualizado correctamente.");
+                return ResponseEntity.ok("Usuario actualizado correctamente.");
             } else {
                 usuarioService.create(usuarioDto);
-                redirectAttributes.addFlashAttribute("mensajeExito", "Usuario creado correctamente.");
+                return ResponseEntity.ok("Usuario creado correctamente.");
             }
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("mensajeError", "Ocurrió un error inesperado al guardar.");
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
-
-        return "redirect:/usuarios";
     }
 
-    @GetMapping("/eliminar/{id}")
-    public String eliminar(@PathVariable Integer id) {
-        usuarioService.delete(id);
-        return "redirect:/usuarios";
+    @DeleteMapping("/eliminar/{id}")
+    @ResponseBody
+    public ResponseEntity<?> eliminar(@PathVariable Integer id) {
+        try {
+            usuarioService.delete(id);
+            return ResponseEntity.ok("Eliminado.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al eliminar.");
+        }
     }
 
     @GetMapping("/cambiar-status/{id}")
-    public String cambiarStatus(@PathVariable Integer id,
-                                RedirectAttributes redirectAttributes) {
+    @ResponseBody
+    public ResponseEntity<?> cambiarStatus(@PathVariable Integer id) {
         try {
-            // NUEVO:
-            // Cambia el estado (activo ↔ inactivo) y devuelve el nuevo valor
             boolean nuevoStatus = usuarioService.toggleStatus(id);
-
-            redirectAttributes.addFlashAttribute(
-                    "mensajeExito",
-                    nuevoStatus
-                            ? "Usuario ACTIVADO correctamente."
-                            : "Usuario DESACTIVADO correctamente."
-            );
-
-        } catch (IllegalArgumentException e) {
-
-            // Usuario no encontrado u otro error controlado
-            redirectAttributes.addFlashAttribute("mensajeError", e.getMessage());
-
+            return ResponseEntity.ok(nuevoStatus ? "Usuario ACTIVADO." : "Usuario DESACTIVADO.");
         } catch (Exception e) {
-
-            // Error no esperado
-            redirectAttributes.addFlashAttribute(
-                    "mensajeError",
-                    "No se pudo cambiar el estado del usuario."
-            );
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
-        return "redirect:/usuarios";
     }
 }

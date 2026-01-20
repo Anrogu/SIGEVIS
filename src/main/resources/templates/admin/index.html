@@ -26,13 +26,15 @@
 
     <nav class="tabs">
         <div class="tabs__left">
-            <a class="tab tab--active" href="/index">NOTICIAS</a>
-            <a class="tab" href="/vacantes">VACANTES</a>
-            <a class="tab" href="/postulaciones">POSTULACIONES</a>
-            <a class="tab" href="/actividades">ACTIVIDADES Y EVIDENCIAS</a>
-            <a class="tab" href="/convenios">CONVENIOS</a>
-            <a class="tab" href="/catalogos">CATÁLOGOS</a>
-            <a class="tab" href="/usuarios">USUARIOS Y ROLES</a>
+            <a class="tab tab--active" th:href="@{/admin/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/admin/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/admin/asignaciones}">ASIGNACIONES</a>
+            <a class="tab" th:href="@{/admin/actividades}">ACTIVIDADES Y EVIDENCIAS</a>
+            <a class="tab" th:href="@{/admin/convenios}">CONVENIOS</a>
+            <a class="tab" th:href="@{/admin/catalogos}">CATÁLOGOS</a>
+            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS Y ROLES</a>
+            <a class="tab" th:href="@{/admin/auditoria}">AUDITORIA</a>
+
         </div>
 
         <div class="tabs__right">

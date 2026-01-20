@@ -14,8 +14,6 @@ public class RegisterViewController {
     @GetMapping("/register") // La ruta limpia para ver el formulario
     public String showRegistrationForm(Model model) {
         model.addAttribute("carreras", carreraService.getAllCarreras());
-
-        // 2. Retornar la plantilla
-        return "register"; // Retorna el archivo crearcuenta.html
+        return "logInAndRegister/register"; // Retorna el archivo crearcuenta.html
     }
 }

@@ -23,7 +23,7 @@ public class PublicController {
     // Login
     @GetMapping("/login")
     public String login() {
-        return "login";
+        return "LogInAndRegister/login";
     }
 
     // Registro
