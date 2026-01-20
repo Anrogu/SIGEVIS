@@ -36,7 +36,7 @@ public class AsignacionesController {
         return asignacionService.update(asignacion);
     }
     @PostMapping("/create")
-    public ResponseEntity<AsignacionDto> registerAsignacion(@Valid @ModelAttribute AsignacionDto asignacion) {
+    public ResponseEntity<AsignacionDto> registerAsignacion(@Valid @RequestBody AsignacionDto asignacion) {
         AsignacionDto nuevaAsignacion = asignacionService.create(asignacion);
         return new ResponseEntity<>(nuevaAsignacion, HttpStatus.CREATED);
     }

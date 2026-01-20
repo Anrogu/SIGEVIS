@@ -30,7 +30,7 @@ public class VacanteController {
     @DeleteMapping("/delete/{id}")
     public String deleteVacante(@PathVariable Long id){
         vacanteService.delete(id);
-        return "Se ha borrado la vacante con éxito";
+        return "Se ha borrado la vacanteIdvacante con éxito";
     }
 
     @PutMapping("/update/{id}")

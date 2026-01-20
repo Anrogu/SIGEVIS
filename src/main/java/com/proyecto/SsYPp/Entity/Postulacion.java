@@ -35,8 +35,4 @@ public class Postulacion {
     @JoinColumn(name = "\"Estatus_IdEstatus\"")
     private StatusPostulacion estatusIdestatus;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "postulacionesIdpostulacion")
-    private Asignacion asignaciones;
-
 }

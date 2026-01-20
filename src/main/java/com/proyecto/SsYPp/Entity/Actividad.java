@@ -29,7 +29,7 @@ public class Actividad {
 
     @NotNull
     @Column(name = "\"fechaActividad\"", nullable = false)
-    private LocalDate fechaActividad;
+    private LocalDate fechaActividad;    @NotNull
 
     @Size(max = 255)
     @NotNull
@@ -50,9 +50,5 @@ public class Actividad {
     @JoinColumn(name = "\"IdAsignacion\"", nullable = false)
     private Asignacion idAsignacion;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"IdAsignacion\"", nullable = false)
-    private Asignacion idAsignacion1;
 
 }

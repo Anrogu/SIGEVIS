@@ -1,12 +1,8 @@
 package com.proyecto.SsYPp.Service.Impl;
 
 import com.proyecto.SsYPp.Dto.AsignacionDto;
-import com.proyecto.SsYPp.Entity.Asignacion;
-import com.proyecto.SsYPp.Entity.Postulacion;
-import com.proyecto.SsYPp.Entity.Usuario;
-import com.proyecto.SsYPp.Repository.AsignacionRepository;
-import com.proyecto.SsYPp.Repository.PostulacionRepository;
-import com.proyecto.SsYPp.Repository.UsuarioRepository;
+import com.proyecto.SsYPp.Entity.*;
+import com.proyecto.SsYPp.Repository.*;
 import com.proyecto.SsYPp.Service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,10 +15,11 @@ public class AsignacionServiceImpl implements AsignacionService {
     @Autowired
     private AsignacionRepository asignacionRepository;
     @Autowired
-    private UsuarioRepository usuarioRepository;
+    private VacanteRepository vacantesRepository;
     @Autowired
     private PostulacionRepository postulacionRepository;
     @Override
+
     public AsignacionDto create(AsignacionDto asignacionDto) {
         Asignacion asignacion = convertirDTOAEntidad(asignacionDto);
         Asignacion guardada = asignacionRepository.save(asignacion);
@@ -60,25 +57,28 @@ public class AsignacionServiceImpl implements AsignacionService {
         asignacionDto.setId(asignacion.getId());
         asignacionDto.setFechaFin(asignacion.getFechaFin());
         asignacionDto.setFechaInicio(asignacion.getFechaInicio());
-        asignacionDto.setEstatus(asignacion.getEstatus());
-        asignacionDto.setUsuariosIdusuario(Math.toIntExact(asignacion.getUsuariosIdusuario().getId()));
-        asignacionDto.setPostulacionesIdpostulacion(Math.toIntExact(asignacion.getPostulacionesIdpostulacion().getId()));
+        asignacionDto.setPostulacionesIdpostulacion(asignacion.getPostulacionesIdpostulacion().getId());
+        asignacionDto.setVacantesIdvacante(asignacion.getVacantesIdvacante().getId());
         return asignacionDto;
 
     }
     public Asignacion convertirDTOAEntidad(AsignacionDto dto) {
-        Usuario usuario = usuarioRepository.findById(Long.valueOf(dto.getUsuariosIdusuario()))
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-        Postulacion postulacion= postulacionRepository.findById(Long.valueOf(dto.getPostulacionesIdpostulacion()))
-                .orElseThrow(() -> new RuntimeException("Postulacion no encontrada"));
+        Postulacion postulacion = postulacionRepository.findById(dto.getPostulacionesIdpostulacion())
+                .orElseThrow(() -> new RuntimeException("postulacion no encontrada"));
+        Vacante vacante = vacantesRepository.findById(dto.getVacantesIdvacante())
+                .orElseThrow(() -> new RuntimeException("vacante no encontrada"));
 
         Asignacion asignacion = new Asignacion();
+
+        if (dto.getId() != null) {
+            asignacion.setId(dto.getId());
+        }
+
         asignacion.setFechaFin(dto.getFechaFin());
         asignacion.setFechaInicio(dto.getFechaInicio());
-        asignacion.setEstatus(dto.getEstatus());
-        asignacion.setId(Long.valueOf(dto.getId()));
-        asignacion.setUsuariosIdusuario(usuario);
         asignacion.setPostulacionesIdpostulacion(postulacion);
+        asignacion.setVacantesIdvacante(vacante);
+
         return asignacion;
     }
 }

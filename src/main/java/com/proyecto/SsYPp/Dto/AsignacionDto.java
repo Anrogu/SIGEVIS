@@ -1,24 +1,27 @@
 package com.proyecto.SsYPp.Dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Value;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-import java.io.Serializable;
 import java.time.OffsetTime;
-import java.util.Set;
 
-/**
- * DTO for {@link com.proyecto.SsYPp.Entity.Asignacion}
- */
-@Value
-public class AsignacionDto implements Serializable {
-    Long id;
+@Getter
+@Setter
+@NoArgsConstructor
+public class AsignacionDto {
+    private Long id;
+
     @NotNull
-    OffsetTime fechaInicio;
+    private OffsetTime fechaInicio;
+
     @NotNull
-    OffsetTime fechaFin;
+    private OffsetTime fechaFin;
+
     @NotNull
-    PostulacionDto postulacionesIdpostulacion;
-    VacanteDto vacantesIdvacante;
-    ActividadDto actividades;
+    private Long postulacionesIdpostulacion; // Objeto para el ID
+
+    @NotNull
+    private Long vacantesIdvacante; // Según tu log, el campo se llama 'vacante'
 }

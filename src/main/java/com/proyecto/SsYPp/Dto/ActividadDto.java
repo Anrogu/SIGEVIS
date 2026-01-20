@@ -27,7 +27,7 @@ public class ActividadDto implements Serializable {
     @Size(max = 255)
     String tipoActividad;
     @NotNull
-    UsuarioDto idUsuario;
+    Long idUsuario;
     @NotNull
-    Asignacion idAsignacion;
+    Long idAsignacion;
 }
