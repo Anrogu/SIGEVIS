@@ -15,6 +15,7 @@ import java.util.List;
 public class NoticiaController {
  @Autowired
  NoticiaService noticiaService;
+
  @GetMapping("/{noticia}")
  public NoticiaDto getNoticia(@PathVariable Long noticia){
      return noticiaService.get(noticia);
