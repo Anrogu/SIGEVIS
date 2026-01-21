@@ -1,10 +1,10 @@
 package com.proyecto.SsYPp.Dto;
 
-import com.proyecto.SsYPp.Entity.StatusPostulacion;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.Value;
 
 import java.io.Serializable;
 import java.time.OffsetTime;
@@ -23,5 +23,4 @@ public class PostulacionDto implements Serializable {
     @NotNull
     Long usuariosIdusuario;
     Long estatusIdestatus;
-    Long asignaciones;
 }
