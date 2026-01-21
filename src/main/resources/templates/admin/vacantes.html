@@ -12,9 +12,15 @@
 <body>
 <div class="app">
 
-    <!-- ✅ Usuario actual (para “creado por”) -->
+    <!-- ✅ Usuario actual (para “creado por” informativo) -->
     <input type="hidden" id="currentUser"
            th:value="${#authentication != null ? #authentication.name : ''}" />
+
+    <!-- ✅ IMPORTANTE: tu backend requiere usuariosIdUsuario en CREATE.
+         Si NO tienes endpoint /admin/usuarios/me, deja un valor fijo temporal (solo para pruebas).
+         Ideal: que lo llene JS desde un endpoint existente.
+    -->
+    <input type="hidden" id="usuariosIdUsuario" value="10" />
 
     <header class="topbar">
         <div class="topbar__left">
@@ -30,15 +36,11 @@
 
     <nav class="tabs">
         <div class="tabs__left">
-            <a class="tab tab--active" th:href="@{/admin/index}">NOTICIAS</a>
-            <a class="tab" th:href="@{/admin/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/admin/index}">NOTICIAS</a>
+            <a class="tab tab--active" th:href="@{/admin/vacantes}">VACANTES</a>
             <a class="tab" th:href="@{/admin/asignaciones}">ASIGNACIONES</a>
             <a class="tab" th:href="@{/admin/actividades}">ACTIVIDADES Y EVIDENCIAS</a>
-            <a class="tab" th:href="@{/admin/convenios}">CONVENIOS</a>
-            <a class="tab" th:href="@{/admin/catalogos}">CATÁLOGOS</a>
             <a class="tab" th:href="@{/admin/usuarios}">USUARIOS Y ROLES</a>
-            <a class="tab" th:href="@{/admin/auditoria}">AUDITORIA</a>
-
         </div>
         <div class="tabs__right">
             <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESION</button>
@@ -71,7 +73,6 @@
                 <table class="table">
                     <thead>
                     <tr>
-                        <!-- ✅ Solo estas columnas -->
                         <th>Título</th>
                         <th>Unidad</th>
                         <th>No. Vacantes</th>
@@ -135,7 +136,6 @@
                         <select id="carreras_idCarrera">
                             <option value="">Cargando carreras...</option>
                         </select>
-
                     </div>
                 </div>
 
@@ -241,39 +241,46 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const API = "/admin/vacantes";
+
         // =================== CARGAR CARRERAS (SELECT) ===================
-const API_CARRERAS = "/Carreras/getAll";
-const carrerasSelect = document.getElementById("carreras_idCarrera");
+        // Ajusta si tu endpoint real es /carreras/getAll (minúsculas)
+        const API_CARRERAS = "/Carreras/getAll";
+        const carrerasSelect = document.getElementById("carreras_idCarrera");
 
-async function cargarCarrerasSelect() {
-    if (!carrerasSelect) return;
+        async function cargarCarrerasSelect() {
+            if (!carrerasSelect) return;
 
-    try {
-        const res = await fetch(API_CARRERAS, { headers: { "Accept": "application/json" } });
-        if (!res.ok) {
-            console.error("Error carreras:", await res.text());
-            carrerasSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
-            return;
+            try {
+                const res = await fetch(API_CARRERAS, { headers: { "Accept": "application/json" } });
+                if (!res.ok) {
+                    console.error("Error carreras:", await res.text());
+                    carrerasSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
+                    return;
+                }
+
+                const carreras = await res.json();
+
+                if (!Array.isArray(carreras) || carreras.length === 0) {
+                    carrerasSelect.innerHTML = `<option value="">(Sin carreras)</option>`;
+                    return;
+                }
+
+                carrerasSelect.innerHTML =
+                    `<option value="">Selecciona una carrera...</option>` +
+                    carreras.map(c => {
+                        const id = c.idCarrera ?? c.idcarrera ?? c.id ?? "";
+                        const nom = c.nombre ?? c.descripcion ?? "(Sin nombre)";
+                        return `<option value="${id}">${nom}</option>`;
+                    }).join("");
+
+            } catch (err) {
+                console.error(err);
+                carrerasSelect.innerHTML = `<option value="">(Error cargando)</option>`;
+            }
         }
 
-        const carreras = await res.json();
-
-        if (!Array.isArray(carreras) || carreras.length === 0) {
-            carrerasSelect.innerHTML = `<option value="">(Sin carreras)</option>`;
-            return;
-        }
-
-        carrerasSelect.innerHTML =
-            `<option value="">Selecciona una carrera...</option>` +
-            carreras.map(c => `<option value="${c.id}">${c.nombre}</option>`).join("");
-
-    } catch (err) {
-        console.error(err);
-        carrerasSelect.innerHTML = `<option value="">(Error cargando)</option>`;
-    }
-}
-// ================================================================
-
+        // ================================================================
+        const currentUser = (document.getElementById("currentUser")?.value || "").trim();
 
         // ================= MODAL (igual estilo Noticias) =================
         const gobModal = document.getElementById("gobModal");
@@ -343,6 +350,30 @@ async function cargarCarrerasSelect() {
         }
         // ================================================================
 
+        // ================== HELPERS ROBUSTOS (ID y CREADOR) ==================
+        function getVacId(v) {
+            return Number(
+                v?.idVacantes ??
+                v?.idVacante ??
+                v?.idvacantes ??
+                v?.id ??
+                v?.vacanteId ??
+                v?.id_vacantes
+            );
+        }
+
+        function getCreatorName(v) {
+            const name =
+                v?.creadoPorNombre ??
+                v?.creado_por_nombre ??
+                v?.usuarioNombre ??
+                v?.usuario ??
+                v?.creadoPor ??
+                "";
+            return String(name).trim() ? String(name).trim() : "—";
+        }
+        // ====================================================================
+
         // Referencias UI
         const btnNew = document.getElementById("btnNewVac");
         const btnCancel = document.getElementById("btnCancelVac");
@@ -357,9 +388,6 @@ async function cargarCarrerasSelect() {
         const vacDetailsWrap = document.getElementById("vacDetailsWrap");
         const vacDetails = document.getElementById("vacDetails");
         const btnCloseDetails = document.getElementById("btnCloseDetails");
-
-        // Usuario actual
-        const currentUser = (document.getElementById("currentUser")?.value || "").trim();
 
         // Estado
         let vacantesCache = [];
@@ -378,7 +406,6 @@ async function cargarCarrerasSelect() {
             const opt = sel.querySelector(`option[value="${value}"]`);
             return opt ? opt.textContent.trim() : String(value ?? "");
         }
-        const areaName = (id) => getSelectText("AreasDgp_idArea", id);
         const carreraName = (id) => getSelectText("carreras_idCarrera", id);
         const modalidadName = (id) => getSelectText("Modalidades_idModalidad", id);
         const horarioName = (id) => getSelectText("Horarios_idHorario", id);
@@ -394,6 +421,67 @@ async function cargarCarrerasSelect() {
             const s = String(hora);
             return s.slice(0, 8);
         }
+
+        // --- UI Formulario ---
+        function openForm(){ layout.classList.add("is-split"); }
+        function closeForm(){ layout.classList.remove("is-split"); editing = null; form.reset(); }
+
+        btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
+        btnCancel?.addEventListener("click", closeForm);
+
+        function openDetails(v) {
+            if (!v) return;
+
+            const unidadTxt = v.areaNombre ?? "—";
+            const carreraTxt   = carreraName(v.carreras_idCarrera);
+            const modalidadTxt = modalidadName(v.Modalidades_idModalidad);
+            const horarioTxt   = horarioName(v.horarios_idHorario);
+            const creadorTxt   = getCreatorName(v);
+            const estadoTxt    = v.estatus === true ? "Publicado" : "No publicado";
+            const horaPub      = fmtHora(v.fechaPublicacion);
+
+            vacDetails.innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div><strong>Título:</strong><br>${v.nombrePuesto ?? ""}</div>
+                    <div><strong>Unidad:</strong><br>${unidadTxt}</div>
+
+                    <div><strong>No. Vacantes:</strong><br>${v.numeroPlazas ?? ""}</div>
+                    <div><strong>Estado:</strong><br>${estadoTxt}</div>
+
+                    <div><strong>Creado por:</strong><br>${creadorTxt}</div>
+                    <div><strong>Publicación:</strong><br>${horaPub || "—"}</div>
+
+                    <div><strong>Modalidad:</strong><br>${modalidadTxt}</div>
+                    <div><strong>Horario:</strong><br>${horarioTxt}</div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Carrera:</strong><br>${carreraTxt}
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Descripción:</strong><br>
+                        <span style="white-space:pre-wrap;">${v.descripcion ?? ""}</span>
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Requisitos:</strong><br>
+                        <span style="white-space:pre-wrap;">${v.requisitos ?? ""}</span>
+                    </div>
+                </div>
+            `;
+
+            vacDetailsWrap.style.display = "block";
+            renderTablaPaginada(currentList);
+            vacDetailsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function closeDetails() {
+            selectedId = null;
+            vacDetailsWrap.style.display = "none";
+            renderTablaPaginada(currentList);
+        }
+
+        btnCloseDetails?.addEventListener("click", closeDetails);
 
         // --- Paginación ---
         function getTotalPages(list) {
@@ -459,79 +547,6 @@ async function cargarCarrerasSelect() {
             renderTablaPaginada(currentList);
         });
 
-        // --- UI Formulario ---
-        function openForm(){ layout.classList.add("is-split"); }
-        function closeForm(){ layout.classList.remove("is-split"); editing = null; form.reset(); }
-
-        btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
-        btnCancel?.addEventListener("click", closeForm);
-        // --- Detalle (abajo) ---
-// ✅ "Creado por": el backend ya manda creadoPorNombre
-function getCreatorName(v) {
-    return (v.creadoPorNombre && v.creadoPorNombre.trim())
-        ? v.creadoPorNombre
-        : "—";
-}
-
-        function openDetails(v) {
-            if (!v) return;
-
-           const unidadTxt = v.areaNombre ?? "—";
-
-            // 🔧 FIX FRONT: nombres según el JSON real del backend
-            const carreraTxt   = carreraName(v.carreras_idCarrera);
-            const modalidadTxt = modalidadName(v.modalidades_idModalidad);
-            const horarioTxt   = horarioName(v.horarios_idHorario);
-            const creadorTxt = getCreatorName(v);
-            const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
-
-            const horaPub = fmtHora(v.fechaPublicacion);
-
-            vacDetails.innerHTML = `
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                    <div><strong>Título:</strong><br>${v.nombrePuesto ?? ""}</div>
-                    <div><strong>Unidad:</strong><br>${unidadTxt}</div>
-
-                    <div><strong>No. Vacantes:</strong><br>${v.numeroPlazas ?? ""}</div>
-                    <div><strong>Estado:</strong><br>${estadoTxt}</div>
-
-                    <div><strong>Creado por:</strong><br>${creadorTxt}</div>
-                    <div><strong>Publicación:</strong><br>${horaPub || "—"}</div>
-
-                    <div><strong>Modalidad:</strong><br>${modalidadTxt}</div>
-                    <div><strong>Horario:</strong><br>${horarioTxt}</div>
-
-                    <div style="grid-column: 1 / -1;">
-                        <strong>Carrera:</strong><br>${carreraTxt}
-                    </div>
-
-                    <div style="grid-column: 1 / -1;">
-                        <strong>Descripción:</strong><br>
-                        <span style="white-space:pre-wrap;">${v.descripcion ?? ""}</span>
-                    </div>
-
-                    <div style="grid-column: 1 / -1;">
-                        <strong>Requisitos:</strong><br>
-                        <span style="white-space:pre-wrap;">${v.requisitos ?? ""}</span>
-                    </div>
-                </div>
-            `;
-
-            vacDetailsWrap.style.display = "block";
-            // Re-render tabla para marcar seleccionado
-            renderTablaPaginada(currentList);
-            // Scroll suave al detalle
-            vacDetailsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
-        }
-
-        function closeDetails() {
-            selectedId = null;
-            vacDetailsWrap.style.display = "none";
-            renderTablaPaginada(currentList);
-        }
-
-        btnCloseDetails?.addEventListener("click", closeDetails);
-
         // --- Cargar ---
         async function cargarVacantes() {
             const res = await fetch(`${API}/getAll`, { headers: { "Accept": "application/json" } });
@@ -544,14 +559,13 @@ function getCreatorName(v) {
             currentPage = 1;
             renderTablaPaginada(vacantesCache);
 
-            // Si había un seleccionado, re-abrir detalle con datos frescos
             if (selectedId != null) {
-                const fresh = vacantesCache.find(x => Number(x.idVacantes) === Number(selectedId));
+                const fresh = vacantesCache.find(x => getVacId(x) === Number(selectedId));
                 if (fresh) openDetails(fresh);
             }
         }
 
-        // --- Render tabla (SOLO columnas pedidas) ---
+        // --- Render tabla ---
         function renderVacantes(lista) {
             tbody.innerHTML = "";
 
@@ -561,14 +575,15 @@ function getCreatorName(v) {
             }
 
             lista.forEach(v => {
-                const id = Number(v.idVacantes);
-               const unidadTxt = (v.areaNombre ?? "").toLowerCase();
+                const id = getVacId(v);
+                if (!id || Number.isNaN(id)) return;
+
+                const unidadTxt = (v.areaNombre ?? "");
                 const creadorTxt = getCreatorName(v);
 
                 const tr = document.createElement("tr");
                 tr.setAttribute("data-row", String(id));
 
-                // “seleccionado” visual sin depender de CSS
                 if (selectedId != null && id === Number(selectedId)) {
                     tr.style.outline = "2px solid rgba(122,15,26,.35)";
                     tr.style.background = "rgba(122,15,26,.04)";
@@ -589,20 +604,15 @@ function getCreatorName(v) {
             });
         }
 
-        // --- Filtros: nombre o unidad (por texto) ---
+        // --- Filtros ---
         function filtrar() {
             const q = (searchInput?.value || "").toLowerCase().trim();
-
             let filtradas = vacantesCache;
 
             if (q) {
                 filtradas = vacantesCache.filter(v => {
                     const nombre = (v.nombrePuesto ?? "").toLowerCase();
-                    // 🔧 FIX FRONT: el backend manda areasDgp_idArea
-                    const unidadTxt = v.areasDgp_idArea
-                    ? areaName(v.areasDgp_idArea).toLowerCase()
-                    : "";
-
+                    const unidadTxt = (v.areaNombre ?? "").toLowerCase();
                     return nombre.includes(q) || unidadTxt.includes(q);
                 });
             }
@@ -614,24 +624,24 @@ function getCreatorName(v) {
         btnSearch?.addEventListener("click", filtrar);
         searchInput?.addEventListener("input", filtrar);
 
-        // --- Click en tabla: Ver detalle / Editar / Eliminar ---
+        // --- Click en tabla: detalle / editar / eliminar ---
         tbody.addEventListener("click", async (e) => {
             const editBtn = e.target.closest("[data-edit]");
             const delBtn = e.target.closest("[data-del]");
 
             if (editBtn) {
                 const id = Number(editBtn.getAttribute("data-edit"));
-                editing = vacantesCache.find(x => Number(x.idVacantes) === id);
+                editing = vacantesCache.find(x => getVacId(x) === id);
                 if (!editing) return;
 
                 document.getElementById("nombrePuesto").value = editing.nombrePuesto ?? "";
                 document.getElementById("descripcion").value = editing.descripcion ?? "";
                 document.getElementById("requisitos").value = editing.requisitos ?? "";
                 document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
-                // 🔧 FIX FRONT: IDs según el JSON real del backend
+
                 document.getElementById("AreasDgp_idArea").value = editing.areasDgp_idArea ?? "";
-               document.getElementById("carreras_idCarrera").value = editing.carreras_idCarrera ?? "";
-                document.getElementById("Modalidades_idModalidad").value = editing.modalidades_idModalidad ?? "";
+                document.getElementById("carreras_idCarrera").value = editing.carreras_idCarrera ?? "";
+                document.getElementById("Modalidades_idModalidad").value = editing.Modalidades_idModalidad ?? "";
                 document.getElementById("Horarios_idHorario").value = editing.horarios_idHorario ?? "";
                 document.getElementById("estatus").value = String(editing.estatus ?? true);
 
@@ -659,7 +669,6 @@ function getCreatorName(v) {
                             showError("No se pudo eliminar la vacante.");
                             return;
                         }
-                        // Si borraste la seleccionada, cerramos detalle
                         if (selectedId != null && Number(selectedId) === Number(id)) {
                             closeDetails();
                         }
@@ -670,11 +679,11 @@ function getCreatorName(v) {
                 return;
             }
 
-            // ✅ Si no fue click en botones, abrimos detalle por fila
             const row = e.target.closest("tr[data-row]");
             if (row) {
                 const id = Number(row.getAttribute("data-row"));
-                const v = vacantesCache.find(x => Number(x.idVacantes) === id);
+                selectedId = id;
+                const v = vacantesCache.find(x => getVacId(x) === id);
                 if (v) openDetails(v);
             }
         });
@@ -685,12 +694,13 @@ function getCreatorName(v) {
 
             const timeVal = document.getElementById("fechaPublicacion").value;
             const hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
-            const timeWithOffset = hhmmss ? `${hhmmss}-06:00` : null;
 
-            if (!timeWithOffset) {
+            if (!hhmmss) {
                 showError("Selecciona una hora.");
                 return;
             }
+
+            const usuariosIdUsuarioVal = Number(document.getElementById("usuariosIdUsuario").value || 0);
 
             const payloadCommon = {
                 idVacantes: editing?.idVacantes ?? null,
@@ -699,13 +709,16 @@ function getCreatorName(v) {
                 requisitos: document.getElementById("requisitos").value.trim(),
                 numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
                 estatus: document.getElementById("estatus").value === "true",
-                AreasDgp_idArea: Number(document.getElementById("AreasDgp_idArea").value || 0),
-                Carreras_idCarerra: Number(document.getElementById("carreras_idCarrera").value || 0),
-                Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
-                Horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
-                fechaPublicacion: timeWithOffset,
 
-                // ✅ Para “Creado por” (si tu backend lo acepta/guarda)
+                areasDgp_idArea: Number(document.getElementById("AreasDgp_idArea").value || 0),
+                carreras_idCarrera: Number(document.getElementById("carreras_idCarrera").value || 0),
+                Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
+                horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
+
+                fechaPublicacion: hhmmss,
+
+                usuariosIdUsuario: usuariosIdUsuarioVal > 0 ? usuariosIdUsuarioVal : null,
+
                 creadoPorNombre: currentUser || null
             };
 
@@ -714,8 +727,14 @@ function getCreatorName(v) {
                 return;
             }
 
+            if (!payloadCommon.usuariosIdUsuario && !editing) {
+                showError("No se detectó el ID del usuario actual.");
+                return;
+            }
+
             if (editing) {
-                const res = await fetch(`${API}/update/${editing.idVacantes}`, {
+                const updateId = getVacId(editing);
+                const res = await fetch(`${API}/update/${updateId}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify(payloadCommon)
@@ -730,8 +749,7 @@ function getCreatorName(v) {
                 closeForm();
                 showSuccess("Vacante actualizada correctamente.");
 
-                // ✅ Abrir detalle de la actualizada
-                const fresh = vacantesCache.find(x => Number(x.idVacantes) === Number(editing.idVacantes));
+                const fresh = vacantesCache.find(x => getVacId(x) === Number(updateId));
                 if (fresh) openDetails(fresh);
 
             } else {
@@ -747,14 +765,10 @@ function getCreatorName(v) {
                     return;
                 }
 
-                // ✅ refrescar lista para que se refleje en tabla
                 await cargarVacantes();
                 closeForm();
                 showSuccess("Vacante creada correctamente.");
 
-                // ✅ Si tu API regresa el objeto creado, puedes abrirlo directo.
-                // Si no, abrimos el “más reciente” por heurística (el último del arreglo).
-                // Ajusta si tu backend ordena distinto.
                 const last = vacantesCache[vacantesCache.length - 1];
                 if (last) openDetails(last);
             }
@@ -763,7 +777,6 @@ function getCreatorName(v) {
         // Inicial
         cargarCarrerasSelect();
         cargarVacantes();
-
     });
 </script>
 
