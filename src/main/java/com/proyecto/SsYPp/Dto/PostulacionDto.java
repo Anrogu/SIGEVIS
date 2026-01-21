@@ -22,5 +22,7 @@ public class PostulacionDto implements Serializable {
     String comentarios;
     @NotNull
     Long usuariosIdusuario;
+    @NotNull
     Long estatusIdestatus;
+    Long vacanteidVacante;
 }

@@ -1,13 +1,11 @@
 package com.proyecto.SsYPp.Service.Impl;
 
 import com.proyecto.SsYPp.Dto.PostulacionDto;
-import com.proyecto.SsYPp.Entity.Asignacion;
-import com.proyecto.SsYPp.Entity.Postulacion;
-import com.proyecto.SsYPp.Entity.StatusPostulacion;
-import com.proyecto.SsYPp.Entity.Usuario;
+import com.proyecto.SsYPp.Entity.*;
 import com.proyecto.SsYPp.Repository.PostulacionRepository;
 import com.proyecto.SsYPp.Repository.StatusPostulacionRepository;
 import com.proyecto.SsYPp.Repository.UsuarioRepository;
+import com.proyecto.SsYPp.Repository.VacanteRepository;
 import com.proyecto.SsYPp.Service.PostulacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +22,8 @@ public class PostulacionServiceImpl implements PostulacionService {
     private UsuarioRepository usuarioRepository;
     @Autowired
     private StatusPostulacionRepository statusPostulacionRepository;
+    @Autowired
+    private VacanteRepository vacanteRepository;
 
     @Override
     public PostulacionDto create(PostulacionDto postulacion) {
@@ -67,6 +67,7 @@ public class PostulacionServiceImpl implements PostulacionService {
         postulacionDto.setComentarios(postulacion.getComentarios());
         postulacionDto.setUsuariosIdusuario(postulacion.getUsuariosIdusuario().getId());
         postulacionDto.setEstatusIdestatus(postulacion.getEstatusIdestatus().getId());
+        postulacionDto.setVacanteidVacante(postulacion.getVacanteIdvacante().getId());
         return postulacionDto;
     }
     public Postulacion convertirDTOAEntidad (PostulacionDto postulacionDto) {
@@ -74,12 +75,15 @@ public class PostulacionServiceImpl implements PostulacionService {
                 .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
         StatusPostulacion status = statusPostulacionRepository.findById(Math.toIntExact(postulacionDto.getEstatusIdestatus().shortValue()))
                 .orElseThrow(() -> new RuntimeException("usuario no encontrado"));
+        Vacante vacante= vacanteRepository.findById(postulacionDto.getVacanteidVacante())
+                .orElseThrow(() -> new RuntimeException("vacante no encontrada"));
         Postulacion postulacion = new Postulacion();
         postulacion.setId(postulacionDto.getId());
         postulacion.setComentarios(postulacionDto.getComentarios());
         postulacion.setFechaPostulacion(OffsetTime.now());
         postulacion.setEstatusIdestatus(status);
         postulacion.setUsuariosIdusuario(usuario);
+        postulacion.setVacanteIdvacante(vacante);
         return postulacion;
     }
 }
