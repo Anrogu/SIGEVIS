@@ -121,9 +121,7 @@
                     <div>
                         <label>Unidad / Área solicitante</label>
                         <select id="AreasDgp_idArea">
-                            <option value="1">Archivo</option>
-                            <option value="2">Jurídico</option>
-                            <option value="3">Desarrollo Tecnológico</option>
+                            <option value="">Cargando áreas...</option>
                         </select>
                     </div>
 
@@ -139,18 +137,14 @@
                     <div>
                         <label>Modalidad</label>
                         <select id="Modalidades_idModalidad">
-                            <option value="1">Presencial</option>
-                            <option value="2">Remoto</option>
-                            <option value="3">Híbrido</option>
+                            <option value="">Cargando modalidades...</option>
                         </select>
                     </div>
 
                     <div>
                         <label>Horario</label>
                         <select id="Horarios_idHorario">
-                            <option value="1">Matutino</option>
-                            <option value="2">Vespertino</option>
-                            <option value="3">Tiempo Completo</option>
+                            <option value="">Cargando horarios...</option>
                         </select>
                     </div>
                 </div>
@@ -240,12 +234,17 @@
 
     document.addEventListener("DOMContentLoaded", () => {
         const API = "/admin/vacantes";
-        const API_USER_ME = "/admin/usuarios/me";
 
-        // =================== CARGAR CARRERAS (SELECT) ===================
-        // Ajusta si tu endpoint real es /carreras/getAll (minúsculas)
+        // =================== ENDPOINTS CATÁLOGOS ===================
         const API_CARRERAS = "/Carreras/getAll";
+        const API_AREAS = "/admin/areas/getAll";
+        const API_MODALIDADES = "/admin/modalidades/getAll";
+        const API_HORARIOS = "/admin/horarios/getAll";
+
         const carrerasSelect = document.getElementById("carreras_idCarrera");
+        const areasSelect = document.getElementById("AreasDgp_idArea");
+        const modalidadesSelect = document.getElementById("Modalidades_idModalidad");
+        const horariosSelect = document.getElementById("Horarios_idHorario");
 
         async function cargarCarrerasSelect() {
             if (!carrerasSelect) return;
@@ -276,6 +275,102 @@
             } catch (err) {
                 console.error(err);
                 carrerasSelect.innerHTML = `<option value="">(Error cargando)</option>`;
+            }
+        }
+
+        async function cargarAreasSelect() {
+            if (!areasSelect) return;
+
+            try {
+                const res = await fetch(API_AREAS, {headers: {"Accept": "application/json"}});
+                if (!res.ok) {
+                    console.error("Error áreas:", await res.text());
+                    areasSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
+                    return;
+                }
+
+                const areas = await res.json();
+
+                if (!Array.isArray(areas) || areas.length === 0) {
+                    areasSelect.innerHTML = `<option value="">(Sin áreas)</option>`;
+                    return;
+                }
+
+                areasSelect.innerHTML =
+                    `<option value="">Selecciona un área...</option>` +
+                    areas.map(a => {
+                        const id = a.idArea ?? a.idarea ?? a.id ?? "";
+                        const nom = a.nombre ?? a.descripcion ?? "(Sin nombre)";
+                        return `<option value="${id}">${nom}</option>`;
+                    }).join("");
+
+            } catch (err) {
+                console.error(err);
+                areasSelect.innerHTML = `<option value="">(Error cargando)</option>`;
+            }
+        }
+
+        async function cargarModalidadesSelect() {
+            if (!modalidadesSelect) return;
+
+            try {
+                const res = await fetch(API_MODALIDADES, {headers: {"Accept": "application/json"}});
+                if (!res.ok) {
+                    console.error("Error modalidades:", await res.text());
+                    modalidadesSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
+                    return;
+                }
+
+                const modalidades = await res.json();
+
+                if (!Array.isArray(modalidades) || modalidades.length === 0) {
+                    modalidadesSelect.innerHTML = `<option value="">(Sin modalidades)</option>`;
+                    return;
+                }
+
+                modalidadesSelect.innerHTML =
+                    `<option value="">Selecciona una modalidad...</option>` +
+                    modalidades.map(m => {
+                        const id = m.idModalidad ?? m.idmodalidad ?? m.id ?? "";
+                        const nom = m.nombre ?? m.descripcion ?? "(Sin nombre)";
+                        return `<option value="${id}">${nom}</option>`;
+                    }).join("");
+
+            } catch (err) {
+                console.error(err);
+                modalidadesSelect.innerHTML = `<option value="">(Error cargando)</option>`;
+            }
+        }
+
+        async function cargarHorariosSelect() {
+            if (!horariosSelect) return;
+
+            try {
+                const res = await fetch(API_HORARIOS, {headers: {"Accept": "application/json"}});
+                if (!res.ok) {
+                    console.error("Error horarios:", await res.text());
+                    horariosSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
+                    return;
+                }
+
+                const horarios = await res.json();
+
+                if (!Array.isArray(horarios) || horarios.length === 0) {
+                    horariosSelect.innerHTML = `<option value="">(Sin horarios)</option>`;
+                    return;
+                }
+
+                horariosSelect.innerHTML =
+                    `<option value="">Selecciona un horario...</option>` +
+                    horarios.map(h => {
+                        const id = h.idHorario ?? h.idhorario ?? h.id ?? "";
+                        const nom = h.nombre ?? h.descripcion ?? "(Sin nombre)";
+                        return `<option value="${id}">${nom}</option>`;
+                    }).join("");
+
+            } catch (err) {
+                console.error(err);
+                horariosSelect.innerHTML = `<option value="">(Error cargando)</option>`;
             }
         }
 
@@ -360,7 +455,7 @@
 
         // ================================================================
 
-        // ================== HELPERS ROBUSTOS (ID y CREADOR) ==================
+        // ================== HELPERS ROBUSTOS ==================
         function getVacId(v) {
             return Number(
                 v?.idVacantes ??
@@ -383,7 +478,13 @@
             return String(name).trim() ? String(name).trim() : "—";
         }
 
-        // ====================================================================
+        // IDs robustos para selects al editar / detalle
+        const getAreaId = (v) => Number(v?.areasDgp_idArea ?? v?.AreasDgp_idArea ?? v?.idArea ?? v?.areaId ?? v?.areasId ?? 0);
+        const getCarreraId = (v) => Number(v?.carreras_idCarrera ?? v?.Carreras_idCarrera ?? v?.idCarrera ?? v?.carreraId ?? 0);
+        const getModalidadId = (v) => Number(v?.Modalidades_idModalidad ?? v?.modalidades_idModalidad ?? v?.idModalidad ?? v?.modalidadId ?? 0);
+        const getHorarioId = (v) => Number(v?.horarios_idHorario ?? v?.Horarios_idHorario ?? v?.idHorario ?? v?.horarioId ?? 0);
+
+        // ================================================================
 
         // Referencias UI
         const btnNew = document.getElementById("btnNewVac");
@@ -421,6 +522,7 @@
         const carreraName = (id) => getSelectText("carreras_idCarrera", id);
         const modalidadName = (id) => getSelectText("Modalidades_idModalidad", id);
         const horarioName = (id) => getSelectText("Horarios_idHorario", id);
+        const areaName = (id) => getSelectText("AreasDgp_idArea", id);
 
         function pillEstatus(estatus) {
             return estatus === true
@@ -455,10 +557,13 @@
         function openDetails(v) {
             if (!v) return;
 
-            const unidadTxt = v.areaNombre ?? "—";
-            const carreraTxt = carreraName(v.carreras_idCarrera);
-            const modalidadTxt = modalidadName(v.Modalidades_idModalidad);
-            const horarioTxt = horarioName(v.horarios_idHorario);
+            // Si el backend no manda areaNombre, lo resolvemos con el select:
+            const areaId = getAreaId(v);
+            const unidadTxt = v.areaNombre ?? (areaId ? areaName(areaId) : "—");
+
+            const carreraTxt = carreraName(getCarreraId(v));
+            const modalidadTxt = modalidadName(getModalidadId(v));
+            const horarioTxt = horarioName(getHorarioId(v));
             const creadorTxt = getCreatorName(v);
             const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
             const horaPub = fmtHora(v.fechaPublicacion);
@@ -601,7 +706,10 @@
                 const id = getVacId(v);
                 if (!id || Number.isNaN(id)) return;
 
-                const unidadTxt = (v.areaNombre ?? "");
+                // Si el backend no manda areaNombre, lo resolvemos con el select:
+                const areaId = getAreaId(v);
+                const unidadTxt = (v.areaNombre ?? (areaId ? areaName(areaId) : ""));
+
                 const creadorTxt = getCreatorName(v);
 
                 const tr = document.createElement("tr");
@@ -635,7 +743,7 @@
             if (q) {
                 filtradas = vacantesCache.filter(v => {
                     const nombre = (v.nombrePuesto ?? "").toLowerCase();
-                    const unidadTxt = (v.areaNombre ?? "").toLowerCase();
+                    const unidadTxt = (v.areaNombre ?? (getAreaId(v) ? areaName(getAreaId(v)) : "")).toLowerCase();
                     return nombre.includes(q) || unidadTxt.includes(q);
                 });
             }
@@ -662,10 +770,10 @@
                 document.getElementById("requisitos").value = editing.requisitos ?? "";
                 document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
 
-                document.getElementById("AreasDgp_idArea").value = editing.areasDgp_idArea ?? "";
-                document.getElementById("carreras_idCarrera").value = editing.carreras_idCarrera ?? "";
-                document.getElementById("Modalidades_idModalidad").value = editing.Modalidades_idModalidad ?? "";
-                document.getElementById("Horarios_idHorario").value = editing.horarios_idHorario ?? "";
+                document.getElementById("AreasDgp_idArea").value = String(getAreaId(editing) || "");
+                document.getElementById("carreras_idCarrera").value = String(getCarreraId(editing) || "");
+                document.getElementById("Modalidades_idModalidad").value = String(getModalidadId(editing) || "");
+                document.getElementById("Horarios_idHorario").value = String(getHorarioId(editing) || "");
                 document.getElementById("estatus").value = String(editing.estatus ?? true);
 
                 const hhmmss = fmtHora(editing.fechaPublicacion);
@@ -726,7 +834,8 @@
             const usuariosIdUsuarioVal = Number(document.getElementById("usuariosIdUsuario").value || 0);
 
             const payloadCommon = {
-                idVacantes: editing?.idVacantes ?? null,
+                idVacantes: editing ? getVacId(editing) : null,
+
                 nombrePuesto: document.getElementById("nombrePuesto").value.trim(),
                 descripcion: document.getElementById("descripcion").value.trim(),
                 requisitos: document.getElementById("requisitos").value.trim(),
@@ -750,6 +859,11 @@
 
             if (!payloadCommon.usuariosIdUsuario && !editing) {
                 showError("No se detectó el ID del usuario actual.");
+                return;
+            }
+
+            if (!payloadCommon.areasDgp_idArea || !payloadCommon.carreras_idCarrera || !payloadCommon.Modalidades_idModalidad || !payloadCommon.horarios_idHorario) {
+                showError("Selecciona Área, Carrera, Modalidad y Horario.");
                 return;
             }
 
@@ -795,8 +909,11 @@
             }
         });
 
-        // Inicial
+        // Inicial (catálogos primero, luego vacantes)
+        cargarAreasSelect();
         cargarCarrerasSelect();
+        cargarModalidadesSelect();
+        cargarHorariosSelect();
         cargarVacantes();
     });
 </script>

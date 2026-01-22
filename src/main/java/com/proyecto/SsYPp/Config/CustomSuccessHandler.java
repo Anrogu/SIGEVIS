@@ -27,7 +27,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
         String redirectURL = switch (role) {
             case "ADMIN" -> "/admin/index";
             case "USUARIO" -> "/usuario/usuarios";
-            case "COORDINADOR" -> "/vacantes";
+            case "COORDINADOR" -> "/coordinador/index";
             default       -> "/login?error=true";
         };
 

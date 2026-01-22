@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Administrador | Noticias</title>
+    <title>Coordinador | Noticias</title>
     <link rel="stylesheet" href="/css_admin/styles.css" />
     <link rel="stylesheet" href="/css_admin/index.css" />
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -14,7 +14,7 @@
 
     <header class="topbar">
         <div class="topbar__left">
-            <span class="topbar__title">ADMINISTRADOR</span>
+            <span class="topbar__title">COORDINADOR</span>
         </div>
 
         <div class="topbar__right">
@@ -26,11 +26,14 @@
 
     <nav class="tabs">
         <div class="tabs__left">
-            <a class="tab tab--active" th:href="@{/admin/index}">NOTICIAS</a>
-            <a class="tab" th:href="@{/admin/vacantes}">VACANTES</a>
-            <a class="tab" th:href="@{/admin/asignaciones}">ASIGNACIONES</a>
-            <a class="tab" th:href="@{/admin/actividades}">ACTIVIDADES Y EVIDENCIAS</a>
-            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS Y ROLES</a>
+            <a class="tab tab--active" th:href="@{/coordinador/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/coordinador/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/coordinador/postulaciones}">POSTULACIONES</a>
+            <!-- ✅ FIX typo: asiganciones -> asignaciones -->
+            <a class="tab" th:href="@{/coordinador/asignaciones}">ASIGNACIONES</a>
+            <a class="tab" th:href="@{/coordinador/actividades}">ASIGNAR ACTIVIDAD</a>
+            <!-- ✅ FIX typo: coordnador -> coordinador -->
+            <a class="tab" th:href="@{/coordinador/asistencias}">ASISTENCIA</a>
         </div>
 
         <div class="tabs__right">

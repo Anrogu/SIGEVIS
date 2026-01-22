@@ -144,6 +144,16 @@ public class UsuarioImpl implements UsuarioService {
 
         return nuevoStatus;
     }
+    @Override
+    public Integer getIdUsuarioByEmail(String email) {
+        Usuario usuario = usuarioRepository.findByEmail(email);
+        if (usuario == null) {
+            throw new RuntimeException("Usuario no encontrado con email: " + email);
+        }
+        // tu entidad Usuario tiene getId() (Long)
+        return usuario.getId().intValue();
+    }
+
 
     // --- MÉTODOS AUXILIARES ---
 

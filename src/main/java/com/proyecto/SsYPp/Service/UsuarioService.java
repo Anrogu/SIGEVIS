@@ -19,4 +19,6 @@ public interface UsuarioService {
 
     // ✅ NUEVO: activar/desactivar
     boolean toggleStatus(Integer id);
+    // ✅ NUEVO: obtener id por email (para autor de noticias)
+    Integer getIdUsuarioByEmail(String email);
 }

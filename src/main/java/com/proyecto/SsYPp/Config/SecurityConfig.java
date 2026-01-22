@@ -42,9 +42,7 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // =========================
-                        // 1) RUTAS PÚBLICAS (SIN LOGIN)
-                        // =========================
+                        // públicas
                         .requestMatchers(
                                 "/",
                                 "/public/**",
@@ -54,23 +52,22 @@ public class SecurityConfig {
                                 "/register",
                                 "/public",
                                 "/gob/auth/**",
-
-                                // ✅ APIs públicas para el perfil sin login
                                 "/noticias/publicadas",
                                 "/noticias/*"
                         ).permitAll()
 
-                        // =========================
-                        // 2) REGLAS POR ROL (TU SISTEMA PRIVADO)
-                        // =========================
-                        .requestMatchers("/usuarios", "/usuarios.html").hasAuthority("ADMIN")
-                        .requestMatchers("/index", "/index.html").hasAnyAuthority("COORDINADOR", "ADMIN")
-                        .requestMatchers("/vacantes", "/vacantes.html").hasAnyAuthority("COORDINADOR","USUARIO", "ADMIN")
+                        // ADMIN
+                        .requestMatchers("/admin/**").hasAuthority("ADMIN")
 
+                        // COORDINADOR
+                        .requestMatchers("/coordinador/**").hasAuthority("COORDINADOR")
 
-                        // 3. Cualquier otra ruta requiere estar autenticado
+                        // USUARIO (si tienes prefijo para usuario)
+                        .requestMatchers("/usuario/**").hasAuthority("USUARIO")
+
                         .anyRequest().authenticated()
                 )
+
                 //---------------------------------------------------------------
                 .authenticationProvider(authenticationProvider())
 

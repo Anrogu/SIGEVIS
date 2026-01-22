@@ -15,17 +15,23 @@ import java.time.OffsetTime;
 @NoArgsConstructor
 public class NoticiaDto implements Serializable {
     Long id;
+
     @NotNull
     @Size(max = 255)
     String titulo;
+
     @NotNull
     String contenido;
+
     @NotNull
     @Size(max = 50)
     String estatus;
+
     @NotNull
     OffsetTime fechaPublicacion;
-    @NotNull
+
+    // ✅ ahora lo asigna el backend
     Integer autoridIdusuario;
+
     String nombreAutor;
 }
