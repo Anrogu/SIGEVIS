@@ -9,9 +9,12 @@ import java.util.List;
 @Repository
 public interface VacanteRepository extends JpaRepository<Vacante, Long> {
 
-    // ✅ Listar vacantes por área (para coordinador)
     List<Vacante> findByAreasdgpIdarea_Id(Long areaId);
 
-    // ✅ Validar rápido si una vacante pertenece a un área (para update/delete)
     boolean existsByIdAndAreasdgpIdarea_Id(Long idVacante, Long areaId);
+
+    // ✅ PRESTADOR
+    List<Vacante> findByCarrerasIdcarrera_Id(Long carreraId);
+
+    List<Vacante> findByCarrerasIdcarrera_IdAndAreasdgpIdarea_Id(Long carreraId, Long areaId);
 }

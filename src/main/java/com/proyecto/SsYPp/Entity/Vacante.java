@@ -45,23 +45,25 @@ public class Vacante {
     @Column(name = "requisitos")
     private String requisitos;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "\"AreasDgp_idArea\"")
     private AreaDgp areasdgpIdarea;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "\"Horarios_idHorario\"")
     private Horario horariosIdhorario;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "\"Modalidades_idModalidad\"")
     private Modalidad modalidadesIdmodalidad;
 
-    @ManyToOne(optional = false)
+    // NOMBRE JAVA CORRECTO (sin typo)
+    // NOMBRE DE COLUMNA BD SE QUEDA TAL CUAL (con typo: idCarerra)
+    @ManyToOne
     @JoinColumn(name = "\"Carreras_idCarerra\"")
-    private Carrera carrerasIdcarerra;
+    private Carrera carrerasIdcarrera;
 
-    @ManyToOne(optional = false)
+    @ManyToOne
     @JoinColumn(name = "\"Usuarios_idUsuario\"")
     private Usuario creadoPor;
 }

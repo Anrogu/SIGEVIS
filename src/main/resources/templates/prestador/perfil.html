@@ -1,24 +1,356 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Perfil del Prestador</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prestador | Vacantes por perfil</title>
+
+    <!-- Reusa tus estilos -->
+    <link rel="stylesheet" href="/css_admin/styles.css" />
+    <link rel="stylesheet" href="/css_admin/convenios.css" />
+    <link rel="stylesheet" href="/css_admin/index.css" />
 </head>
+
 <body>
-<h1>Mi Perfil</h1>
+<div class="app">
 
-<div>
-    <p><b>Nombre:</b>
-        <span th:text="${usuario.nombres} + ' ' + ${usuario.primerApellido} + ' ' + ${usuario.segundoApellido}"></span>
-    </p>
+    <!-- HEADER (mismo estilo público, pero con sesión iniciada) -->
+    <header class="public-header">
 
-    <p><b>Correo:</b> <span th:text="${usuario.correo}"></span></p>
+        <div class="public-header__row1">
+            <div></div>
 
-    <p><b>Carrera:</b>
-        <span th:text="${usuario.carrera != null ? usuario.carrera.nombre : 'Sin carrera registrada'}"></span>
-    </p>
+            <div class="public-header__title">PLATAFORMA SERVICIO SOCIAL</div>
+
+            <div class="public-header__logos">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
+            </div>
+        </div>
+
+        <div class="public-header__row2">
+            <nav class="public-nav">
+                <a class="public-nav__link public-nav__link--active" href="/usuario/perfil">Mi Perfil</a>
+                <a class="public-nav__link" href="/usuario/postulaciones">Mis Postulaciones</a>
+            </nav>
+
+            <div class="public-actions" style="display:flex; gap:10px; align-items:center;">
+                <span style="color:#111827; font-weight:600;"
+                      th:text="'Hola, ' + ${usuario.nombre}">Hola</span>
+                <a class="btn btn--outline" th:href="@{/logout}" style="text-decoration:none;">Cerrar sesión</a>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- TOOLBAR -->
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="searchVac" class="search__input" type="text"
+                   placeholder="Buscar por título o unidad..." />
+        </div>
+        <button class="btn btn--primary" type="button" id="btnSearchVac">Buscar</button>
+    </section>
+
+    <!-- CONTENIDO -->
+    <section class="content-grid" id="vacLayout">
+
+        <!-- LISTA -->
+        <main class="panel panel--left">
+            <div class="panel__header">
+                <div>
+                    <h2 class="panel__title">VACANTES PARA TU PERFIL</h2>
+                    <p style="margin:6px 0 0; color:#6b7280; font-size:.95rem;">
+                        Carrera:
+                        <strong th:text="${usuario.carrerasIdcarrera != null ? usuario.carrerasIdcarrera.nombre : 'No asignada'}">—</strong>
+                        <span style="margin:0 6px;">·</span>
+                        Área:
+                        <strong th:text="${usuario.area != null ? usuario.area.nombre : 'No asignada'}">—</strong>
+                    </p>
+                </div>
+
+                <div class="panel__actions"></div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Unidad</th>
+                        <th>No. Vacantes</th>
+                        <th>Estado</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <!-- ✅ La tabla se llena con Thymeleaf (vacantes filtradas ya vienen del controller) -->
+                    <tbody id="vacantesBody">
+                    <tr th:if="${#lists.isEmpty(vacantes)}">
+                        <td colspan="5" style="text-align:center; padding:20px;">
+                            No hay vacantes disponibles para tu perfil por el momento.
+                        </td>
+                    </tr>
+
+                    <tr th:each="v : ${vacantes}"
+                        th:attr="data-row=${v.id}">
+                        <td th:text="${v.nombrePuesto}">Título</td>
+                        <td th:text="${v.areasdgpIdarea != null ? v.areasdgpIdarea.nombre : '—'}">Unidad</td>
+                        <td th:text="${v.numeroPlazas}">0</td>
+                        <td>
+                            <span th:if="${v.estatus == true}" class="pill pill--vigente">Publicado</span>
+                            <span th:if="${v.estatus != true}" class="pill pill--cancelado">No publicado</span>
+                        </td>
+                        <td class="actions">
+                            <button class="btn btn--mini btn--outline" type="button"
+                                    th:attr="data-view=${v.id}">
+                                Ver
+                            </button>
+
+                            <!-- ✅ Botón de postulación (ruta sugerida) -->
+                            <a class="btn btn--mini btn--primary"
+                               style="text-decoration:none;"
+                               th:href="@{/usuario/postular/{idVacante}(idVacante=${v.id})}">
+                                Postularme
+                            </a>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- DETALLE -->
+            <div id="vacDetailsWrap" style="display:none; margin-top:14px;">
+                <div class="panel" style="border:1px solid var(--border, #ddd); background:#fff;">
+                    <div class="panel__header panel__header--compact" style="display:flex; align-items:center; justify-content:space-between;">
+                        <h3 class="panel__subtitle" style="margin:0;">DETALLE DE VACANTE</h3>
+                        <button type="button" id="btnCloseDetails" class="btn btn--outline btn--mini">Cerrar</button>
+                    </div>
+
+                    <div id="vacDetails" style="padding:14px;">
+                        <!-- JS llena aquí -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- DERECHA -->
+        <aside class="panel panel--right">
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">¿CÓMO POSTULARME?</h3>
+            </div>
+
+            <div style="padding:14px; color:#111827;">
+                <ol style="margin:0; padding-left:18px;">
+                    <li>Selecciona una vacante y da clic en <strong>POSTULARME</strong>.</li>
+                    <li>Tu postulación quedará registrada en el sistema.</li>
+                    <li>Puedes revisar el seguimiento en <strong>Mis Postulaciones</strong>.</li>
+                </ol>
+
+                <hr style="margin:14px 0; border:none; border-top:1px solid #e5e7eb;" />
+
+                <p style="margin:0; color:#6b7280; font-size:.95rem;">
+                    Solo se muestran vacantes compatibles con tu carrera (y área, si aplica).
+                </p>
+            </div>
+        </aside>
+
+    </section>
 </div>
 
-<a href="/vacantes">Ver vacantes</a>
+<!-- ======================================================
+     MODAL GOV (reusa index.css)
+====================================================== -->
+<div id="gobModal" class="gob-modal gob-modal--danger" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card" role="dialog" aria-modal="true" aria-labelledby="gobModalTitle">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">!</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Título</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle">Subtítulo</p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body">Contenido</div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cancelar</button>
+            <button id="gobModalOk" type="button" class="btn btn--primary">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+
+        // ====== MODAL ======
+        const gobModal = document.getElementById("gobModal");
+        const gobModalTitle = document.getElementById("gobModalTitle");
+        const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+        const gobModalBody = document.getElementById("gobModalBody");
+        const gobModalOk = document.getElementById("gobModalOk");
+        const gobModalCancel = document.getElementById("gobModalCancel");
+        let modalOnOk = null;
+
+        function openGobModal({type="info", title="Aviso", subtitle="", body="", okText="Aceptar", cancelText="Cancelar", onOk=null, hideCancel=false}) {
+            gobModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
+            gobModal.classList.add(`gob-modal--${type}`);
+
+            gobModalTitle.textContent = title;
+            gobModalSubtitle.textContent = subtitle;
+            gobModalBody.textContent = body;
+
+            gobModalOk.textContent = okText;
+            gobModalCancel.textContent = cancelText;
+            gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+
+            modalOnOk = onOk;
+            gobModal.style.display = "flex";
+        }
+
+        function closeGobModal() {
+            gobModal.style.display = "none";
+            modalOnOk = null;
+        }
+
+        gobModal.addEventListener("click", (e) => {
+            const close = e.target.closest("[data-close='1']");
+            if (close) closeGobModal();
+        });
+        gobModalCancel.addEventListener("click", closeGobModal);
+        gobModalOk.addEventListener("click", async () => {
+            if (typeof modalOnOk === "function") await modalOnOk();
+            closeGobModal();
+        });
+
+        function showInfo(message) {
+            openGobModal({
+                type: "info",
+                title: "Aviso",
+                subtitle: "",
+                body: message,
+                okText: "Entendido",
+                hideCancel: true
+            });
+        }
+
+        // ====== UI refs ======
+        const tbody = document.getElementById("vacantesBody");
+        const searchInput = document.getElementById("searchVac");
+        const btnSearch = document.getElementById("btnSearchVac");
+
+        const vacDetailsWrap = document.getElementById("vacDetailsWrap");
+        const vacDetails = document.getElementById("vacDetails");
+        const btnCloseDetails = document.getElementById("btnCloseDetails");
+
+        // ====== Cache desde la tabla renderizada por Thymeleaf ======
+        // Construimos un cache a partir de atributos data-... para el detalle.
+        // Si quieres más campos en el detalle, agrega data-* en la fila (tr) desde Thymeleaf.
+        let vacantesCache = [];
+
+        function pillEstatus(estatus) {
+            return estatus === true
+                ? `<span class="pill pill--vigente">Publicado</span>`
+                : `<span class="pill pill--cancelado">No publicado</span>`;
+        }
+
+        function buildCacheFromDOM() {
+            vacantesCache = [];
+            const rows = tbody.querySelectorAll("tr[data-row]");
+            rows.forEach(r => {
+                const id = Number(r.getAttribute("data-row"));
+                const cols = r.querySelectorAll("td");
+                if (!cols || cols.length < 4) return;
+
+                vacantesCache.push({
+                    id,
+                    titulo: cols[0]?.innerText?.trim() || "",
+                    unidad: cols[1]?.innerText?.trim() || "—",
+                    plazas: cols[2]?.innerText?.trim() || "",
+                    estadoTxt: cols[3]?.innerText?.trim() || "",
+                });
+            });
+        }
+
+        // ====== Detalle ======
+        let selectedId = null;
+
+        function openDetails(v) {
+            if (!v) return;
+            selectedId = Number(v.id);
+
+            vacDetails.innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div><strong>Título:</strong><br>${v.titulo}</div>
+                    <div><strong>Unidad:</strong><br>${v.unidad}</div>
+                    <div><strong>No. Vacantes:</strong><br>${v.plazas}</div>
+                    <div><strong>Estado:</strong><br>${v.estadoTxt || "—"}</div>
+                </div>
+            `;
+
+            vacDetailsWrap.style.display = "block";
+            vacDetailsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function closeDetails() {
+            selectedId = null;
+            vacDetailsWrap.style.display = "none";
+        }
+
+        btnCloseDetails?.addEventListener("click", closeDetails);
+
+        // ====== Buscar (filtra filas existentes) ======
+        function filtrar() {
+            const q = (searchInput?.value || "").toLowerCase().trim();
+            const rows = tbody.querySelectorAll("tr[data-row]");
+
+            rows.forEach(row => {
+                const tds = row.querySelectorAll("td");
+                const titulo = (tds[0]?.innerText || "").toLowerCase();
+                const unidad = (tds[1]?.innerText || "").toLowerCase();
+
+                const match = !q || titulo.includes(q) || unidad.includes(q);
+                row.style.display = match ? "" : "none";
+            });
+
+            // Si hay detalle abierto y el registro quedó oculto, lo cerramos
+            if (selectedId != null) {
+                const selRow = tbody.querySelector(`tr[data-row='${selectedId}']`);
+                if (selRow && selRow.style.display === "none") closeDetails();
+            }
+        }
+
+        btnSearch?.addEventListener("click", filtrar);
+        searchInput?.addEventListener("input", filtrar);
+
+        // ====== Click Ver ======
+        tbody.addEventListener("click", (e) => {
+            const viewBtn = e.target.closest("[data-view]");
+            const row = e.target.closest("tr[data-row]");
+
+            if (viewBtn) {
+                const id = Number(viewBtn.getAttribute("data-view"));
+                const v = vacantesCache.find(x => Number(x.id) === id);
+                if (v) openDetails(v);
+                else showInfo("No se pudo cargar el detalle de la vacante.");
+                return;
+            }
+
+            // Click en fila = abre detalle
+            if (row) {
+                const id = Number(row.getAttribute("data-row"));
+                const v = vacantesCache.find(x => Number(x.id) === id);
+                if (v) openDetails(v);
+            }
+        });
+
+        // init
+        buildCacheFromDOM();
+    });
+</script>
+
 </body>
 </html>

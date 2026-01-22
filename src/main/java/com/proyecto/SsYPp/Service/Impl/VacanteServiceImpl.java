@@ -75,7 +75,7 @@ public class VacanteServiceImpl implements VacanteService {
         existente.setAreasdgpIdarea(area);
         existente.setModalidadesIdmodalidad(modalidad);
         existente.setHorariosIdhorario(horario);
-        existente.setCarrerasIdcarerra(carrera);
+        existente.setCarrerasIdcarrera(carrera);
 
         Vacante guardada = vacanteRepository.save(existente);
         return convertirEntidadADTO(guardada);
@@ -116,8 +116,8 @@ public class VacanteServiceImpl implements VacanteService {
         }
 
         // ✅ Carrera (puede ser null)
-        if (v.getCarrerasIdcarerra() != null) {
-            dto.setCarrerasIdCarrera((long) v.getCarrerasIdcarerra().getId());
+        if (v.getCarrerasIdcarrera() != null) {
+            dto.setCarrerasIdCarrera((long) v.getCarrerasIdcarrera().getId());
         } else {
             dto.setCarrerasIdCarrera(null);
         }
@@ -166,7 +166,7 @@ public class VacanteServiceImpl implements VacanteService {
         v.setAreasdgpIdarea(area);
         v.setModalidadesIdmodalidad(modalidad);
         v.setHorariosIdhorario(horario);
-        v.setCarrerasIdcarerra(carrera);
+        v.setCarrerasIdcarrera(carrera);
         v.setCreadoPor(usuario);
 
         return v;
