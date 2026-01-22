@@ -1,10 +1,857 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Coordinador | Vacantes</title>
+    <link rel="stylesheet" href="/css_admin/styles.css"/>
+    <link rel="stylesheet" href="/css_admin/index.css"/> <!-- ✅ Modal GOV -->
+    <link rel="stylesheet" href="/css_admin/convenios.css"/>
 </head>
+
 <body>
+<div class="app">
+
+    <!-- ✅ Usuario actual (para “creado por” informativo) -->
+    <input type="hidden" id="currentUser"
+           th:value="${#authentication != null ? #authentication.name : ''}"/>
+
+    <input type="hidden" id="usuariosIdUsuario" th:value="${currentUserId != null ? currentUserId : ''}"/>
+
+    <!-- ✅ Área del coordinador (se llena por /coordinador/vacantes/mi-area) -->
+    <input type="hidden" id="coorAreaId" value=""/>
+    <input type="hidden" id="coorAreaName" value=""/>
+
+    <header class="topbar">
+        <div class="topbar__left">
+            <span class="topbar__title">COORDINADOR DE ÁREA</span>
+        </div>
+
+        <div class="topbar__right">
+            <div class="logos">
+                <img src="/img/EscudosGEM.png" alt="EscudosGEM" class="logo-img">
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <div class="tabs__left">
+            <!-- ✅ Ajusta las rutas si tu coordinador tiene otras -->
+            <a class="tab" th:href="@{/coordinador/index}">NOTICIAS</a>
+            <a class="tab tab--active" th:href="@{/coordinador/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/coordinador/postulaciones}">POSTULACIONES</a>
+            <a class="tab" th:href="@{/coordinador/asignaciones}">ASIGNACIONES</a>
+            <a class="tab" th:href="@{/coordinador/actividades}">ASIGNAR ACTIVIDAD</a>
+            <a class="tab" th:href="@{/coordinador/asistencias}">ASISTENCIA</a>
+        </div>
+        <div class="tabs__right">
+            <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESIÓN</button>
+        </div>
+    </nav>
+
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="searchVac" class="search__input" type="text"
+                   placeholder="Buscar por nombre de vacante..."/>
+        </div>
+        <button class="btn btn--primary" type="button" id="btnSearchVac">Buscar</button>
+    </section>
+
+    <section class="content-grid" id="vacLayout">
+
+        <main class="panel panel--left">
+            <div class="panel__header">
+                <h2 class="panel__title">VACANTES</h2>
+
+                <div class="panel__actions">
+                    <button class="btn btn--primary" type="button" id="btnNewVac">
+                        Nueva vacante
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Unidad</th>
+                        <th>No. Vacantes</th>
+                        <th>Creado por</th>
+                        <th>Estado</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="vacantesBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+
+            <!-- ✅ DETALLE -->
+            <div id="vacDetailsWrap" style="display:none; margin-top:14px;">
+                <div class="panel" style="border:1px solid var(--border, #ddd); background:#fff;">
+                    <div class="panel__header panel__header--compact"
+                         style="display:flex; align-items:center; justify-content:space-between;">
+                        <h3 class="panel__subtitle" style="margin:0;">DETALLE DE VACANTE</h3>
+                        <button type="button" id="btnCloseDetails" class="btn btn--outline btn--mini">Cerrar</button>
+                    </div>
+
+                    <div id="vacDetails" style="padding:14px;">
+                        <!-- JS llena aquí -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <aside id="vacFormPanel" class="panel panel--right">
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">VACANTES</h3>
+            </div>
+
+            <form class="form" id="vacForm">
+
+                <div class="form-row">
+                    <label>Título de la Vacante</label>
+                    <input id="nombrePuesto" type="text" placeholder="Ej. Auxiliar Administrativo..."/>
+                </div>
+
+                <div class="form-row">
+                    <label>Descripción</label>
+                    <textarea id="descripcion" rows="3" placeholder="Describe brevemente la vacante..."></textarea>
+                </div>
+
+                <!-- ✅ Área fija del coordinador (NO editable) -->
+                <div class="form-row">
+                    <label>Unidad / Área solicitante</label>
+                    <input id="areaTxt" type="text" readonly placeholder="Cargando tu área..."/>
+                    <small style="display:block; margin-top:6px; opacity:.8;">
+                        Este campo se asigna automáticamente a tu área.
+                    </small>
+                </div>
+
+                <div class="form-row">
+                    <label>Carrera / Estudiante que curse</label>
+                    <select id="carreras_idCarrera">
+                        <option value="">Cargando carreras...</option>
+                    </select>
+                </div>
+
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Modalidad</label>
+                        <select id="Modalidades_idModalidad">
+                            <option value="">Cargando modalidades...</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label>Horario</label>
+                        <select id="Horarios_idHorario">
+                            <option value="">Cargando horarios...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <label>Requisitos</label>
+                    <textarea id="requisitos" rows="3"
+                              placeholder="Ej. Ser alumno regular, promedio mínimo..."></textarea>
+                </div>
+
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Número de Vacantes</label>
+                        <input id="numeroPlazas" class="input--small" type="number" min="1" placeholder="5"/>
+                    </div>
+
+                    <div>
+                        <label>Programar Publicación</label>
+                        <input id="fechaPublicacion" class="input--small" type="time" step="1"/>
+                    </div>
+                </div>
+
+                <div class="form-row form-row--2">
+                    <div>
+                        <label>Estatus</label>
+                        <select id="estatus">
+                            <option value="true">Publicado</option>
+                            <option value="false">No publicado</option>
+                        </select>
+                    </div>
+                    <div></div>
+                </div>
+
+                <div class="form-actions form-actions--center">
+                    <button type="submit" class="btn btn--primary">Guardar</button>
+                    <button type="button" class="btn btn--wine" id="btnCancelVac">Cancelar</button>
+                </div>
+            </form>
+        </aside>
+
+    </section>
+</div>
+
+<!-- ======================================================
+     MODAL GOV
+====================================================== -->
+<div id="gobModal" class="gob-modal gob-modal--danger" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card" role="dialog" aria-modal="true" aria-labelledby="gobModalTitle">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">!</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Título</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle">Subtítulo</p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body">
+            Contenido
+        </div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cancelar</button>
+            <button id="gobModalOk" type="button" class="btn btn--primary">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const btnLogout = document.getElementById("btnLogout");
+
+    btnLogout?.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/logout", { method: "POST", credentials: "same-origin" });
+            if (res.ok || res.status === 302) window.location.href = "/login?logout";
+        } catch (err) {
+            console.error(err);
+        }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+        // ✅ ENDPOINTS COORDINADOR
+        const API = "/coordinador/vacantes";
+
+        // Catálogos (ajusta si tus rutas reales son otras)
+        const API_CARRERAS = "/Carreras/getAll";
+        const API_MODALIDADES = "/coordinador/modalidades/getAll";
+        const API_HORARIOS = "/coordinador/horarios/getAll";
+
+
+        const carrerasSelect = document.getElementById("carreras_idCarrera");
+        const modalidadesSelect = document.getElementById("Modalidades_idModalidad");
+        const horariosSelect = document.getElementById("Horarios_idHorario");
+
+        const areaTxt = document.getElementById("areaTxt");
+        const coorAreaId = document.getElementById("coorAreaId");
+        const coorAreaName = document.getElementById("coorAreaName");
+
+        async function cargarCarrerasSelect() {
+            if (!carrerasSelect) return;
+            try {
+                const res = await fetch(API_CARRERAS, { headers: {"Accept": "application/json"} });
+                if (!res.ok) {
+                    console.error("Error carreras:", await res.text());
+                    carrerasSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
+                    return;
+                }
+                const carreras = await res.json();
+                if (!Array.isArray(carreras) || carreras.length === 0) {
+                    carrerasSelect.innerHTML = `<option value="">(Sin carreras)</option>`;
+                    return;
+                }
+                carrerasSelect.innerHTML =
+                    `<option value="">Selecciona una carrera...</option>` +
+                    carreras.map(c => {
+                        const id = c.idCarrera ?? c.idcarrera ?? c.id ?? "";
+                        const nom = c.nombre ?? c.descripcion ?? "(Sin nombre)";
+                        return `<option value="${id}">${nom}</option>`;
+                    }).join("");
+            } catch (err) {
+                console.error(err);
+                carrerasSelect.innerHTML = `<option value="">(Error cargando)</option>`;
+            }
+        }
+
+        async function cargarModalidadesSelect() {
+            if (!modalidadesSelect) return;
+            try {
+                const res = await fetch(API_MODALIDADES, { headers: {"Accept": "application/json"} });
+                if (!res.ok) {
+                    console.error("Error modalidades:", await res.text());
+                    modalidadesSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
+                    return;
+                }
+                const modalidades = await res.json();
+                if (!Array.isArray(modalidades) || modalidades.length === 0) {
+                    modalidadesSelect.innerHTML = `<option value="">(Sin modalidades)</option>`;
+                    return;
+                }
+                modalidadesSelect.innerHTML =
+                    `<option value="">Selecciona una modalidad...</option>` +
+                    modalidades.map(m => {
+                        const id = m.idModalidad ?? m.idmodalidad ?? m.id ?? "";
+                        const nom = m.nombre ?? m.descripcion ?? "(Sin nombre)";
+                        return `<option value="${id}">${nom}</option>`;
+                    }).join("");
+            } catch (err) {
+                console.error(err);
+                modalidadesSelect.innerHTML = `<option value="">(Error cargando)</option>`;
+            }
+        }
+
+        async function cargarHorariosSelect() {
+            if (!horariosSelect) return;
+            try {
+                const res = await fetch(API_HORARIOS, { headers: {"Accept": "application/json"} });
+                if (!res.ok) {
+                    console.error("Error horarios:", await res.text());
+                    horariosSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
+                    return;
+                }
+                const horarios = await res.json();
+                if (!Array.isArray(horarios) || horarios.length === 0) {
+                    horariosSelect.innerHTML = `<option value="">(Sin horarios)</option>`;
+                    return;
+                }
+                horariosSelect.innerHTML =
+                    `<option value="">Selecciona un horario...</option>` +
+                    horarios.map(h => {
+                        const id = h.idHorario ?? h.idhorario ?? h.id ?? "";
+                        const nom = h.nombre ?? h.descripcion ?? "(Sin nombre)";
+                        return `<option value="${id}">${nom}</option>`;
+                    }).join("");
+            } catch (err) {
+                console.error(err);
+                horariosSelect.innerHTML = `<option value="">(Error cargando)</option>`;
+            }
+        }
+
+        // ✅ Cargar MI ÁREA (del backend coordinador)
+        async function cargarMiArea() {
+            try {
+                const res = await fetch(`${API}/mi-area`, { headers: {"Accept": "application/json"} });
+                if (!res.ok) {
+                    console.error("Error mi-area:", await res.text());
+                    areaTxt.value = "(No se pudo cargar tu área)";
+                    return;
+                }
+                const area = await res.json(); // {idArea, nombre}
+                coorAreaId.value = String(area?.idArea ?? "");
+                coorAreaName.value = String(area?.nombre ?? "");
+                areaTxt.value = coorAreaName.value || "(Sin área asignada)";
+            } catch (err) {
+                console.error(err);
+                areaTxt.value = "(Error cargando tu área)";
+            }
+        }
+
+        // ================================================================
+        const currentUser = (document.getElementById("currentUser")?.value || "").trim();
+
+        // ================= MODAL =================
+        const gobModal = document.getElementById("gobModal");
+        const gobModalTitle = document.getElementById("gobModalTitle");
+        const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+        const gobModalBody = document.getElementById("gobModalBody");
+        const gobModalOk = document.getElementById("gobModalOk");
+        const gobModalCancel = document.getElementById("gobModalCancel");
+        let modalOnOk = null;
+
+        function openGobModal({
+            type = "info",
+            title = "Aviso",
+            subtitle = "",
+            body = "",
+            okText = "Aceptar",
+            cancelText = "Cancelar",
+            onOk = null,
+            hideCancel = false
+        }) {
+            gobModal.classList.remove("gob-modal--info", "gob-modal--success", "gob-modal--warning", "gob-modal--danger");
+            gobModal.classList.add(`gob-modal--${type}`);
+
+            gobModalTitle.textContent = title;
+            gobModalSubtitle.textContent = subtitle;
+            gobModalBody.textContent = body;
+
+            gobModalOk.textContent = okText;
+            gobModalCancel.textContent = cancelText;
+
+            gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+
+            modalOnOk = onOk;
+            gobModal.style.display = "flex";
+        }
+
+        function closeGobModal() {
+            gobModal.style.display = "none";
+            modalOnOk = null;
+        }
+
+        gobModal.addEventListener("click", (e) => {
+            const close = e.target.closest("[data-close='1']");
+            if (close) closeGobModal();
+        });
+
+        gobModalCancel.addEventListener("click", closeGobModal);
+
+        gobModalOk.addEventListener("click", async () => {
+            if (typeof modalOnOk === "function") await modalOnOk();
+            closeGobModal();
+        });
+
+        function showSuccess(message) {
+            openGobModal({ type: "success", title: "Listo", body: message, okText: "OK", hideCancel: true });
+        }
+
+        function showError(message) {
+            openGobModal({ type: "danger", title: "Ocurrió un error", body: message, okText: "Entendido", hideCancel: true });
+        }
+
+        // ================== HELPERS ==================
+        function getVacId(v) {
+            return Number(v?.idVacantes ?? v?.idVacante ?? v?.idvacantes ?? v?.id ?? v?.vacanteId ?? v?.id_vacantes);
+        }
+
+        function getCreatorName(v) {
+            // En tu JSON nuevo puede venir como objeto creadoPor
+            const obj = v?.creadoPor;
+            if (obj && typeof obj === "object") {
+                const nom = [obj.nombre, obj.primerapellido, obj.segundoapellido].filter(Boolean).join(" ").trim();
+                return nom || obj.email || "—";
+            }
+
+            const name = v?.creadoPorNombre ?? v?.creado_por_nombre ?? v?.usuarioNombre ?? v?.usuario ?? "";
+            return String(name).trim() ? String(name).trim() : "—";
+        }
+
+        // IDs robustos (por si backend manda distintos nombres)
+        const getAreaId = (v) => Number(v?.areasDgp_idArea ?? v?.AreasDgp_idArea ?? v?.idArea ?? v?.areaId ?? v?.areasId ?? 0);
+        const getCarreraId = (v) => Number(v?.carreras_idCarrera ?? v?.Carreras_idCarrera ?? v?.idCarrera ?? v?.carreraId ?? 0);
+        const getModalidadId = (v) => Number(v?.Modalidades_idModalidad ?? v?.modalidades_idModalidad ?? v?.idModalidad ?? v?.modalidadId ?? 0);
+        const getHorarioId = (v) => Number(v?.horarios_idHorario ?? v?.Horarios_idHorario ?? v?.idHorario ?? v?.horarioId ?? 0);
+
+        // Referencias UI
+        const btnNew = document.getElementById("btnNewVac");
+        const btnCancel = document.getElementById("btnCancelVac");
+        const layout = document.getElementById("vacLayout");
+        const tbody = document.getElementById("vacantesBody");
+        const form = document.getElementById("vacForm");
+        const searchInput = document.getElementById("searchVac");
+        const btnSearch = document.getElementById("btnSearchVac");
+        const pagination = document.getElementById("pagination");
+
+        // Detalle
+        const vacDetailsWrap = document.getElementById("vacDetailsWrap");
+        const vacDetails = document.getElementById("vacDetails");
+        const btnCloseDetails = document.getElementById("btnCloseDetails");
+
+        // Estado
+        let vacantesCache = [];
+        let currentList = [];
+        let editing = null;
+        let selectedId = null;
+
+        // Paginación
+        const PAGE_SIZE = 9;
+        let currentPage = 1;
+
+        // Textos de selects
+        function getSelectText(selectId, value) {
+            const sel = document.getElementById(selectId);
+            if (!sel) return String(value ?? "");
+            const opt = sel.querySelector(`option[value="${value}"]`);
+            return opt ? opt.textContent.trim() : String(value ?? "");
+        }
+
+        const carreraName = (id) => getSelectText("carreras_idCarrera", id);
+        const modalidadName = (id) => getSelectText("Modalidades_idModalidad", id);
+        const horarioName = (id) => getSelectText("Horarios_idHorario", id);
+
+        function pillEstatus(estatus) {
+            return estatus === true
+                ? `<span class="pill pill--vigente">Publicado</span>`
+                : `<span class="pill pill--cancelado">No publicado</span>`;
+        }
+
+        function fmtHora(hora) {
+            if (!hora) return "";
+            const s = String(hora);
+            return s.slice(0, 8);
+        }
+
+        // --- UI Formulario ---
+        function openForm() { layout.classList.add("is-split"); }
+
+        function closeForm() {
+            layout.classList.remove("is-split");
+            editing = null;
+            form.reset();
+            // Mantener el área visible en el input readonly
+            areaTxt.value = coorAreaName.value || areaTxt.value;
+        }
+
+        btnNew?.addEventListener("click", () => {
+            editing = null;
+            form.reset();
+            // Mantener área
+            areaTxt.value = coorAreaName.value || areaTxt.value;
+            openForm();
+        });
+        btnCancel?.addEventListener("click", closeForm);
+
+        function openDetails(v) {
+            if (!v) return;
+
+            const unidadTxt = v?.areasdgpIdarea?.nombre ?? coorAreaName.value ?? "—";
+            const carreraTxt = v?.carrerasIdcarerra?.nombre ?? carreraName(getCarreraId(v));
+            const modalidadTxt = v?.modalidadesIdmodalidad?.nombre ?? modalidadName(getModalidadId(v));
+            const horarioTxt = v?.horariosIdhorario?.nombre ?? horarioName(getHorarioId(v));
+
+            const creadorTxt = getCreatorName(v);
+            const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
+            const horaPub = fmtHora(v.fechaPublicacion);
+
+            vacDetails.innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div><strong>Título:</strong><br>${v.nombrePuesto ?? ""}</div>
+                    <div><strong>Unidad:</strong><br>${unidadTxt}</div>
+
+                    <div><strong>No. Vacantes:</strong><br>${v.numeroPlazas ?? ""}</div>
+                    <div><strong>Estado:</strong><br>${estadoTxt}</div>
+
+                    <div><strong>Creado por:</strong><br>${creadorTxt}</div>
+                    <div><strong>Publicación:</strong><br>${horaPub || "—"}</div>
+
+                    <div><strong>Modalidad:</strong><br>${modalidadTxt}</div>
+                    <div><strong>Horario:</strong><br>${horarioTxt}</div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Carrera:</strong><br>${carreraTxt}
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Descripción:</strong><br>
+                        <span style="white-space:pre-wrap;">${v.descripcion ?? ""}</span>
+                    </div>
+
+                    <div style="grid-column: 1 / -1;">
+                        <strong>Requisitos:</strong><br>
+                        <span style="white-space:pre-wrap;">${v.requisitos ?? ""}</span>
+                    </div>
+                </div>
+            `;
+
+            vacDetailsWrap.style.display = "block";
+            renderTablaPaginada(currentList);
+            vacDetailsWrap.scrollIntoView({behavior: "smooth", block: "start"});
+        }
+
+        function closeDetails() {
+            selectedId = null;
+            vacDetailsWrap.style.display = "none";
+            renderTablaPaginada(currentList);
+        }
+
+        btnCloseDetails?.addEventListener("click", closeDetails);
+
+        // --- Paginación ---
+        function getTotalPages(list) { return Math.max(1, Math.ceil(list.length / PAGE_SIZE)); }
+
+        function getPageSlice(list, page) {
+            const start = (page - 1) * PAGE_SIZE;
+            return list.slice(start, start + PAGE_SIZE);
+        }
+
+        function renderPagination(totalPages) {
+            if (!pagination) return;
+            if (currentList.length === 0) { pagination.innerHTML = ""; return; }
+
+            let html = "";
+            html += (currentPage > 1)
+                ? `<button class="page" type="button" data-page="prev">‹</button>`
+                : `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">‹</button>`;
+
+            for (let p = 1; p <= totalPages; p++) {
+                const activeClass = p === currentPage ? "page--active" : "";
+                html += `<button class="page ${activeClass}" type="button" data-page="${p}">${p}</button>`;
+            }
+
+            html += (currentPage < totalPages)
+                ? `<button class="page" type="button" data-page="next">›</button>`
+                : `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">›</button>`;
+
+            pagination.innerHTML = html;
+        }
+
+        function renderTablaPaginada(list) {
+            currentList = list || [];
+            const totalPages = getTotalPages(currentList);
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            renderVacantes(getPageSlice(currentList, currentPage));
+            renderPagination(totalPages);
+        }
+
+        pagination?.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-page]");
+            if (!btn || btn.disabled) return;
+
+            const totalPages = getTotalPages(currentList);
+            const val = btn.dataset.page;
+
+            if (val === "prev" && currentPage > 1) currentPage--;
+            else if (val === "next" && currentPage < totalPages) currentPage++;
+            else {
+                const n = Number(val);
+                if (!isNaN(n)) currentPage = n;
+            }
+            renderTablaPaginada(currentList);
+        });
+
+        // --- Cargar ---
+        async function cargarVacantes() {
+            const res = await fetch(`${API}/getAll`, { headers: {"Accept": "application/json"} });
+            if (!res.ok) {
+                console.error("Error getAll:", await res.text());
+                showError("No se pudieron cargar las vacantes.");
+                return;
+            }
+            vacantesCache = await res.json();
+            currentPage = 1;
+            renderTablaPaginada(vacantesCache);
+
+            if (selectedId != null) {
+                const fresh = vacantesCache.find(x => getVacId(x) === Number(selectedId));
+                if (fresh) openDetails(fresh);
+            }
+        }
+
+        // --- Render tabla ---
+        function renderVacantes(lista) {
+            tbody.innerHTML = "";
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(v => {
+                const id = getVacId(v);
+                if (!id || Number.isNaN(id)) return;
+
+                const unidadTxt = v?.areasdgpIdarea?.nombre ?? coorAreaName.value ?? "";
+
+                const creadorTxt = getCreatorName(v);
+
+                const tr = document.createElement("tr");
+                tr.setAttribute("data-row", String(id));
+
+                if (selectedId != null && id === Number(selectedId)) {
+                    tr.style.outline = "2px solid rgba(122,15,26,.35)";
+                    tr.style.background = "rgba(122,15,26,.04)";
+                }
+
+                tr.innerHTML = `
+                    <td>${v.nombrePuesto ?? ""}</td>
+                    <td>${unidadTxt}</td>
+                    <td>${v.numeroPlazas ?? ""}</td>
+                    <td>${creadorTxt}</td>
+                    <td>${pillEstatus(v.estatus)}</td>
+                    <td class="actions">
+                        <button class="btn btn--mini" type="button" data-edit="${id}">Editar</button>
+                        <button class="btn btn--mini btn--outline" type="button" data-del="${id}">Eliminar</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Filtros ---
+        function filtrar() {
+            const q = (searchInput?.value || "").toLowerCase().trim();
+            let filtradas = vacantesCache;
+
+            if (q) {
+                filtradas = vacantesCache.filter(v => {
+                    const nombre = (v.nombrePuesto ?? "").toLowerCase();
+                    return nombre.includes(q);
+                });
+            }
+
+            currentPage = 1;
+            renderTablaPaginada(filtradas);
+        }
+
+        btnSearch?.addEventListener("click", filtrar);
+        searchInput?.addEventListener("input", filtrar);
+
+        // --- Click en tabla: detalle / editar / eliminar ---
+        tbody.addEventListener("click", async (e) => {
+            const editBtn = e.target.closest("[data-edit]");
+            const delBtn = e.target.closest("[data-del]");
+
+            if (editBtn) {
+                const id = Number(editBtn.getAttribute("data-edit"));
+                editing = vacantesCache.find(x => getVacId(x) === id);
+                if (!editing) return;
+
+                document.getElementById("nombrePuesto").value = editing.nombrePuesto ?? "";
+                document.getElementById("descripcion").value = editing.descripcion ?? "";
+                document.getElementById("requisitos").value = editing.requisitos ?? "";
+                document.getElementById("numeroPlazas").value = editing.numeroPlazas ?? "";
+
+                // ✅ área NO se edita: solo mostramos texto
+                areaTxt.value = coorAreaName.value || areaTxt.value;
+
+                document.getElementById("carreras_idCarrera").value = String(editing?.carrerasIdcarerra?.id ?? getCarreraId(editing) ?? "");
+                document.getElementById("Modalidades_idModalidad").value = String(editing?.modalidadesIdmodalidad?.id ?? getModalidadId(editing) ?? "");
+                document.getElementById("Horarios_idHorario").value = String(editing?.horariosIdhorario?.id ?? getHorarioId(editing) ?? "");
+                document.getElementById("estatus").value = String(editing.estatus ?? true);
+
+                const hhmmss = fmtHora(editing.fechaPublicacion);
+                document.getElementById("fechaPublicacion").value = hhmmss || "";
+
+                openForm();
+                return;
+            }
+
+            if (delBtn) {
+                const id = delBtn.getAttribute("data-del");
+
+                openGobModal({
+                    type: "danger",
+                    title: "Eliminar vacante",
+                    subtitle: "Esta acción no se puede deshacer",
+                    body: "¿Seguro que deseas eliminar esta vacante?",
+                    okText: "Eliminar",
+                    cancelText: "Cancelar",
+                    onOk: async () => {
+                        const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
+                        if (!res.ok) {
+                            console.error("Error delete:", await res.text());
+                            showError("No se pudo eliminar la vacante.");
+                            return;
+                        }
+                        if (selectedId != null && Number(selectedId) === Number(id)) closeDetails();
+                        await cargarVacantes();
+                        showSuccess("Vacante eliminada correctamente.");
+                    }
+                });
+                return;
+            }
+
+            const row = e.target.closest("tr[data-row]");
+            if (row) {
+                const id = Number(row.getAttribute("data-row"));
+                selectedId = id;
+                const v = vacantesCache.find(x => getVacId(x) === id);
+                if (v) openDetails(v);
+            }
+        });
+
+        // --- SUBMIT ---
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            const timeVal = document.getElementById("fechaPublicacion").value;
+            const hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
+            if (!hhmmss) { showError("Selecciona una hora válida."); return; }
+
+            // ✅ Área fija del coordinador
+            const areaId = Number(coorAreaId.value || 0);
+            if (!areaId) { showError("No se detectó tu área. Reintenta."); return; }
+
+            const payloadCommon = {
+                idVacantes: editing ? getVacId(editing) : null,
+                nombrePuesto: document.getElementById("nombrePuesto").value.trim(),
+                descripcion: document.getElementById("descripcion").value.trim(),
+                requisitos: document.getElementById("requisitos").value.trim(),
+                numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
+                estatus: document.getElementById("estatus").value === "true",
+
+                // ⚠️ Se manda pero el BACKEND igual lo fuerza; aquí solo para que no truene tu lógica
+                areasDgp_idArea: areaId,
+
+                carreras_idCarrera: Number(document.getElementById("carreras_idCarrera").value || 0),
+                Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
+                horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
+
+                fechaPublicacion: hhmmss,
+                creadoPorNombre: currentUser || null
+            };
+
+            if (!payloadCommon.nombrePuesto || payloadCommon.numeroPlazas < 1) {
+                showError("Faltan datos obligatorios.");
+                return;
+            }
+
+            if (!payloadCommon.carreras_idCarrera || !payloadCommon.Modalidades_idModalidad || !payloadCommon.horarios_idHorario) {
+                showError("Selecciona Carrera, Modalidad y Horario.");
+                return;
+            }
+
+            if (editing) {
+                const updateId = getVacId(editing);
+                const res = await fetch(`${API}/update/${updateId}`, {
+                    method: "PUT",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(payloadCommon)
+                });
+
+                if (!res.ok) {
+                    console.error("Error update:", await res.text());
+                    showError("Error al actualizar la vacante.");
+                    return;
+                }
+
+                await cargarVacantes();
+                closeForm();
+                showSuccess("Vacante actualizada correctamente.");
+
+                const fresh = vacantesCache.find(x => getVacId(x) === Number(updateId));
+                if (fresh) openDetails(fresh);
+
+            } else {
+                const res = await fetch(`${API}/create`, {
+                    method: "POST",
+                    headers: {"Content-Type": "application/json"},
+                    body: JSON.stringify(payloadCommon)
+                });
+
+                if (!res.ok) {
+                    console.error("Error create:", await res.text());
+                    showError("Error al crear la vacante.");
+                    return;
+                }
+
+                await cargarVacantes();
+                closeForm();
+                showSuccess("Vacante creada correctamente.");
+
+                const last = vacantesCache[vacantesCache.length - 1];
+                if (last) openDetails(last);
+            }
+        });
+
+        // Inicial (mi área primero, luego catálogos, luego vacantes)
+        (async () => {
+            await cargarMiArea();
+            await cargarCarrerasSelect();
+            await cargarModalidadesSelect();
+            await cargarHorariosSelect();
+            await cargarVacantes();
+        })();
+    });
+</script>
 
 </body>
 </html>

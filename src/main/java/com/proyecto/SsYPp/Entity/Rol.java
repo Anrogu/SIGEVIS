@@ -1,5 +1,6 @@
 package com.proyecto.SsYPp.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,9 +11,11 @@ import java.time.OffsetDateTime;
 
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "roles")
 public class Rol {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idrol", nullable = false)
@@ -30,5 +33,4 @@ public class Rol {
     @NotNull
     @Column(name = "updatedat", nullable = false)
     private OffsetDateTime updatedat;
-
 }

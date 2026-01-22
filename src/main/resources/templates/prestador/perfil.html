@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Perfil del Prestador</title>
+</head>
+<body>
+<h1>Mi Perfil</h1>
+
+<div>
+    <p><b>Nombre:</b>
+        <span th:text="${usuario.nombres} + ' ' + ${usuario.primerApellido} + ' ' + ${usuario.segundoApellido}"></span>
+    </p>
+
+    <p><b>Correo:</b> <span th:text="${usuario.correo}"></span></p>
+
+    <p><b>Carrera:</b>
+        <span th:text="${usuario.carrera != null ? usuario.carrera.nombre : 'Sin carrera registrada'}"></span>
+    </p>
+</div>
+
+<a href="/vacantes">Ver vacantes</a>
+</body>
+</html>

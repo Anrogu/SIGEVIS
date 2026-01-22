@@ -9,11 +9,16 @@ import lombok.Setter;
 import java.time.OffsetDateTime;
 import java.time.OffsetTime;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 @Getter
 @Setter
 @Entity
 @Table(name = "usuarios")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Usuario {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "idusuario", nullable = false)
@@ -42,12 +47,14 @@ public class Usuario {
     @Column(name = "emailverifiedat")
     private OffsetDateTime emailverifiedat;
 
-    @Size(max = 255)
+    // 🔒 NO debe exponerse nunca
+    @JsonIgnore
     @NotNull
     @Column(name = "password", nullable = false)
     private String password;
 
-    @Size(max = 255)
+    // 🔒 Tampoco debe exponerse
+    @JsonIgnore
     @Column(name = "rememberedtoken")
     private String rememberedtoken;
 
@@ -69,4 +76,8 @@ public class Usuario {
     @JoinColumn(name = "carreras_idcarrera")
     private Carrera carrerasIdcarrera;
 
+    // ✅ Área del coordinador
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "areasdgp_idarea")
+    private AreaDgp area;
 }

@@ -1,5 +1,6 @@
 package com.proyecto.SsYPp.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -8,9 +9,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "\"AreasDgp\"")
 public class AreaDgp {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "\"idArea\"", nullable = false)
@@ -24,5 +27,4 @@ public class AreaDgp {
     @NotNull
     @Column(name = "\"Vacantes_idVacantes\"", nullable = false)
     private Long vacantesIdvacantes;
-
 }

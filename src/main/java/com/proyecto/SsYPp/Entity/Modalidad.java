@@ -1,5 +1,6 @@
 package com.proyecto.SsYPp.Entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -11,9 +12,11 @@ import lombok.Setter;
 
 @Getter
 @Setter
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Entity
 @Table(name = "\"Modalidades\"")
 public class Modalidad {
+
     @Id
     @Column(name = "\"idModalidad\"", nullable = false)
     private Integer id;
@@ -22,5 +25,4 @@ public class Modalidad {
     @NotNull
     @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
-
 }
