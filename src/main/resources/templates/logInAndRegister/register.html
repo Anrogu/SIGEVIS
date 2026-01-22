@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Crear Cuenta - Servicio Social</title>
 
-    <link rel="stylesheet" href="/css/styles.css">
-    <link rel="stylesheet" href="/css/login.css">
+    <link rel="stylesheet" href="/css_admin/styles.css">
+    <link rel="stylesheet" href="/css_admin/login.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
     <style>
@@ -215,21 +215,36 @@
     document.getElementById("registerForm").addEventListener("submit", async function (e) {
         e.preventDefault();
         ocultarError();
+
+        // 1. Convertir FormData a JSON
         const formData = new FormData(this);
+        const data = Object.fromEntries(formData.entries());
+
+        data.status = true;
+
+        // Convertir strings a números
+        data.idrol = Number(data.idrol);
+        data.carrerasIdcarrera = Number(data.carrerasIdcarrera);
+
         try {
-            const response = await fetch("/gob/auth/register", { method: "POST", body: formData });
+            const response = await fetch("/gob/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data)
+            });
+
             if (response.ok) {
                 window.location.href = "/login?success=true";
             } else {
                 const raw = await response.text();
-                if (raw.length > 200 || raw.includes("Exception")) {
-                    mostrarError("Error técnico. Verifica tus datos.");
-                } else {
-                    mostrarError(raw);
-                }
+                // Mostrar error limpio si viene del backend
+                mostrarError(raw || "Error al procesar el registro.");
             }
         } catch (err) {
-            mostrarError("Error de conexión.");
+            console.error(err);
+            mostrarError("Error de conexión con el servidor.");
         }
     });
 </script>

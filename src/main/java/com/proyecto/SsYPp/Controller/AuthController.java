@@ -17,11 +17,20 @@ public class AuthController {
     private UsuarioService usuarioService;
 
     @PostMapping("/register")
-    public ResponseEntity<UsuarioDto> registerUsuario(@Valid @ModelAttribute UsuarioDto usuarioDto) {
-        UsuarioDto nuevoUsuario = usuarioService.create(usuarioDto);
-        return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
+    public ResponseEntity<?> registerUsuario(@RequestBody UsuarioDto usuarioDto) {
+        try {
+            if (usuarioService.existsByEmail(usuarioDto.getEmail())) {
+                return ResponseEntity.badRequest().body("El correo electrónico ya está registrado.");
+            }
 
+            UsuarioDto nuevoUsuario = usuarioService.create(usuarioDto);
+            return new ResponseEntity<>(nuevoUsuario, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Error al registrar: " + e.getMessage());
+        }
     }
+
     @GetMapping("/perfil")
     public ResponseEntity<?> getAuthenticatedUserProfile(@AuthenticationPrincipal UserDetails userDetails) {
         if (userDetails == null) {

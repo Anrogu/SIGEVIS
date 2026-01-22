@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Administrador | Vacantes</title>
-    <link rel="stylesheet" href="/css/styles.css" />
-    <link rel="stylesheet" href="/css/index.css" /> <!-- ✅ Para el modal GOV como Noticias -->
-    <link rel="stylesheet" href="/css/convenios.css" />
+    <link rel="stylesheet" href="/css_admin/styles.css"/>
+    <link rel="stylesheet" href="/css_admin/index.css"/> <!-- ✅ Para el modal GOV como Noticias -->
+    <link rel="stylesheet" href="/css_admin/convenios.css"/>
 </head>
 
 <body>
@@ -14,14 +14,9 @@
 
     <!-- ✅ Usuario actual (para “creado por” informativo) -->
     <input type="hidden" id="currentUser"
-           th:value="${#authentication != null ? #authentication.name : ''}" />
+           th:value="${#authentication != null ? #authentication.name : ''}"/>
 
-    <!-- ✅ IMPORTANTE: tu backend requiere usuariosIdUsuario en CREATE.
-         Si NO tienes endpoint /admin/usuarios/me, deja un valor fijo temporal (solo para pruebas).
-         Ideal: que lo llene JS desde un endpoint existente.
-    -->
-    <input type="hidden" id="usuariosIdUsuario" value="10" />
-
+    <input type="hidden" id="usuariosIdUsuario" th:value="${currentUserId != null ? currentUserId : ''}"/>
     <header class="topbar">
         <div class="topbar__left">
             <span class="topbar__title">ADMINISTRADOR</span>
@@ -51,7 +46,7 @@
         <div class="search">
             <span class="search__icon">🔎</span>
             <input id="searchVac" class="search__input" type="text"
-                   placeholder="Buscar por nombre de vacante o unidad..." />
+                   placeholder="Buscar por nombre de vacante o unidad..."/>
         </div>
         <button class="btn btn--primary" type="button" id="btnSearchVac">Buscar</button>
     </section>
@@ -91,7 +86,8 @@
             <!-- ✅ DETALLE (abajo, como Noticias) -->
             <div id="vacDetailsWrap" style="display:none; margin-top:14px;">
                 <div class="panel" style="border:1px solid var(--border, #ddd); background:#fff;">
-                    <div class="panel__header panel__header--compact" style="display:flex; align-items:center; justify-content:space-between;">
+                    <div class="panel__header panel__header--compact"
+                         style="display:flex; align-items:center; justify-content:space-between;">
                         <h3 class="panel__subtitle" style="margin:0;">DETALLE DE VACANTE</h3>
                         <button type="button" id="btnCloseDetails" class="btn btn--outline btn--mini">Cerrar</button>
                     </div>
@@ -113,7 +109,7 @@
 
                 <div class="form-row">
                     <label>Título de la Vacante</label>
-                    <input id="nombrePuesto" type="text" placeholder="Ej. Auxiliar Administrativo..." />
+                    <input id="nombrePuesto" type="text" placeholder="Ej. Auxiliar Administrativo..."/>
                 </div>
 
                 <div class="form-row">
@@ -161,18 +157,19 @@
 
                 <div class="form-row">
                     <label>Requisitos</label>
-                    <textarea id="requisitos" rows="3" placeholder="Ej. Ser alumno regular, promedio mínimo..."></textarea>
+                    <textarea id="requisitos" rows="3"
+                              placeholder="Ej. Ser alumno regular, promedio mínimo..."></textarea>
                 </div>
 
                 <div class="form-row form-row--2">
                     <div>
                         <label>Número de Vacantes</label>
-                        <input id="numeroPlazas" class="input--small" type="number" min="1" placeholder="5" />
+                        <input id="numeroPlazas" class="input--small" type="number" min="1" placeholder="5"/>
                     </div>
 
                     <div>
                         <label>Programar Publicación</label>
-                        <input id="fechaPublicacion" class="input--small" type="time" step="1" />
+                        <input id="fechaPublicacion" class="input--small" type="time" step="1"/>
                     </div>
                 </div>
 
@@ -236,11 +233,14 @@
             if (res.ok || res.status === 302) {
                 window.location.href = "/login?logout";
             }
-        } catch (err) { console.error(err); }
+        } catch (err) {
+            console.error(err);
+        }
     });
 
     document.addEventListener("DOMContentLoaded", () => {
         const API = "/admin/vacantes";
+        const API_USER_ME = "/admin/usuarios/me";
 
         // =================== CARGAR CARRERAS (SELECT) ===================
         // Ajusta si tu endpoint real es /carreras/getAll (minúsculas)
@@ -251,7 +251,7 @@
             if (!carrerasSelect) return;
 
             try {
-                const res = await fetch(API_CARRERAS, { headers: { "Accept": "application/json" } });
+                const res = await fetch(API_CARRERAS, {headers: {"Accept": "application/json"}});
                 if (!res.ok) {
                     console.error("Error carreras:", await res.text());
                     carrerasSelect.innerHTML = `<option value="">(No se pudieron cargar)</option>`;
@@ -291,8 +291,17 @@
         const gobModalCancel = document.getElementById("gobModalCancel");
         let modalOnOk = null;
 
-        function openGobModal({type="info", title="Aviso", subtitle="", body="", okText="Aceptar", cancelText="Cancelar", onOk=null, hideCancel=false}) {
-            gobModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
+        function openGobModal({
+                                  type = "info",
+                                  title = "Aviso",
+                                  subtitle = "",
+                                  body = "",
+                                  okText = "Aceptar",
+                                  cancelText = "Cancelar",
+                                  onOk = null,
+                                  hideCancel = false
+                              }) {
+            gobModal.classList.remove("gob-modal--info", "gob-modal--success", "gob-modal--warning", "gob-modal--danger");
             gobModal.classList.add(`gob-modal--${type}`);
 
             gobModalTitle.textContent = title;
@@ -348,6 +357,7 @@
                 hideCancel: true
             });
         }
+
         // ================================================================
 
         // ================== HELPERS ROBUSTOS (ID y CREADOR) ==================
@@ -372,6 +382,7 @@
                 "";
             return String(name).trim() ? String(name).trim() : "—";
         }
+
         // ====================================================================
 
         // Referencias UI
@@ -406,6 +417,7 @@
             const opt = sel.querySelector(`option[value="${value}"]`);
             return opt ? opt.textContent.trim() : String(value ?? "");
         }
+
         const carreraName = (id) => getSelectText("carreras_idCarrera", id);
         const modalidadName = (id) => getSelectText("Modalidades_idModalidad", id);
         const horarioName = (id) => getSelectText("Horarios_idHorario", id);
@@ -423,22 +435,33 @@
         }
 
         // --- UI Formulario ---
-        function openForm(){ layout.classList.add("is-split"); }
-        function closeForm(){ layout.classList.remove("is-split"); editing = null; form.reset(); }
+        function openForm() {
+            layout.classList.add("is-split");
+        }
 
-        btnNew?.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
+        function closeForm() {
+            layout.classList.remove("is-split");
+            editing = null;
+            form.reset();
+        }
+
+        btnNew?.addEventListener("click", () => {
+            editing = null;
+            form.reset();
+            openForm();
+        });
         btnCancel?.addEventListener("click", closeForm);
 
         function openDetails(v) {
             if (!v) return;
 
             const unidadTxt = v.areaNombre ?? "—";
-            const carreraTxt   = carreraName(v.carreras_idCarrera);
+            const carreraTxt = carreraName(v.carreras_idCarrera);
             const modalidadTxt = modalidadName(v.Modalidades_idModalidad);
-            const horarioTxt   = horarioName(v.horarios_idHorario);
-            const creadorTxt   = getCreatorName(v);
-            const estadoTxt    = v.estatus === true ? "Publicado" : "No publicado";
-            const horaPub      = fmtHora(v.fechaPublicacion);
+            const horarioTxt = horarioName(v.horarios_idHorario);
+            const creadorTxt = getCreatorName(v);
+            const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
+            const horaPub = fmtHora(v.fechaPublicacion);
 
             vacDetails.innerHTML = `
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
@@ -472,7 +495,7 @@
 
             vacDetailsWrap.style.display = "block";
             renderTablaPaginada(currentList);
-            vacDetailsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+            vacDetailsWrap.scrollIntoView({behavior: "smooth", block: "start"});
         }
 
         function closeDetails() {
@@ -549,7 +572,7 @@
 
         // --- Cargar ---
         async function cargarVacantes() {
-            const res = await fetch(`${API}/getAll`, { headers: { "Accept": "application/json" } });
+            const res = await fetch(`${API}/getAll`, {headers: {"Accept": "application/json"}});
             if (!res.ok) {
                 console.error("Error getAll:", await res.text());
                 showError("No se pudieron cargar las vacantes.");
@@ -663,7 +686,7 @@
                     okText: "Eliminar",
                     cancelText: "Cancelar",
                     onOk: async () => {
-                        const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
+                        const res = await fetch(`${API}/delete/${id}`, {method: "DELETE"});
                         if (!res.ok) {
                             console.error("Error delete:", await res.text());
                             showError("No se pudo eliminar la vacante.");
@@ -693,10 +716,10 @@
             e.preventDefault();
 
             const timeVal = document.getElementById("fechaPublicacion").value;
-            const hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
-
-            if (!hhmmss) {
-                showError("Selecciona una hora.");
+            let hhmmss = timeVal ? (timeVal.length === 5 ? timeVal + ":00" : timeVal) : null;
+            const fechaPublicacionFinal = hhmmss;
+            if (!fechaPublicacionFinal) {
+                showError("Selecciona una hora válida.");
                 return;
             }
 
@@ -715,10 +738,8 @@
                 Modalidades_idModalidad: Number(document.getElementById("Modalidades_idModalidad").value || 0),
                 horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
 
-                fechaPublicacion: hhmmss,
-
+                fechaPublicacion: fechaPublicacionFinal,
                 usuariosIdUsuario: usuariosIdUsuarioVal > 0 ? usuariosIdUsuarioVal : null,
-
                 creadoPorNombre: currentUser || null
             };
 
@@ -736,7 +757,7 @@
                 const updateId = getVacId(editing);
                 const res = await fetch(`${API}/update/${updateId}`, {
                     method: "PUT",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(payloadCommon)
                 });
                 if (!res.ok) {
@@ -755,7 +776,7 @@
             } else {
                 const res = await fetch(`${API}/create`, {
                     method: "POST",
-                    headers: { "Content-Type": "application/json" },
+                    headers: {"Content-Type": "application/json"},
                     body: JSON.stringify(payloadCommon)
                 });
 

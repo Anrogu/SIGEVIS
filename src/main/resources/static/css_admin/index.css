@@ -15,6 +15,7 @@ body{
     max-width: 1500px;
     background: var(--bg);
     border: 2px solid var(--border-2);
+    min-height: 100vh;
 }
 
 /* TOPBAR */
@@ -86,6 +87,7 @@ body{
 .tab--active{
     border: 1px solid var(--border);
     background: #f2f2f2;
+    font-weight: 600;
 }
 
 .btn--logout{

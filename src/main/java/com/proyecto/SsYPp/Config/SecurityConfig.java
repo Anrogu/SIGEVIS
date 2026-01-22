@@ -48,11 +48,12 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/",
                                 "/public/**",
-                                "/css/**", "/js/**", "/img/**",
+                                "/css_admin/**", "/js/**", "/img/**",
                                 "/login",
                                 "/registro",
                                 "/register",
                                 "/public",
+                                "/gob/auth/**",
 
                                 // ✅ APIs públicas para el perfil sin login
                                 "/noticias/publicadas",
