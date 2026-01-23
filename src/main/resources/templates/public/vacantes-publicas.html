@@ -65,7 +65,21 @@
                 <div class="panel__actions"></div>
             </div>
 
-            <div class="vac-list" id="vacantesBody"></div>
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Título</th>
+                        <th>Unidad</th>
+                        <th>No. Vacantes</th>
+                        <th>Estado</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="vacantesBody"></tbody>
+                </table>
+            </div>
 
             <div class="pagination" id="pagination"></div>
 
@@ -217,7 +231,7 @@
         let selectedId = null;
 
         // ====== Paginación ======
-        const PAGE_SIZE = 5;
+        const PAGE_SIZE = 9;
         let currentPage = 1;
 
         function pillEstatus(estatus) {
@@ -328,49 +342,37 @@
 
         // ====== Render tabla ======
         function renderVacantes(lista) {
-  tbody.innerHTML = "";
+            tbody.innerHTML = "";
 
-  if (!lista || lista.length === 0) {
-    tbody.innerHTML = `<div style="text-align:center; padding:20px;">No se encontraron registros.</div>`;
-    return;
-  }
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
+                return;
+            }
 
-  lista.forEach(v => {
-    const id = Number(v.idVacantes);
+            lista.forEach(v => {
+                const id = Number(v.idVacantes);
 
-    const card = document.createElement("article");
-    card.className = "vac-card";
-    card.setAttribute("data-row", String(id));
+                const tr = document.createElement("tr");
+                tr.setAttribute("data-row", String(id));
 
-    if (selectedId != null && id === Number(selectedId)) {
-      card.classList.add("is-selected");
-    }
+                if (selectedId != null && id === Number(selectedId)) {
+                    tr.style.outline = "2px solid rgba(122,15,26,.35)";
+                    tr.style.background = "rgba(122,15,26,.04)";
+                }
 
-    const preview = (v.descripcion ?? "").trim();
-
-    card.innerHTML = `
-      <div class="vac-card__top">
-        <h3 class="vac-card__title">${v.nombrePuesto ?? ""}</h3>
-        ${pillEstatus(v.estatus)}
-      </div>
-
-      <div class="vac-card__meta">
-        <span class="vac-chip">Unidad: <strong>${v.areaNombre ?? "—"}</strong></span>
-        <span class="vac-chip">Plazas: <strong>${v.numeroPlazas ?? "—"}</strong></span>
-      </div>
-
-      <p class="vac-card__preview">${preview || "Sin descripción."}</p>
-
-      <div class="vac-card__actions">
-        <button class="btn btn--mini btn--outline" type="button" data-view="${id}">Ver</button>
-        <button class="btn btn--mini btn--primary" type="button" data-postular="${id}">Postularme</button>
-      </div>
-    `;
-
-    tbody.appendChild(card);
-  });
-}
-
+                tr.innerHTML = `
+                    <td>${v.nombrePuesto ?? ""}</td>
+                    <td>${v.areaNombre ?? "—"}</td>
+                    <td>${v.numeroPlazas ?? ""}</td>
+                    <td>${pillEstatus(v.estatus)}</td>
+                    <td class="actions">
+                        <button class="btn btn--mini btn--outline" type="button" data-view="${id}">Ver</button>
+                        <button class="btn btn--mini btn--primary" type="button" data-postular="${id}">Postularme</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
 
         // ====== Filtro ======
         function filtrar() {
@@ -380,7 +382,7 @@
             if (q) {
                 filtradas = vacantesCache.filter(v => {
                     const nombre = (v.nombrePuesto ?? "").toLowerCase();
-                    const unidad = (v.areaNombre ?? "").toLowerCase();
+                    const unidad = String(v.areasDgp_idArea ?? "").toLowerCase();
                     return nombre.includes(q) || unidad.includes(q);
                 });
             }
@@ -396,8 +398,7 @@
         tbody.addEventListener("click", (e) => {
             const viewBtn = e.target.closest("[data-view]");
             const postBtn = e.target.closest("[data-postular]");
-            const row = e.target.closest("[data-row]");
-
+            const row = e.target.closest("tr[data-row]");
 
             if (viewBtn) {
                 const id = Number(viewBtn.getAttribute("data-view"));

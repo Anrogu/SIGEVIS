@@ -1,10 +1,7 @@
 :root {
     /* Letra */
     --font-family: 'Poppins', sans-serif;
-    /*Forzar Poppins en td el sistema*/
-        html, body, .app, button, input, select, textarea, table, th, td, a, p, span, div {
-          font-family: var(--font-family) !important;
-    }
+
     /* Paleta de Colores */
     --color-vino: #7b1e3d;
     --color-dorado: #B59560;
