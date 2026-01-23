@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="_csrf" th:content="${_csrf != null ? _csrf.token : ''}"/>
+    <meta name="_csrf_header" th:content="${_csrf != null ? _csrf.headerName : ''}"/>
     <title>Usuarios y Roles</title>
 
     <link rel="stylesheet" href="/css_admin/styles.css" />
@@ -128,23 +130,19 @@
 
             <div class="pagination" th:if="${totalPages > 0}">
                 <a th:if="${currentPage > 0}"
-                   th:href="@{/usuarios(page=${currentPage - 1})}"
+                   th:href="@{/admin/usuarios(page=${currentPage - 1})}"
                    class="page">‹</a>
-                <span th:unless="${currentPage > 0}"
-                      class="page" style="opacity:0.5; cursor:default">‹</span>
 
                 <a th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
-                   th:href="@{/usuarios(page=${i})}"
+                   th:href="@{/admin/usuarios(page=${i})}"
                    th:text="${i + 1}"
                    class="page"
                    th:classappend="${currentPage == i} ? 'page--active' : ''">
                 </a>
 
                 <a th:if="${currentPage < totalPages - 1}"
-                   th:href="@{/usuarios(page=${currentPage + 1})}"
+                   th:href="@{/admin/usuarios(page=${currentPage + 1})}"
                    class="page">›</a>
-                <span th:unless="${currentPage < totalPages - 1}"
-                      class="page" style="opacity:0.5; cursor:default">›</span>
             </div>
         </main>
 
@@ -154,11 +152,11 @@
             </div>
 
             <form class="form" id="usuarioForm"
-                  th:action="@{/usuarios/guardar}"
+                  th:action="@{/admin/usuarios/guardar}"
                   th:object="${usuario}"
                   method="post">
 
-                <input type="hidden" th:field="*{idusuario}" id="fieldIdUsuario" />
+            <input type="hidden" th:field="*{idusuario}" id="fieldIdUsuario" />
 
                 <div class="form-row">
                     <label>Nombre(s)</label>
@@ -439,10 +437,11 @@
                     onOk: async () => {
                         try {
                             // Mantengo tu endpoint original (MVC)
-                            const res = await fetch(`/usuarios/cambiar-status/${id}`, {
-                                method: "GET",
-                                credentials: "same-origin"
+                            const res = await fetch(`/admin/usuarios/cambiar-status/${id}`, {
+                            method: "GET",
+                            credentials: "same-origin"
                             });
+
 
                             if (res.ok || res.redirected) {
                                 showSuccess(`Usuario ${isActivo ? "desactivado" : "activado"} correctamente.`);
@@ -485,22 +484,61 @@
         if (err) showError(err);
 
         // (Opcional) Si quieres confirmación antes de guardar:
-        form?.addEventListener("submit", (ev) => {
-            // Si quieres bloquear el submit y confirmar con modal, descomenta:
-            /*
-            ev.preventDefault();
-            openGobModal({
-                type: "warning",
-                title: "Guardar cambios",
-                subtitle: "Confirma la operación",
-                body: "¿Seguro que deseas guardar los cambios realizados en este usuario?",
-                okText: "Guardar",
-                cancelText: "Cancelar",
-                onOk: async () => form.submit()
-            });
-            */
+        form?.addEventListener("submit", async (ev) => {
+    ev.preventDefault(); // 🚫 evitamos submit normal (form-urlencoded)
+
+    try {
+        // ===== CSRF (Spring Security) =====
+        const csrfToken = document.querySelector('meta[name="_csrf"]')?.getAttribute("content");
+        const csrfHeader = document.querySelector('meta[name="_csrf_header"]')?.getAttribute("content");
+
+        // ===== Construir JSON desde el form =====
+        const payload = {
+            idusuario: fId?.value ? Number(fId.value) : null,
+            nombre: fNombre?.value?.trim() || "",
+            primerapellido: fApp1?.value?.trim() || "",
+            segundoapellido: fApp2?.value?.trim() || null,
+            email: fEmail?.value?.trim() || "",
+            password: (fPass?.value && fPass.value.trim() !== "") ? fPass.value : null,
+            idrol: fRol?.value ? Number(fRol.value) : null,
+            status: (fStatus?.value === "true")
+        };
+
+        // Validación mínima (por si acaso)
+        if (!payload.nombre || !payload.primerapellido || !payload.email || !payload.idrol) {
+            showError("Completa nombre, primer apellido, correo y rol.");
+            return;
+        }
+
+        // Endpoint correcto (tu controller está en /admin/usuarios)
+        const url = "/admin/usuarios/guardar";
+
+        const headers = { "Content-Type": "application/json" };
+        if (csrfToken && csrfHeader) headers[csrfHeader] = csrfToken;
+
+        const res = await fetch(url, {
+            method: "POST",
+            headers,
+            credentials: "same-origin",
+            body: JSON.stringify(payload)
         });
-    });
+
+        const text = await res.text(); // tu controller devuelve texto
+        if (!res.ok) {
+            console.error("Guardar usuario error:", text);
+            showError(text || "No se pudo guardar el usuario.");
+            return;
+        }
+
+        showSuccess(text || "Guardado correctamente.");
+        setTimeout(() => window.location.reload(), 450);
+
+    } catch (err) {
+        console.error(err);
+        showError("No se pudo guardar el usuario.");
+    }
+});
+});
 </script>
 
 </body>

@@ -22,6 +22,14 @@ public class UsuarioController {
     @GetMapping
     public String index(Model model) {
         model.addAttribute("usuario", new UsuarioDto()); // ✅ ESTO ARREGLA EL ERROR
+
+        // 👇 ESTO ES LO QUE TE FALTA
+        List<UsuarioDto> usuarios = usuarioService.getAll(PageRequest.of(0, 1000)).getContent();
+        model.addAttribute("usuarios", usuarios);
+
+        // (Opcional) para que no truene tu paginación si la usas
+        model.addAttribute("currentPage", 0);
+        model.addAttribute("totalPages", 1);
         return "admin/usuarios";
     }
 
