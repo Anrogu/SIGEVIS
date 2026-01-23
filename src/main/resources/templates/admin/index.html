@@ -149,7 +149,6 @@
     </section>
 </div>
 
-<!-- ✅ MODAL BONITO (adaptado a tus estilos/variables) -->
 <div class="gob-modal" id="appModal" aria-hidden="true" style="display:none;">
     <div class="gob-modal__backdrop" data-modal-close></div>
 
@@ -177,210 +176,208 @@
     const btnLogout = document.getElementById("btnLogout");
 
     btnLogout?.addEventListener("click", async () => {
-      try {
-        const res = await fetch("/logout", { method: "POST", credentials: "same-origin" });
-        if (res.ok || res.status === 302) window.location.href = "/login?logout";
-      } catch (err) {
-        console.error(err);
-      }
+        try {
+            const res = await fetch("/logout", { method: "POST", credentials: "same-origin" });
+            if (res.ok || res.status === 302) window.location.href = "/login?logout";
+        } catch (err) {
+            console.error(err);
+        }
     });
 
     document.addEventListener("DOMContentLoaded", () => {
 
-      // ===== MODAL BONITO (reemplazo de alert/confirm del navegador) =====
-      const appModal = document.getElementById("appModal");
-      const modalTitle = document.getElementById("modalTitle");
-      const modalSubtitle = document.getElementById("modalSubtitle");
-      const modalBody = document.getElementById("modalBody");
-      const modalFooter = document.getElementById("modalFooter");
-      const modalIcon = document.getElementById("modalIcon");
+        // ===== MODAL BONITO (reemplazo de alert/confirm del navegador) =====
+        const appModal = document.getElementById("appModal");
+        const modalTitle = document.getElementById("modalTitle");
+        const modalSubtitle = document.getElementById("modalSubtitle");
+        const modalBody = document.getElementById("modalBody");
+        const modalFooter = document.getElementById("modalFooter");
+        const modalIcon = document.getElementById("modalIcon");
 
-      function setModalType(type){
-        if (!appModal) return;
-        appModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
-        appModal.classList.add(`gob-modal--${type}`);
+        function setModalType(type){
+            if (!appModal) return;
+            appModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
+            appModal.classList.add(`gob-modal--${type}`);
 
-        const iconHtml =
-          type === "success" ? '<i class="fa-solid fa-circle-check"></i>' :
-          type === "danger"  ? '<i class="fa-solid fa-triangle-exclamation"></i>' :
-          type === "warning" ? '<i class="fa-solid fa-triangle-exclamation"></i>' :
-                               '<i class="fa-solid fa-circle-info"></i>';
+            const iconHtml =
+                type === "success" ? '<i class="fa-solid fa-circle-check"></i>' :
+                    type === "danger"  ? '<i class="fa-solid fa-triangle-exclamation"></i>' :
+                        type === "warning" ? '<i class="fa-solid fa-triangle-exclamation"></i>' :
+                            '<i class="fa-solid fa-circle-info"></i>';
 
-        if (modalIcon) modalIcon.innerHTML = iconHtml;
-      }
-
-      function openModal({ type="info", title="Aviso", subtitle="", message="", buttons=[] }){
-        if (!appModal) return;
-
-        setModalType(type);
-        modalTitle.textContent = title;
-        modalSubtitle.textContent = subtitle;
-        modalBody.textContent = message;
-
-        modalFooter.innerHTML = "";
-        buttons.forEach(b => {
-          const btn = document.createElement("button");
-          btn.type = "button";
-          btn.className = b.className || "btn btn--outline";
-          btn.textContent = b.text || "Aceptar";
-          btn.addEventListener("click", () => {
-            closeModal();
-            b.onClick?.();
-          });
-          modalFooter.appendChild(btn);
-        });
-
-        appModal.style.display = "block";
-        appModal.setAttribute("aria-hidden", "false");
-      }
-
-      function closeModal(){
-        if (!appModal) return;
-        appModal.style.display = "none";
-        appModal.setAttribute("aria-hidden", "true");
-      }
-
-      // cerrar al click fuera o X
-      appModal?.addEventListener("click", (e) => {
-        if (e.target.matches("[data-modal-close]")) closeModal();
-      });
-
-      function appAlert(message, type="info", title="Aviso", subtitle=""){
-        openModal({
-          type, title, subtitle, message,
-          buttons: [{ text: "Aceptar", className: "btn btn--primary" }]
-        });
-      }
-
-      function appConfirm(message, {
-        type="warning",
-        title="Confirmar acción",
-        subtitle="",
-        okText="Aceptar",
-        cancelText="Cancelar",
-        okClass="btn btn--primary",
-        cancelClass="btn btn--outline"
-      } = {}){
-        return new Promise(resolve => {
-          openModal({
-            type, title, subtitle, message,
-            buttons: [
-              { text: cancelText, className: cancelClass, onClick: () => resolve(false) },
-              { text: okText, className: okClass, onClick: () => resolve(true) }
-            ]
-          });
-        });
-      }
-
-      // ===== APP =====
-      // ✅ Puedes dejar estos endpoints si tu backend valida roles.
-      // Si tienes endpoints separados para coordinador, cámbialos aquí.
-      const API = {
-        all: "/noticias/getAll",
-        one: (id) => `/noticias/${id}`,
-        create: "/noticias/create",
-        update: (id) => `/noticias/update/${id}`,
-        del: (id) => `/noticias/delete/${id}`,
-      };
-
-      const layout = document.getElementById("newsLayout");
-      const tbody = document.getElementById("newsTbody");
-
-      const btnNew = document.getElementById("btnNewNews");
-      const btnCancel = document.getElementById("btnCancelNews");
-      const form = document.getElementById("newsForm");
-
-      const inpTitulo = document.getElementById("inpTitulo");
-      const txtContenido = document.getElementById("txtContenido");
-      const selEstatus = document.getElementById("selEstatus");
-      const inpHora = document.getElementById("inpHora");
-
-      const searchInput = document.getElementById("searchTitulo");
-      const btnBuscar = document.getElementById("btnBuscar");
-
-      // Preview refs
-      const preview = document.getElementById("newsPreview");
-      const previewTitle = document.getElementById("previewTitle");
-      const previewHora = document.getElementById("previewHora");
-      const previewAutor = document.getElementById("previewAutor");
-      const previewEstatus = document.getElementById("previewEstatus");
-      const previewContenido = document.getElementById("previewContenido");
-      const btnClosePreview = document.getElementById("btnClosePreview");
-      const previewImageWrap = document.getElementById("previewImageWrap");
-      const previewImage = document.getElementById("previewImage");
-
-      // Pagination refs/state
-      const pagination = document.getElementById("pagination");
-      const PAGE_SIZE = 4;
-      let currentPage = 1;
-
-      let editingId = null;
-      let cacheNoticias = [];
-      let currentList = [];
-
-      function openForm(){ layout.classList.add("is-split"); }
-      function closeForm(){ layout.classList.remove("is-split"); }
-      function limpiarForm(){ editingId = null; form.reset(); }
-
-      function escapeHtml(str) {
-        return String(str ?? "")
-          .replaceAll("&", "&amp;")
-          .replaceAll("<", "&lt;")
-          .replaceAll(">", "&gt;")
-          .replaceAll('"', "&quot;")
-          .replaceAll("'", "&#039;");
-      }
-
-      function fmtHora(offsetTimeStr){
-        if (!offsetTimeStr) return "";
-        const m = String(offsetTimeStr).match(/^(\d{2}:\d{2})/);
-        return m ? m[1] : String(offsetTimeStr);
-      }
-
-      function pillEstatus(estatus) {
-        const e = (estatus || "").toLowerCase();
-        if (e.includes("public")) return `<span class="pill pill--ok">${escapeHtml(estatus)}</span>`;
-        if (e.includes("venc")) return `<span class="pill pill--bad">${escapeHtml(estatus)}</span>`;
-        if (e.includes("por")) return `<span class="pill pill--warn">${escapeHtml(estatus)}</span>`;
-        return `<span class="pill">${escapeHtml(estatus || "")}</span>`;
-      }
-
-      function showPreview(n) {
-        if (!preview) return;
-
-        previewTitle.textContent = n.titulo ?? "";
-        previewHora.textContent = fmtHora(n.fechaPublicacion) ?? "";
-        previewAutor.textContent = n.nombreAutor ?? "";
-        previewEstatus.textContent = n.estatus ?? "";
-        previewContenido.textContent = n.contenido ?? "";
-
-        if (previewImageWrap && previewImage && n.imagenUrl) {
-          previewImage.src = n.imagenUrl;
-          previewImageWrap.style.display = "flex";
-        } else if (previewImageWrap) {
-          previewImageWrap.style.display = "none";
+            if (modalIcon) modalIcon.innerHTML = iconHtml;
         }
 
-        preview.style.display = "block";
-        preview.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
+        function openModal({ type="info", title="Aviso", subtitle="", message="", buttons=[] }){
+            if (!appModal) return;
 
-      function hidePreview() {
-        if (!preview) return;
-        preview.style.display = "none";
-        previewTitle.textContent = "";
-        previewHora.textContent = "";
-        previewAutor.textContent = "";
-        previewEstatus.textContent = "";
-        previewContenido.textContent = "";
-        if (previewImageWrap) previewImageWrap.style.display = "none";
-        if (previewImage) previewImage.src = "";
-      }
+            setModalType(type);
+            modalTitle.textContent = title;
+            modalSubtitle.textContent = subtitle;
+            modalBody.textContent = message;
 
-      btnClosePreview?.addEventListener("click", hidePreview);
+            modalFooter.innerHTML = "";
+            buttons.forEach(b => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = b.className || "btn btn--outline";
+                btn.textContent = b.text || "Aceptar";
+                btn.addEventListener("click", () => {
+                    closeModal();
+                    b.onClick?.();
+                });
+                modalFooter.appendChild(btn);
+            });
 
-      function renderTabla(lista){
-        tbody.innerHTML = lista.map(n => `
+            appModal.style.display = "block";
+            appModal.setAttribute("aria-hidden", "false");
+        }
+
+        function closeModal(){
+            if (!appModal) return;
+            appModal.style.display = "none";
+            appModal.setAttribute("aria-hidden", "true");
+        }
+
+        // cerrar al click fuera o X
+        appModal?.addEventListener("click", (e) => {
+            if (e.target.matches("[data-modal-close]")) closeModal();
+        });
+
+        function appAlert(message, type="info", title="Aviso", subtitle=""){
+            openModal({
+                type, title, subtitle, message,
+                buttons: [{ text: "Aceptar", className: "btn btn--primary" }]
+            });
+        }
+
+        function appConfirm(message, {
+            type="warning",
+            title="Confirmar acción",
+            subtitle="",
+            okText="Aceptar",
+            cancelText="Cancelar",
+            okClass="btn btn--primary",
+            cancelClass="btn btn--outline"
+        } = {}){
+            return new Promise(resolve => {
+                openModal({
+                    type, title, subtitle, message,
+                    buttons: [
+                        { text: cancelText, className: cancelClass, onClick: () => resolve(false) },
+                        { text: okText, className: okClass, onClick: () => resolve(true) }
+                    ]
+                });
+            });
+        }
+
+        // ===== APP =====
+        const API = {
+            all: "/noticias/getAll",
+            one: (id) => `/noticias/${id}`,
+            create: "/noticias/create",
+            update: (id) => `/noticias/update/${id}`,
+            del: (id) => `/noticias/delete/${id}`,
+        };
+
+        const layout = document.getElementById("newsLayout");
+        const tbody = document.getElementById("newsTbody");
+
+        const btnNew = document.getElementById("btnNewNews");
+        const btnCancel = document.getElementById("btnCancelNews");
+        const form = document.getElementById("newsForm");
+
+        const inpTitulo = document.getElementById("inpTitulo");
+        const txtContenido = document.getElementById("txtContenido");
+        const selEstatus = document.getElementById("selEstatus");
+        const inpHora = document.getElementById("inpHora");
+
+        const searchInput = document.getElementById("searchTitulo");
+        const btnBuscar = document.getElementById("btnBuscar");
+
+        // Preview refs
+        const preview = document.getElementById("newsPreview");
+        const previewTitle = document.getElementById("previewTitle");
+        const previewHora = document.getElementById("previewHora");
+        const previewAutor = document.getElementById("previewAutor");
+        const previewEstatus = document.getElementById("previewEstatus");
+        const previewContenido = document.getElementById("previewContenido");
+        const btnClosePreview = document.getElementById("btnClosePreview");
+        const previewImageWrap = document.getElementById("previewImageWrap");
+        const previewImage = document.getElementById("previewImage");
+
+        // Pagination refs/state
+        const pagination = document.getElementById("pagination");
+        const PAGE_SIZE = 4;
+        let currentPage = 1;
+
+        let editingId = null;
+        let cacheNoticias = [];
+        let currentList = [];
+
+        function openForm(){ layout.classList.add("is-split"); }
+        function closeForm(){ layout.classList.remove("is-split"); }
+        function limpiarForm(){ editingId = null; form.reset(); }
+
+        function escapeHtml(str) {
+            return String(str ?? "")
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+        function fmtHora(offsetTimeStr){
+            if (!offsetTimeStr) return "";
+            const m = String(offsetTimeStr).match(/^(\d{2}:\d{2})/);
+            return m ? m[1] : String(offsetTimeStr);
+        }
+
+        function pillEstatus(estatus) {
+            const e = (estatus || "").toLowerCase();
+            if (e.includes("public")) return `<span class="pill pill--ok">${escapeHtml(estatus)}</span>`;
+            if (e.includes("venc")) return `<span class="pill pill--bad">${escapeHtml(estatus)}</span>`;
+            if (e.includes("por")) return `<span class="pill pill--warn">${escapeHtml(estatus)}</span>`;
+            return `<span class="pill">${escapeHtml(estatus || "")}</span>`;
+        }
+
+        function showPreview(n) {
+            if (!preview) return;
+
+            previewTitle.textContent = n.titulo ?? "";
+            previewHora.textContent = fmtHora(n.fechaPublicacion) ?? "";
+            previewAutor.textContent = n.nombreAutor ?? "";
+            previewEstatus.textContent = n.estatus ?? "";
+            previewContenido.textContent = n.contenido ?? "";
+
+            if (previewImageWrap && previewImage && n.imagenUrl) {
+                previewImage.src = n.imagenUrl;
+                previewImageWrap.style.display = "flex";
+            } else if (previewImageWrap) {
+                previewImageWrap.style.display = "none";
+            }
+
+            preview.style.display = "block";
+            preview.scrollIntoView({ behavior: "smooth", block: "start" });
+        }
+
+        function hidePreview() {
+            if (!preview) return;
+            preview.style.display = "none";
+            previewTitle.textContent = "";
+            previewHora.textContent = "";
+            previewAutor.textContent = "";
+            previewEstatus.textContent = "";
+            previewContenido.textContent = "";
+            if (previewImageWrap) previewImageWrap.style.display = "none";
+            if (previewImage) previewImage.src = "";
+        }
+
+        btnClosePreview?.addEventListener("click", hidePreview);
+
+        function renderTabla(lista){
+            tbody.innerHTML = lista.map(n => `
           <tr class="news-row" data-row-id="${n.id}" style="cursor:pointer;">
             <td>${fmtHora(n.fechaPublicacion)}</td>
             <td>${escapeHtml(n.titulo)}</td>
@@ -392,264 +389,264 @@
             </td>
           </tr>
         `).join("");
-      }
-
-      // ===== PAGINACIÓN =====
-      function getTotalPages(list) {
-        return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
-      }
-
-      function getPageSlice(list, page) {
-        const start = (page - 1) * PAGE_SIZE;
-        return list.slice(start, start + PAGE_SIZE);
-      }
-
-      function renderPagination(totalPages) {
-        if (!pagination) return;
-
-        let html = "";
-        html += `<button class="page" type="button" data-page="prev" ${currentPage === 1 ? "disabled" : ""}>‹</button>`;
-        for (let p = 1; p <= totalPages; p++) {
-          html += `<button class="page ${p === currentPage ? "page--active" : ""}" type="button" data-page="${p}">${p}</button>`;
-        }
-        html += `<button class="page" type="button" data-page="next" ${currentPage === totalPages ? "disabled" : ""}>›</button>`;
-        pagination.innerHTML = html;
-      }
-
-      function renderTablaPaginada(list) {
-        currentList = Array.isArray(list) ? list : [];
-        const totalPages = getTotalPages(currentList);
-        if (currentPage > totalPages) currentPage = totalPages;
-
-        const pageItems = getPageSlice(currentList, currentPage);
-        renderTabla(pageItems);
-        renderPagination(totalPages);
-      }
-
-      pagination?.addEventListener("click", (e) => {
-        const btn = e.target.closest("button[data-page]");
-        if (!btn) return;
-
-        const totalPages = getTotalPages(currentList);
-        const val = btn.dataset.page;
-
-        if (val === "prev" && currentPage > 1) currentPage--;
-        else if (val === "next" && currentPage < totalPages) currentPage++;
-        else {
-          const n = Number(val);
-          if (!isNaN(n)) currentPage = n;
         }
 
-        renderTablaPaginada(currentList);
-      });
-
-      // ===== API CALLS =====
-      async function cargarNoticias(){
-        const res = await fetch(API.all);
-        if (!res.ok) {
-          appAlert("Error cargando noticias (GET /noticias/getAll).", "danger", "Error");
-          return;
+        // ===== PAGINACIÓN =====
+        function getTotalPages(list) {
+            return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
         }
-        cacheNoticias = await res.json();
-        currentPage = 1;
 
-        // ✅ IMPORTANTE: aplica el filtro actual (si el input está vacío, muestra TODO)
-        buscarLocal();
-
-        hidePreview();
-      }
-
-      async function cargarParaEditar(id){
-        const res = await fetch(API.one(id));
-        if (!res.ok) {
-          appAlert("No se pudo cargar la noticia.", "danger", "Error");
-          return;
+        function getPageSlice(list, page) {
+            const start = (page - 1) * PAGE_SIZE;
+            return list.slice(start, start + PAGE_SIZE);
         }
-        const n = await res.json();
 
-        editingId = n.id;
-        inpTitulo.value = n.titulo ?? "";
-        txtContenido.value = n.contenido ?? "";
-        selEstatus.value = n.estatus ?? "Publicada";
-        inpHora.value = fmtHora(n.fechaPublicacion) || "";
+        function renderPagination(totalPages) {
+            if (!pagination) return;
 
-        openForm();
-      }
+            let html = "";
+            html += `<button class="page" type="button" data-page="prev" ${currentPage === 1 ? "disabled" : ""}>‹</button>`;
+            for (let p = 1; p <= totalPages; p++) {
+                html += `<button class="page ${p === currentPage ? "page--active" : ""}" type="button" data-page="${p}">${p}</button>`;
+            }
+            html += `<button class="page" type="button" data-page="next" ${currentPage === totalPages ? "disabled" : ""}>›</button>`;
+            pagination.innerHTML = html;
+        }
 
-      async function eliminarNoticia(id){
-        const ok = await appConfirm("¿Seguro que deseas eliminar esta noticia?", {
-          type: "danger",
-          title: "Eliminar noticia",
-          subtitle: "Esta acción no se puede deshacer",
-          okText: "Eliminar",
-          cancelText: "Cancelar"
+        function renderTablaPaginada(list) {
+            currentList = Array.isArray(list) ? list : [];
+            const totalPages = getTotalPages(currentList);
+            if (currentPage > totalPages) currentPage = totalPages;
+
+            const pageItems = getPageSlice(currentList, currentPage);
+            renderTabla(pageItems);
+            renderPagination(totalPages);
+        }
+
+        pagination?.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-page]");
+            if (!btn) return;
+
+            const totalPages = getTotalPages(currentList);
+            const val = btn.dataset.page;
+
+            if (val === "prev" && currentPage > 1) currentPage--;
+            else if (val === "next" && currentPage < totalPages) currentPage++;
+            else {
+                const n = Number(val);
+                if (!isNaN(n)) currentPage = n;
+            }
+
+            renderTablaPaginada(currentList);
         });
-        if (!ok) return;
 
-        const res = await fetch(API.del(id), { method: "DELETE" });
-        if (!res.ok) {
-          appAlert("Error al eliminar la noticia.", "danger", "No se pudo eliminar");
-          return;
-        }
-        await cargarNoticias();
-        appAlert("Noticia eliminada correctamente.", "success", "Listo");
-      }
+        // ===== API CALLS =====
+        async function cargarNoticias(){
+            const res = await fetch(API.all);
+            if (!res.ok) {
+                appAlert("Error cargando noticias (GET /noticias/getAll).", "danger", "Error");
+                return;
+            }
+            cacheNoticias = await res.json();
+            currentPage = 1;
 
-      // "HH:MM" -> "HH:MM:00-06:00" para OffsetTime
-      function horaAOffsetTime(hhmm, offset = "-06:00"){
-        return `${hhmm}:00${offset}`;
-      }
+            // ✅ IMPORTANTE: aplica el filtro actual (si el input está vacío, muestra TODO)
+            buscarLocal();
 
-      // ✅ FIX: crear sin autoridIdusuario (autor viene del backend por sesión)
-      async function crearNoticia(){
-        const titulo = inpTitulo.value.trim();
-        const contenido = txtContenido.value.trim();
-        const estatus = selEstatus.value;
-        const hhmm = inpHora.value;
-
-        if (!titulo || !contenido || !estatus || !hhmm) {
-          appAlert("Completa: Título, Contenido, Estatus y Hora.", "warning", "Campos incompletos");
-          return;
+            hidePreview();
         }
 
-        if (titulo.length > 40) {
-          appAlert(`El título es muy largo. Tienes ${titulo.length} caracteres, el máximo es 40.`, "warning", "Validación");
-          return;
+        async function cargarParaEditar(id){
+            const res = await fetch(API.one(id));
+            if (!res.ok) {
+                appAlert("No se pudo cargar la noticia.", "danger", "Error");
+                return;
+            }
+            const n = await res.json();
+
+            editingId = n.id;
+            inpTitulo.value = n.titulo ?? "";
+            txtContenido.value = n.contenido ?? "";
+            selEstatus.value = n.estatus ?? "Publicada";
+            inpHora.value = fmtHora(n.fechaPublicacion) || "";
+
+            openForm();
         }
 
-        const fd = new FormData();
-        fd.append("titulo", titulo);
-        fd.append("contenido", contenido);
-        fd.append("estatus", estatus);
-        fd.append("fechaPublicacion", horaAOffsetTime(hhmm));
+        async function eliminarNoticia(id){
+            const ok = await appConfirm("¿Seguro que deseas eliminar esta noticia?", {
+                type: "danger",
+                title: "Eliminar noticia",
+                subtitle: "Esta acción no se puede deshacer",
+                okText: "Eliminar",
+                cancelText: "Cancelar"
+            });
+            if (!ok) return;
 
-        try {
-          const res = await fetch(API.create, { method: "POST", body: fd });
-
-          if (!res.ok) {
-            const txt = await res.text().catch(()=> "");
-            appAlert("Error al crear.\n" + txt, "danger", "No se pudo crear");
-            return;
-          }
-
-          limpiarForm(); closeForm();
-          await cargarNoticias();
-          appAlert("Noticia creada correctamente.", "success", "Listo");
-        } catch (err) {
-          console.error(err);
-          appAlert("Ocurrió un error inesperado al crear la noticia.", "danger", "Error");
-        }
-      }
-
-      // ✅ FIX: actualizar sin autoridIdusuario
-      async function actualizarNoticia(id){
-        const titulo = inpTitulo.value.trim();
-        const contenido = txtContenido.value.trim();
-        const estatus = selEstatus.value;
-        const hhmm = inpHora.value;
-
-        if (!id) {
-          appAlert("No hay ID para actualizar.", "danger", "Error");
-          return;
-        }
-        if (!titulo || !contenido || !estatus || !hhmm) {
-          appAlert("Completa: Título, Contenido, Estatus y Hora.", "warning", "Campos incompletos");
-          return;
+            const res = await fetch(API.del(id), { method: "DELETE" });
+            if (!res.ok) {
+                appAlert("Error al eliminar la noticia.", "danger", "No se pudo eliminar");
+                return;
+            }
+            await cargarNoticias();
+            appAlert("Noticia eliminada correctamente.", "success", "Listo");
         }
 
-        const payload = {
-          id: id,
-          titulo,
-          contenido,
-          estatus,
-          fechaPublicacion: horaAOffsetTime(hhmm)
-        };
-
-        try {
-          const res = await fetch(API.update(id), {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload)
-          });
-
-          if (!res.ok) {
-            const txt = await res.text().catch(()=> "");
-            appAlert("Error al actualizar.\n" + txt, "danger", "No se pudo actualizar");
-            return;
-          }
-
-          limpiarForm(); closeForm();
-          await cargarNoticias();
-          appAlert("Noticia actualizada correctamente.", "success", "Listo");
-        } catch (err) {
-          console.error(err);
-          appAlert("Ocurrió un error inesperado al actualizar la noticia.", "danger", "Error");
-        }
-      }
-
-      function buscarLocal(){
-        const q = (searchInput.value || "").toLowerCase().trim();
-        if (!q) { currentPage = 1; renderTablaPaginada(cacheNoticias); return; }
-
-        const filtradas = cacheNoticias.filter(n =>
-          String(n.titulo || "").toLowerCase().includes(q)
-        );
-
-        currentPage = 1;
-        renderTablaPaginada(filtradas);
-      }
-
-      // Eventos UI
-      btnNew?.addEventListener("click", () => { limpiarForm(); openForm(); });
-      btnCancel?.addEventListener("click", () => { limpiarForm(); closeForm(); });
-
-      // ✅ Botón buscar
-      btnBuscar?.addEventListener("click", buscarLocal);
-
-      // ✅ Enter buscar
-      searchInput?.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") { e.preventDefault(); buscarLocal(); }
-      });
-
-      // ✅ BÚSQUEDA EN VIVO: cada tecla (incluye borrar)
-      searchInput?.addEventListener("input", () => {
-        buscarLocal();
-      });
-
-      // Delegación en tabla: botones + click en fila para preview
-      tbody.addEventListener("click", async (e) => {
-        // Botones Editar/Eliminar
-        const btn = e.target.closest("button[data-action]");
-        if (btn) {
-          const id = Number(btn.dataset.id);
-          if (!id) return;
-
-          if (btn.dataset.action === "edit") cargarParaEditar(id);
-          if (btn.dataset.action === "delete") eliminarNoticia(id);
-          return;
+        // "HH:MM" -> "HH:MM:00-06:00" para OffsetTime
+        function horaAOffsetTime(hhmm, offset = "-06:00"){
+            return `${hhmm}:00${offset}`;
         }
 
-        // Click en fila => preview
-        const row = e.target.closest("tr[data-row-id]");
-        if (!row) return;
+        // ✅ FIX: crear sin autoridIdusuario (autor viene del backend por sesión)
+        async function crearNoticia(){
+            const titulo = inpTitulo.value.trim();
+            const contenido = txtContenido.value.trim();
+            const estatus = selEstatus.value;
+            const hhmm = inpHora.value;
 
-        const id = Number(row.dataset.rowId);
-        if (!id) return;
+            if (!titulo || !contenido || !estatus || !hhmm) {
+                appAlert("Completa: Título, Contenido, Estatus y Hora.", "warning", "Campos incompletos");
+                return;
+            }
 
-        const res = await fetch(API.one(id));
-        if (!res.ok) { appAlert("No se pudo cargar el detalle.", "danger", "Error"); return; }
-        const n = await res.json();
-        showPreview(n);
-      });
+            if (titulo.length > 40) {
+                appAlert(`El título es muy largo. Tienes ${titulo.length} caracteres, el máximo es 40.`, "warning", "Validación");
+                return;
+            }
 
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        if (editingId) actualizarNoticia(editingId);
-        else crearNoticia();
-      });
+            const fd = new FormData();
+            fd.append("titulo", titulo);
+            fd.append("contenido", contenido);
+            fd.append("estatus", estatus);
+            fd.append("fechaPublicacion", horaAOffsetTime(hhmm));
 
-      // Inicial
-      cargarNoticias();
+            try {
+                const res = await fetch(API.create, { method: "POST", body: fd });
+
+                if (!res.ok) {
+                    const txt = await res.text().catch(()=> "");
+                    appAlert("Error al crear.\n" + txt, "danger", "No se pudo crear");
+                    return;
+                }
+
+                limpiarForm(); closeForm();
+                await cargarNoticias();
+                appAlert("Noticia creada correctamente.", "success", "Listo");
+            } catch (err) {
+                console.error(err);
+                appAlert("Ocurrió un error inesperado al crear la noticia.", "danger", "Error");
+            }
+        }
+
+        // ✅ FIX: actualizar sin autoridIdusuario
+        async function actualizarNoticia(id){
+            const titulo = inpTitulo.value.trim();
+            const contenido = txtContenido.value.trim();
+            const estatus = selEstatus.value;
+            const hhmm = inpHora.value;
+
+            if (!id) {
+                appAlert("No hay ID para actualizar.", "danger", "Error");
+                return;
+            }
+            if (!titulo || !contenido || !estatus || !hhmm) {
+                appAlert("Completa: Título, Contenido, Estatus y Hora.", "warning", "Campos incompletos");
+                return;
+            }
+
+            const payload = {
+                id: id,
+                titulo,
+                contenido,
+                estatus,
+                fechaPublicacion: horaAOffsetTime(hhmm)
+            };
+
+            try {
+                const res = await fetch(API.update(id), {
+                    method: "PUT",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!res.ok) {
+                    const txt = await res.text().catch(()=> "");
+                    appAlert("Error al actualizar.\n" + txt, "danger", "No se pudo actualizar");
+                    return;
+                }
+
+                limpiarForm(); closeForm();
+                await cargarNoticias();
+                appAlert("Noticia actualizada correctamente.", "success", "Listo");
+            } catch (err) {
+                console.error(err);
+                appAlert("Ocurrió un error inesperado al actualizar la noticia.", "danger", "Error");
+            }
+        }
+
+        function buscarLocal(){
+            const q = (searchInput.value || "").toLowerCase().trim();
+            if (!q) { currentPage = 1; renderTablaPaginada(cacheNoticias); return; }
+
+            const filtradas = cacheNoticias.filter(n =>
+                String(n.titulo || "").toLowerCase().includes(q)
+            );
+
+            currentPage = 1;
+            renderTablaPaginada(filtradas);
+        }
+
+        // Eventos UI
+        btnNew?.addEventListener("click", () => { limpiarForm(); openForm(); });
+        btnCancel?.addEventListener("click", () => { limpiarForm(); closeForm(); });
+
+        // ✅ Botón buscar
+        btnBuscar?.addEventListener("click", buscarLocal);
+
+        // ✅ Enter buscar
+        searchInput?.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") { e.preventDefault(); buscarLocal(); }
+        });
+
+        // ✅ BÚSQUEDA EN VIVO: cada tecla (incluye borrar)
+        searchInput?.addEventListener("input", () => {
+            buscarLocal();
+        });
+
+        // Delegación en tabla: botones + click en fila para preview
+        tbody.addEventListener("click", async (e) => {
+            // Botones Editar/Eliminar
+            const btn = e.target.closest("button[data-action]");
+            if (btn) {
+                const id = Number(btn.dataset.id);
+                if (!id) return;
+
+                if (btn.dataset.action === "edit") cargarParaEditar(id);
+                if (btn.dataset.action === "delete") eliminarNoticia(id);
+                return;
+            }
+
+            // Click en fila => preview
+            const row = e.target.closest("tr[data-row-id]");
+            if (!row) return;
+
+            const id = Number(row.dataset.rowId);
+            if (!id) return;
+
+            const res = await fetch(API.one(id));
+            if (!res.ok) { appAlert("No se pudo cargar el detalle.", "danger", "Error"); return; }
+            const n = await res.json();
+            showPreview(n);
+        });
+
+        form.addEventListener("submit", (e) => {
+            e.preventDefault();
+            if (editingId) actualizarNoticia(editingId);
+            else crearNoticia();
+        });
+
+        // Inicial
+        cargarNoticias();
     });
 </script>
 

@@ -1,10 +1,316 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Administrador | Actividades</title>
+
+    <link rel="stylesheet" href="/css_admin/styles.css" />
+    <link rel="stylesheet" href="/css_admin/convenios.css" />
+    <link rel="stylesheet" href="/css_admin/index.css" />
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        /* Ajuste específico para la barra de filtros de este módulo */
+        .filters-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr auto;
+            gap: 12px;
+            width: 100%;
+            align-items: center;
+        }
+
+        .filter-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 7px 10px;
+            background: #fff;
+        }
+
+        .filter-box select, .filter-box input {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            background: transparent !important;
+            width: 100%;
+            font-size: 11px;
+            color: var(--text);
+        }
+
+        .btn-action-row {
+            border-radius: 20px;
+            padding: 4px 12px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-weight: 600;
+        }
+    </style>
 </head>
+
 <body>
+<div class="app">
+
+    <header class="topbar">
+        <div class="topbar__left">
+            <span class="topbar__title">ADMINISTRADOR</span>
+        </div>
+        <div class="topbar__right">
+            <div class="logos">
+                <img src="/img/EscudosGEM.png" alt="EscudosGEM" class="logo-img">
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <div class="tabs__left">
+            <a class="tab" th:href="@{/admin/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/admin/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/admin/asignaciones}">ASIGNACIONES</a>
+            <a class="tab tab--active" th:href="@{/admin/actividades}">ACTIVIDADES Y EVIDENCIAS</a>
+            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS Y ROLES</a>
+        </div>
+        <div class="tabs__right">
+            <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESION</button>
+        </div>
+    </nav>
+
+    <section class="toolbar">
+        <div class="filters-container">
+            <div class="filter-box">
+                <i class="fa-regular fa-user search__icon"></i>
+                <input type="text" id="filterPrestador" placeholder="Filtrar por Prestador..." />
+            </div>
+
+            <div class="filter-box">
+                <i class="fa-solid fa-filter search__icon"></i>
+                <select id="filterStatus">
+                    <option value="">Filtrar por Estado de la Actividad</option>
+                    <option value="Aprobada">Aprobada</option>
+                    <option value="Pendiente">Pendiente</option>
+                    <option value="Rechazada">Rechazada</option>
+                </select>
+            </div>
+
+            <div class="filter-box">
+                <i class="fa-regular fa-calendar search__icon"></i>
+                <input type="date" id="filterFecha" placeholder="Filtrar por Periodo" />
+            </div>
+
+            <button class="btn btn--primary" type="button" id="btnSearch">Buscar</button>
+        </div>
+    </section>
+
+    <section class="content-grid" id="mainLayout">
+
+        <main class="panel panel--left">
+            <div class="panel__header">
+                <h2 class="panel__title">ACTIVIDADES REGISTRADAS</h2>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Prestador</th>
+                        <th>Actividad</th>
+                        <th>Fecha</th>
+                        <th>Área</th>
+                        <th>Estatus</th>
+                        <th class="th-actions" style="width: 200px !important;">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+
+            <div id="detailsPanel" style="display:none; margin-top:14px; border-top:1px solid #eee; padding-top:14px;">
+                <div class="panel" style="background:#fff;">
+                    <div class="panel__header panel__header--compact">
+                        <h3 class="panel__subtitle">DETALLE DE EVIDENCIA</h3>
+                        <button type="button" class="btn btn--mini btn--outline" onclick="document.getElementById('detailsPanel').style.display='none'">Cerrar</button>
+                    </div>
+                    <div class="panel__body" style="padding:10px; font-size:11px;">
+                        <p><strong>Descripción:</strong> <span id="detDesc"></span></p>
+                        <p><strong>Evidencia Adjunta:</strong> <a href="#" style="color:var(--color-vino);">Descargar PDF</a></p>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+    </section>
+</div>
+
+<script>
+
+    // Datos de prueba
+    const mockData = [
+        { id: 1, prestador: "Ana López", actividad: "Apoyo Administrativo", fecha: "2025-12-15", area: "Jurídico", estatus: "Aprobada" },
+        { id: 2, prestador: "Juan Montez", actividad: "Soporte Técnico", fecha: "2025-12-15", area: "Sistemas", estatus: "Rechazada" },
+        { id: 3, prestador: "Maria Juarez", actividad: "Revisión de Expedientes", fecha: "2025-12-15", area: "Archivo", estatus: "Pendiente" },
+        { id: 6, prestador: "Julia Sofia", actividad: "Apoyo Administrativo", fecha: "2025-12-15", area: "Sistemas", estatus: "Aprobada" },
+        { id: 8, prestador: "Benito Juárez", actividad: "Jurídico Avanzado", fecha: "2025-12-16", area: "Jurídico", estatus: "Aprobada" },
+        { id: 9, prestador: "Elon Musk", actividad: "Cohetería", fecha: "2025-12-16", area: "Tecnología", estatus: "Pendiente" },
+        { id: 10, prestador: "Bill Gates", actividad: "Office 365", fecha: "2025-12-16", area: "Sistemas", estatus: "Aprobada" },
+        { id: 11, prestador: "Steve Jobs", actividad: "Diseño UX", fecha: "2025-12-16", area: "Diseño", estatus: "Rechazada" },
+    ];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        const tbody = document.getElementById("tableBody");
+        const pagination = document.getElementById("pagination");
+
+        // Configuración de Paginación
+        const PAGE_SIZE = 9;
+        let currentPage = 1;
+        let currentList = [];
+
+        function getStatusPill(status) {
+            if (status === "Aprobada") {
+                return `<span class="pill pill--ok">Aprobada</span>`;
+            }
+            if (status === "Rechazada") {
+                return `<span class="pill pill--bad">Rechazada</span>`;
+            }
+            if (status === "Pendiente") {
+                return `<span class="pill pill--warn">Pendiente</span>`;
+            }
+
+            // Default
+            return `<span class="pill">${status}</span>`;
+        }
+
+        function getActionButton(status, id) {
+            const btnVer = `<button class="btn btn--outline btn-action-row" onclick="verDetalle(${id})">Ver <i class="fa-regular fa-eye"></i></button>`;
+            let btnAccion = "";
+
+            if (status === "Rechazada") {
+                btnAccion = `<button class="btn btn--outline btn-action-row" onclick="corregir(${id})">Corregir <i class="fa-solid fa-pen-to-square"></i></button>`;
+            } else if (status === "Pendiente") {
+                btnAccion = `<button class="btn btn--outline btn-action-row" onclick="actualizar(${id})">Actualizar</button>`;
+            }
+
+            return `<div style="display:flex; gap:6px; justify-content:center;">${btnVer} ${btnAccion}</div>`;
+        }
+
+        function renderPageRows(pageData) {
+            tbody.innerHTML = "";
+            pageData.forEach(item => {
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${item.prestador}</td>
+                    <td>${item.actividad}</td>
+                    <td>${item.fecha}</td>
+                    <td>${item.area}</td>
+                    <td>${getStatusPill(item.estatus)}</td>
+                    <td class="actions">
+                        ${getActionButton(item.estatus, item.id)}
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        // --- Lógica Paginación ---
+        function getTotalPages(list) {
+            return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+        }
+
+        function getPageSlice(list, page) {
+            const start = (page - 1) * PAGE_SIZE;
+            return list.slice(start, start + PAGE_SIZE);
+        }
+
+        function renderPagination(totalPages) {
+            if (!pagination) return;
+
+            let html = "";
+            html += `<button class="page" type="button" data-page="prev" ${currentPage === 1 ? "disabled" : ""}>‹</button>`;
+
+            for (let p = 1; p <= totalPages; p++) {
+                const activeClass = p === currentPage ? "page--active" : "";
+                html += `<button class="page ${activeClass}" type="button" data-page="${p}">${p}</button>`;
+            }
+
+            html += `<button class="page" type="button" data-page="next" ${currentPage === totalPages ? "disabled" : ""}>›</button>`;
+            pagination.innerHTML = html;
+        }
+
+        function renderTablaPaginada(list) {
+            currentList = Array.isArray(list) ? list : [];
+            const totalPages = getTotalPages(currentList);
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const pageItems = getPageSlice(currentList, currentPage);
+            renderPageRows(pageItems);
+            renderPagination(totalPages);
+        }
+
+        pagination.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-page]");
+            if (!btn || btn.disabled) return;
+
+            const totalPages = getTotalPages(currentList);
+            const val = btn.dataset.page;
+
+            if (val === "prev" && currentPage > 1) currentPage--;
+            else if (val === "next" && currentPage < totalPages) currentPage++;
+            else {
+                const n = Number(val);
+                if (!isNaN(n)) currentPage = n;
+            }
+
+            renderTablaPaginada(currentList);
+        });
+
+        // --- Filtros ---
+        const btnSearch = document.getElementById("btnSearch");
+        const inpPrestador = document.getElementById("filterPrestador");
+        const selStatus = document.getElementById("filterStatus");
+
+        btnSearch.addEventListener("click", () => {
+            const txt = inpPrestador.value.toLowerCase();
+            const stat = selStatus.value;
+
+            const filtrados = mockData.filter(d => {
+                const matchName = d.prestador.toLowerCase().includes(txt);
+                const matchStatus = stat === "" || d.estatus === stat;
+                return matchName && matchStatus;
+            });
+
+            currentPage = 1;
+            renderTablaPaginada(filtrados);
+        });
+
+        // Inicializar
+        renderTablaPaginada(mockData);
+    });
+
+    // Acciones simuladas
+    function verDetalle(id) {
+        const item = mockData.find(d => d.id === id);
+        document.getElementById("detDesc").textContent = `Detalle de la actividad "${item.actividad}" realizada por ${item.prestador}.`;
+        document.getElementById("detailsPanel").style.display = "block";
+    }
+
+    function corregir(id) { alert("Abrir modal corregir ID: " + id); }
+    function actualizar(id) { alert("Abrir modal actualizar ID: " + id); }
+
+    document.getElementById("btnLogout")?.addEventListener("click", async () => {
+        try { await fetch("/logout", { method: "POST" }); window.location.href = "/login?logout"; }
+        catch (e) { console.error(e); }
+    });
+</script>
 
 </body>
 </html>
