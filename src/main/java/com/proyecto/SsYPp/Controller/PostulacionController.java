@@ -104,24 +104,28 @@ public class PostulacionController {
             Authentication authentication,
             @RequestHeader(value = "Referer", required = false) String referer
     ) {
-        postulacionService.postular(vacanteId, comentarios, authentication.getName());
-
-        // ✅ volver a la misma página (donde estaba el prestador)
+        // 1. Definir a dónde volveremos
         String redirectTo = (referer != null && !referer.isBlank())
                 ? referer
-                : "/"; // fallback por si no viene Referer
+                : "/";
 
-        // ✅ agregamos un mensaje por query param
-        // (lo leemos en el HTML y lo mostramos)
-        if (redirectTo.contains("?")) {
-            redirectTo += "&msgPostulacion=ok";
-        } else {
-            redirectTo += "?msgPostulacion=ok";
+        try {
+            // 2. Intentamos postular
+            postulacionService.postular(vacanteId, comentarios, authentication.getName());
+
+            // ÉXITO: Agregamos ?msgPostulacion=ok
+            redirectTo += (redirectTo.contains("?") ? "&" : "?") + "msgPostulacion=ok";
+
+        } catch (RuntimeException e) {
+            // 3. ERROR (Ya existe, o cualquier otra validación):
+            // Agregamos ?msgPostulacion=error y el texto del error
+            // Usamos replace para quitar espacios si quieres, o URLEncoder si prefieres
+            String errorMsg = e.getMessage().replace(" ", "%20");
+            redirectTo += (redirectTo.contains("?") ? "&" : "?") + "msgPostulacion=error&msgText=" + errorMsg;
         }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(redirectTo));
         return new ResponseEntity<>(headers, HttpStatus.FOUND); // 302
     }
-
 }

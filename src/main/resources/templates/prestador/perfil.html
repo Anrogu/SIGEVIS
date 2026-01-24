@@ -187,7 +187,7 @@
 <script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", () => {
 
-        // ====== MODAL ======
+        // ====== MODAL (Reutilizamos tu modal existente) ======
         const gobModal = document.getElementById("gobModal");
         const gobModalTitle = document.getElementById("gobModalTitle");
         const gobModalSubtitle = document.getElementById("gobModalSubtitle");
@@ -231,27 +231,51 @@
             openGobModal({
                 type: "info",
                 title: "Aviso",
-                subtitle: "",
                 body: message,
-                okText: "Entendido",
                 hideCancel: true
             });
         }
 
-        // ✅ Mostrar mensaje si viene de una postulación (?msgPostulacion=ok)
-        const msgPostulacion = /*[[${param.msgPostulacion != null ? 'ok' : ''}]]*/ '';
-        if (msgPostulacion === 'ok') {
+        // ============================================================
+        // ✅ LÓGICA DE MENSAJES (ÉXITO Y ERROR)
+        // ============================================================
+
+        // Leemos los parámetros de la URL
+        const params = new URLSearchParams(window.location.search);
+        const msgType = params.get("msgPostulacion"); // 'ok' o 'error'
+        const msgText = params.get("msgText");        // Texto del error (si hay)
+
+        // 1. CASO ÉXITO (Verde)
+        if (msgType === 'ok') {
             openGobModal({
                 type: "success",
                 title: "Postulación enviada",
-                subtitle: "",
                 body: "Tu postulación fue registrada correctamente. Está en proceso de revisión por el coordinador.",
                 okText: "Entendido",
                 hideCancel: true
             });
+            // Limpiamos la URL para que no salga el modal al recargar
+            window.history.replaceState({}, document.title, window.location.pathname);
         }
 
-        // ====== UI refs ======
+        // 2. CASO ERROR (Rojo) - "Ya existe una postulación..."
+        if (msgType === 'error') {
+            const textoError = msgText ? decodeURIComponent(msgText) : "No se pudo realizar la postulación.";
+
+            openGobModal({
+                type: "danger",
+                title: "No se pudo postular",
+                body: textoError, // Aquí saldrá: "Ya existe una postulación para esta vacante"
+                okText: "Entendido",
+                hideCancel: true
+            });
+            // Limpiamos la URL
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
+
+        // ============================================================
+
+        // ====== UI refs y Lógica de Tablas ======
         const tbody = document.getElementById("vacantesBody");
         const searchInput = document.getElementById("searchVac");
         const btnSearch = document.getElementById("btnSearchVac");
@@ -344,6 +368,10 @@
             }
 
             if (row) {
+                // Si hizo click en la fila pero NO en un botón (para ver detalle)
+                // Checamos que no sea el form button
+                if (e.target.closest("button") || e.target.closest("form")) return;
+
                 const id = Number(row.getAttribute("data-row"));
                 const v = vacantesCache.find(x => Number(x.id) === id);
                 if (v) openDetails(v);

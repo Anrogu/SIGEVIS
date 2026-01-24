@@ -1,6 +1,7 @@
 package com.proyecto.SsYPp.Controller;
 
 import com.proyecto.SsYPp.Dto.CambioStatusRequest;
+import com.proyecto.SsYPp.Dto.PostulacionCoordinadorRowDto;
 import com.proyecto.SsYPp.Entity.*;
 import com.proyecto.SsYPp.Repository.*;
 import com.proyecto.SsYPp.Service.Impl.PostulacionServiceImpl;
@@ -153,4 +154,10 @@ public class CoordinadorVacanteController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
+    @GetMapping("/postulaciones")
+    public List<PostulacionCoordinadorRowDto> listarMisPostulaciones(Authentication auth) {
+        return postulacionService.misPostulacionesCoordinador(auth.getName());
+    }
+
 }
