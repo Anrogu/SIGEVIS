@@ -107,12 +107,13 @@
                                 Ver
                             </button>
 
-                            <!-- ✅ Botón de postulación (ruta sugerida) -->
-                            <a class="btn btn--mini btn--primary"
-                               style="text-decoration:none;"
-                               th:href="@{/usuario/postular/{idVacante}(idVacante=${v.id})}">
-                                Postularme
-                            </a>
+                            <!-- ✅ Botón de postulación -->
+                            <form th:action="@{/postulaciones/postular-form}" method="post" style="display:inline;">
+                                <input type="hidden" name="vacanteId" th:value="${v.id}" />
+                                <button class="btn btn--mini btn--primary" type="submit">
+                                    Postularme
+                                </button>
+                            </form>
                         </td>
                     </tr>
                     </tbody>
@@ -183,7 +184,7 @@
     </div>
 </div>
 
-<script>
+<script th:inline="javascript">
     document.addEventListener("DOMContentLoaded", () => {
 
         // ====== MODAL ======
@@ -237,6 +238,19 @@
             });
         }
 
+        // ✅ Mostrar mensaje si viene de una postulación (?msgPostulacion=ok)
+        const msgPostulacion = /*[[${param.msgPostulacion != null ? 'ok' : ''}]]*/ '';
+        if (msgPostulacion === 'ok') {
+            openGobModal({
+                type: "success",
+                title: "Postulación enviada",
+                subtitle: "",
+                body: "Tu postulación fue registrada correctamente. Está en proceso de revisión por el coordinador.",
+                okText: "Entendido",
+                hideCancel: true
+            });
+        }
+
         // ====== UI refs ======
         const tbody = document.getElementById("vacantesBody");
         const searchInput = document.getElementById("searchVac");
@@ -246,16 +260,7 @@
         const vacDetails = document.getElementById("vacDetails");
         const btnCloseDetails = document.getElementById("btnCloseDetails");
 
-        // ====== Cache desde la tabla renderizada por Thymeleaf ======
-        // Construimos un cache a partir de atributos data-... para el detalle.
-        // Si quieres más campos en el detalle, agrega data-* en la fila (tr) desde Thymeleaf.
         let vacantesCache = [];
-
-        function pillEstatus(estatus) {
-            return estatus === true
-                ? `<span class="pill pill--vigente">Publicado</span>`
-                : `<span class="pill pill--cancelado">No publicado</span>`;
-        }
 
         function buildCacheFromDOM() {
             vacantesCache = [];
@@ -316,7 +321,6 @@
                 row.style.display = match ? "" : "none";
             });
 
-            // Si hay detalle abierto y el registro quedó oculto, lo cerramos
             if (selectedId != null) {
                 const selRow = tbody.querySelector(`tr[data-row='${selectedId}']`);
                 if (selRow && selRow.style.display === "none") closeDetails();
@@ -339,7 +343,6 @@
                 return;
             }
 
-            // Click en fila = abre detalle
             if (row) {
                 const id = Number(row.getAttribute("data-row"));
                 const v = vacantesCache.find(x => Number(x.id) === id);
