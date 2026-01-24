@@ -12,6 +12,7 @@ import com.proyecto.SsYPp.Repository.StatusPostulacionRepository;
 import com.proyecto.SsYPp.Repository.UsuarioRepository;
 import com.proyecto.SsYPp.Repository.VacanteRepository;
 import com.proyecto.SsYPp.Service.PostulacionService;
+import com.proyecto.SsYPp.Service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -33,6 +34,9 @@ public class PostulacionServiceImpl implements PostulacionService {
 
     @Autowired
     private VacanteRepository vacanteRepository;
+
+    @Autowired
+    private AsignacionService asignacionService;
 
     @Override
     public PostulacionDto create(PostulacionDto postulacion) {
@@ -319,4 +323,36 @@ public class PostulacionServiceImpl implements PostulacionService {
         if (estatusId == 3L) return "Aceptado";
         return "Nuevo";
     }
+
+    @Override
+    public void gestionarCandidatos(List<Long> ids, Long statusId, String mensajeExtra) {
+
+        // 1. Usar statusPostulacionRepository (nombre correcto)
+        StatusPostulacion nuevoStatus = statusPostulacionRepository.findById(statusId)
+                .orElseThrow(() -> new RuntimeException("Estatus no encontrado"));
+
+        // 2. Iterar
+        for (Long idPostulacion : ids) {
+            Postulacion p = postulacionRepository.findById(idPostulacion).orElse(null);
+            if (p == null) continue;
+
+            p.setEstatusIdestatus(nuevoStatus);
+
+            // 3. Lógica según ID
+            if (statusId == 2) { // Entrevista
+                p.setComentarios("Entrevista requerida. Link: " + mensajeExtra);
+            }
+            else if (statusId == 3) { // Aceptado
+                p.setComentarios("Aceptado. " + (mensajeExtra != null ? mensajeExtra : ""));
+                // ✅ Usar asignacionService (ahora sí inyectado)
+                asignacionService.crearAsignacionDesdePostulacion(p);
+            }
+            else if (statusId == 4) { // Rechazado
+                p.setComentarios("Rechazado: " + mensajeExtra);
+            }
+
+            postulacionRepository.save(p);
+        }
+    }
+
 }

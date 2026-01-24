@@ -3,11 +3,9 @@ package com.proyecto.SsYPp.Service;
 import com.proyecto.SsYPp.Dto.PostulacionCoordinadorDetalleDto;
 import com.proyecto.SsYPp.Dto.PostulacionCoordinadorRowDto;
 import com.proyecto.SsYPp.Dto.PostulacionDto;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public interface PostulacionService {
 
     PostulacionDto create(PostulacionDto postulacion);
@@ -23,12 +21,15 @@ public interface PostulacionService {
     // ✅ Prestador: crear postulación
     PostulacionDto postular(Long vacanteId, String comentarios, String authName);
 
-    // ✅ Coordinador: listado para tabla (YA con nombres)
+    // ✅ Coordinador: listado para tabla
     List<PostulacionCoordinadorRowDto> misPostulacionesCoordinador(String authName);
 
-    // ✅ Coordinador: detalle (comprobación)  [lo implementamos después]
+    // ✅ Coordinador: detalle
     PostulacionCoordinadorDetalleDto detalleCoordinador(Long postulacionId, String authName);
 
-    // ✅ Coordinador: cambiar estatus (Nuevo->Aceptar/Rechazar) [lo implementamos después]
+    // ✅ Coordinador: cambiar estatus (Individual)
     void cambiarEstatus(Long postulacionId, Long estatusId, String authName);
+
+    // ✅ Coordinador: Gestión Masiva (SOLO LA FIRMA AQUÍ)
+    void gestionarCandidatos(List<Long> ids, Long statusId, String mensajeExtra);
 }

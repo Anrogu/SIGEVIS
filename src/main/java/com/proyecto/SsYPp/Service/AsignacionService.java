@@ -2,6 +2,7 @@ package com.proyecto.SsYPp.Service;
 
 import com.proyecto.SsYPp.Dto.AsignacionDto;
 import com.proyecto.SsYPp.Dto.NoticiaDto;
+import com.proyecto.SsYPp.Entity.Postulacion;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,4 +14,6 @@ public interface AsignacionService {
     public AsignacionDto get(Long id);
     public void delete (Long id);
     public AsignacionDto update(AsignacionDto asignacion);
+
+    void crearAsignacionDesdePostulacion(Postulacion p);
 }

@@ -1,7 +1,10 @@
 package com.proyecto.SsYPp.Controller;
 
+import com.proyecto.SsYPp.Dto.CambioStatusRequest;
 import com.proyecto.SsYPp.Entity.*;
 import com.proyecto.SsYPp.Repository.*;
+import com.proyecto.SsYPp.Service.Impl.PostulacionServiceImpl;
+import com.proyecto.SsYPp.Service.PostulacionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,22 +18,20 @@ public class CoordinadorVacanteController {
 
     private final UsuarioRepository usuarioRepository;
     private final VacanteRepository vacanteRepository;
-    private final CarreraRepository carreraRepository;
-    private final ModalidadRepository modalidadRepository;
-    private final HorarioRepository horarioRepository;
+    private final PostulacionService postulacionService;
 
     public CoordinadorVacanteController(
             UsuarioRepository usuarioRepository,
             VacanteRepository vacanteRepository,
             CarreraRepository carreraRepository,
             ModalidadRepository modalidadRepository,
-            HorarioRepository horarioRepository
+            HorarioRepository horarioRepository,
+            PostulacionService postulacionService
+
     ) {
         this.usuarioRepository = usuarioRepository;
         this.vacanteRepository = vacanteRepository;
-        this.carreraRepository = carreraRepository;
-        this.modalidadRepository = modalidadRepository;
-        this.horarioRepository = horarioRepository;
+        this.postulacionService = postulacionService;
     }
 
     // =========================================================
@@ -130,5 +131,26 @@ public class CoordinadorVacanteController {
 
         vacanteRepository.deleteById(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/postulaciones/cambiar-status")
+    public ResponseEntity<?> cambiarStatusMasivo(@RequestBody CambioStatusRequest request) {
+        try {
+            if (request.getPostulacionIds() == null || request.getPostulacionIds().isEmpty()) {
+                return ResponseEntity.badRequest().body("No seleccionaste ningún candidato.");
+            }
+
+            postulacionService.gestionarCandidatos(
+                    request.getPostulacionIds(),
+                    request.getNuevoStatusId(),
+                    request.getMensaje()
+            );
+
+            return ResponseEntity.ok("Candidatos actualizados correctamente.");
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body("Error: " + e.getMessage());
+        }
     }
 }

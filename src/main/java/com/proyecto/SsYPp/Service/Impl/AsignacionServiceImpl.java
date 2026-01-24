@@ -7,6 +7,7 @@ import com.proyecto.SsYPp.Service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.OffsetTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -62,6 +63,7 @@ public class AsignacionServiceImpl implements AsignacionService {
         return asignacionDto;
 
     }
+
     public Asignacion convertirDTOAEntidad(AsignacionDto dto) {
         Postulacion postulacion = postulacionRepository.findById(dto.getPostulacionesIdpostulacion())
                 .orElseThrow(() -> new RuntimeException("postulacion no encontrada"));
@@ -81,4 +83,35 @@ public class AsignacionServiceImpl implements AsignacionService {
 
         return asignacion;
     }
+
+    @Override
+    public void crearAsignacionDesdePostulacion(Postulacion p) {
+        Asignacion nueva = new Asignacion();
+
+        // 1. Relaciones (Usando los nombres exactos de tus entidades)
+        nueva.setPostulacionesIdpostulacion(p);
+
+        // En tu entidad Asignacion tienes 'vacantesIdvacante', lo llenamos desde la postulación
+        nueva.setVacantesIdvacante(p.getVacanteIdvacante());
+
+        // 2. Área (Corrigiendo el nombre del getter)
+        // En Vacante.java tienes: private AreaDgp areasdgpIdarea;
+        // Lombok genera: getAreasdgpIdarea()
+        if(p.getVacanteIdvacante().getAreasdgpIdarea() != null) {
+            // Asumiendo que Asignacion tiene un campo 'area' o similar.
+            // Si no lo tienes en Asignacion.java, borra estas 3 lineas.
+            // nueva.setArea(p.getVacanteIdvacante().getAreasdgpIdarea());
+        }
+
+        // 3. Fechas (OffsetTime)
+        // Tu entidad usa OffsetTime, así que usamos OffsetTime.now()
+        nueva.setFechaInicio(OffsetTime.now());
+
+        // Ponemos fecha fin tentativa (ej. misma hora) o null si tu BD lo permite
+        nueva.setFechaFin(OffsetTime.now().plusHours(1));
+
+        asignacionRepository.save(nueva);
+    }
+
+
 }
