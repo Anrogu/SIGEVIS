@@ -19,6 +19,7 @@ public class VacanteServiceImpl implements VacanteService {
     @Autowired private HorarioRepository horarioRepository;
     @Autowired private CarreraRepository carreraRepository;
     @Autowired private UsuarioRepository usuarioRepository;
+    @Autowired private PostulacionRepository postulacionRepository;
 
     @Override
     public VacanteDto create(VacanteDto dto) {
@@ -170,5 +171,44 @@ public class VacanteServiceImpl implements VacanteService {
         v.setCreadoPor(usuario);
 
         return v;
+    }
+
+    // ✅ NUEVO: Vacantes por perfil excluyendo las ya postuladas por el usuario
+    @Override
+    public List<VacanteDto> getVacantesParaPrestadorSinPostuladas(Long idUsuario) {
+
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        // Carrera del usuario
+        Long carreraId = null;
+        if (usuario.getCarrerasIdcarrera() != null) {
+            carreraId = (long) usuario.getCarrerasIdcarrera().getId();
+        }
+
+        // ✅ Área del usuario (tu entity Usuario tiene "area", NO "areasdgpIdarea")
+        Long areaId = null;
+        if (usuario.getArea() != null && usuario.getArea().getId() != null) {
+            areaId = usuario.getArea().getId();
+        }
+
+        // 1) Vacantes por perfil (reutilizando tu repo)
+        List<Vacante> vacantesPerfil;
+        if (carreraId != null && areaId != null) {
+            vacantesPerfil = vacanteRepository.findByCarrerasIdcarrera_IdAndAreasdgpIdarea_Id(carreraId, areaId);
+        } else if (carreraId != null) {
+            vacantesPerfil = vacanteRepository.findByCarrerasIdcarrera_Id(carreraId);
+        } else {
+            vacantesPerfil = List.of();
+        }
+
+        // 2) Vacantes ya postuladas por este usuario
+        List<Long> idsPostuladas = postulacionRepository.findVacanteIdsPostuladasByUsuario(idUsuario);
+
+        // 3) Filtrar y convertir
+        return vacantesPerfil.stream()
+                .filter(v -> !idsPostuladas.contains(v.getId()))
+                .map(this::convertirEntidadADTO)
+                .toList();
     }
 }

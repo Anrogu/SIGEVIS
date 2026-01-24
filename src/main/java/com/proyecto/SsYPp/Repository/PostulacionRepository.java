@@ -58,4 +58,39 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     """, nativeQuery = true)
     List<PostulacionCoordinadorRowDto> findRowsByArea(@Param("areaId") Long areaId);
 
+    // ✅ IDs de vacantes ya postuladas por el prestador (para filtrar "Vacantes para tu perfil")
+    @Query(value = """
+    SELECT p."Vacante_IdVacante"
+    FROM "Postulaciones" p
+    WHERE p."Usuarios_idUsuario" = :usuarioId
+    """, nativeQuery = true)
+    List<Long> findVacanteIdsPostuladasByUsuario(@Param("usuarioId") Long usuarioId);
+    // ✅ LISTADO PRESTADOR: postulaciones por usuario (projection)
+    @Query(value = """
+    SELECT
+        p."idPostulacion" AS idPostulacion,
+        to_char(p."fechaPostulacion"::time, 'HH24:MI') AS fechaPostulacion,
+
+        v."idVacantes" AS vacanteId,
+        v."nombrePuesto" AS vacanteNombre,
+        v."numeroPlazas" AS numeroPlazas,
+
+        a."nombre" AS areaNombre,
+
+        COALESCE(sp."idPostulacion", 1) AS estatusId,
+        CASE
+            WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Enviada'
+            WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazada'
+            WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptada'
+            ELSE 'Enviada'
+        END AS estatusTexto
+
+    FROM "Postulaciones" p
+    JOIN "Vacantes" v ON v."idVacantes" = p."Vacante_IdVacante"
+    LEFT JOIN "AreasDgp" a ON a."idArea" = v."AreasDgp_idArea"
+    LEFT JOIN "StatusPostulacion" sp ON sp."idPostulacion" = p."Estatus_IdEstatus"
+    WHERE p."Usuarios_idUsuario" = :usuarioId
+    ORDER BY p."fechaPostulacion" DESC
+""", nativeQuery = true)
+    List<com.proyecto.SsYPp.Dto.PostulacionPrestadorRowDto> findRowsByUsuario(@Param("usuarioId") Long usuarioId);
 }

@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Prestador | Mis Postulaciones</title>
+
+    <!-- Reusa tus estilos -->
+    <link rel="stylesheet" href="/css_admin/styles.css" />
+    <link rel="stylesheet" href="/css_admin/convenios.css" />
+    <link rel="stylesheet" href="/css_admin/index.css" />
+
+    <style>
+        /* Pastillas similares a tu estilo, pero para estatus de postulación */
+        .pill--nuevo { border:1px solid #c7d2fe; color:#3730a3; background:#eef2ff; }
+        .pill--aceptado { border:1px solid #86efac; color:#166534; background:#dcfce7; }
+        .pill--rechazado { border:1px solid #fecaca; color:#991b1b; background:#fee2e2; }
+        .pill--enviado { border:1px solid #e5e7eb; color:#374151; background:#f9fafb; }
+
+        .th-actions { width: 190px; text-align: center; }
+        .actions { text-align:center; }
+    </style>
+</head>
+
+<body>
+<div class="app">
+
+    <!-- HEADER -->
+    <header class="public-header">
+        <div class="public-header__row1">
+            <div></div>
+
+            <div class="public-header__title">PLATAFORMA SERVICIO SOCIAL</div>
+
+            <div class="public-header__logos">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
+            </div>
+        </div>
+
+        <div class="public-header__row2">
+            <nav class="public-nav">
+                <a class="public-nav__link" href="/usuario/perfil">Mi Perfil</a>
+                <a class="public-nav__link public-nav__link--active" href="/usuario/postulaciones">Mis Postulaciones</a>
+            </nav>
+
+            <div class="public-actions" style="display:flex; gap:10px; align-items:center;">
+        <span style="color:#111827; font-weight:600;"
+              th:text="'Hola, ' + ${usuario.nombre}">Hola</span>
+                <a class="btn btn--outline" th:href="@{/logout}" style="text-decoration:none;">Cerrar sesión</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- TOOLBAR -->
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="searchPost" class="search__input" type="text"
+                   placeholder="Buscar por vacante o unidad..." />
+        </div>
+        <button class="btn btn--primary" type="button" id="btnSearchPost">Buscar</button>
+    </section>
+
+    <!-- CONTENIDO -->
+    <section class="content-grid" id="postLayout">
+
+        <!-- LISTA -->
+        <main class="panel panel--left">
+            <div class="panel__header">
+                <div>
+                    <h2 class="panel__title">MIS POSTULACIONES</h2>
+                    <p style="margin:6px 0 0; color:#6b7280; font-size:.95rem;">
+                        Aquí puedes ver el seguimiento de tus postulaciones y su estatus.
+                    </p>
+                </div>
+                <div class="panel__actions"></div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Vacante</th>
+                        <th>Unidad</th>
+                        <th>Fecha</th>
+                        <th>Estatus</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="postBody">
+
+                    <!-- Sin datos -->
+                    <tr th:if="${#lists.isEmpty(postulaciones)}">
+                        <td colspan="5" style="text-align:center; padding:20px;">
+                            Aún no tienes postulaciones registradas.
+                        </td>
+                    </tr>
+
+                    <!-- Filas -->
+                    <tr th:each="p : ${postulaciones}"
+                        th:attr="data-row=${p.idPostulacion}">
+                        <td th:text="${p.vacanteNombre}">Vacante</td>
+                        <td th:text="${p.areaNombre != null ? p.areaNombre : '—'}">Unidad</td>
+                        <td th:text="${p.fechaPostulacion != null ? p.fechaPostulacion : '—'}">—</td>
+                        <td>
+                            <!-- Puedes mapear estatusId (1 Nuevo, 2 Rechazado, 3 Aceptado) -->
+                            <span th:if="${p.estatusId == 1}" class="pill pill--nuevo" th:text="${p.estatusTexto}">Nuevo</span>
+                            <span th:if="${p.estatusId == 2}" class="pill pill--rechazado" th:text="${p.estatusTexto}">Rechazado</span>
+                            <span th:if="${p.estatusId == 3}" class="pill pill--aceptado" th:text="${p.estatusTexto}">Aceptado</span>
+
+                            <!-- fallback -->
+                            <span th:if="${p.estatusId == null}" class="pill pill--enviado" th:text="${p.estatusTexto != null ? p.estatusTexto : 'Enviada'}">Enviada</span>
+                        </td>
+                        <td class="actions">
+                            <button class="btn btn--mini btn--outline" type="button"
+                                    th:attr="data-view=${p.idPostulacion}">
+                                Ver
+                            </button>
+
+                            <!-- Solo para mostrar un mensaje bonito si está aceptada -->
+                            <button class="btn btn--mini btn--primary" type="button"
+                                    th:if="${p.estatusId == 3}"
+                                    th:attr="data-welcome=${p.idPostulacion}">
+                                Ver mensaje
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- DETALLE -->
+            <div id="postDetailsWrap" style="display:none; margin-top:14px;">
+                <div class="panel" style="border:1px solid var(--border, #ddd); background:#fff;">
+                    <div class="panel__header panel__header--compact" style="display:flex; align-items:center; justify-content:space-between;">
+                        <h3 class="panel__subtitle" style="margin:0;">DETALLE DE POSTULACIÓN</h3>
+                        <button type="button" id="btnClosePostDetails" class="btn btn--outline btn--mini">Cerrar</button>
+                    </div>
+
+                    <div id="postDetails" style="padding:14px;">
+                        <!-- JS llena aquí -->
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- DERECHA -->
+        <aside class="panel panel--right">
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">SEGUIMIENTO</h3>
+            </div>
+
+            <div style="padding:14px; color:#111827;">
+                <ol style="margin:0; padding-left:18px;">
+                    <li><strong>Nuevo / Enviada:</strong> tu solicitud fue registrada.</li>
+                    <li><strong>Revisión:</strong> el coordinador valida tu información.</li>
+                    <li><strong>Aceptado:</strong> tu postulación fue aprobada.</li>
+                    <li><strong>Rechazado:</strong> tu postulación no fue seleccionada.</li>
+                </ol>
+
+                <hr style="margin:14px 0; border:none; border-top:1px solid #e5e7eb;" />
+
+                <p style="margin:0; color:#6b7280; font-size:.95rem;">
+                    Cuando una postulación sea <strong>ACEPTADA</strong>, aquí mismo verás el mensaje de bienvenida.
+                </p>
+            </div>
+        </aside>
+
+    </section>
+</div>
+
+<!-- ======================================================
+     MODAL GOV (reusa index.css)
+====================================================== -->
+<div id="gobModal" class="gob-modal gob-modal--danger" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card" role="dialog" aria-modal="true" aria-labelledby="gobModalTitle">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">!</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Título</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle">Subtítulo</p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body">Contenido</div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cancelar</button>
+            <button id="gobModalOk" type="button" class="btn btn--primary">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    document.addEventListener("DOMContentLoaded", () => {
+
+      // ====== MODAL ======
+      const gobModal = document.getElementById("gobModal");
+      const gobModalTitle = document.getElementById("gobModalTitle");
+      const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+      const gobModalBody = document.getElementById("gobModalBody");
+      const gobModalOk = document.getElementById("gobModalOk");
+      const gobModalCancel = document.getElementById("gobModalCancel");
+      let modalOnOk = null;
+
+      function openGobModal({type="info", title="Aviso", subtitle="", body="", okText="Aceptar", cancelText="Cancelar", onOk=null, hideCancel=false}) {
+        gobModal.classList.remove("gob-modal--info","gob-modal--success","gob-modal--warning","gob-modal--danger");
+        gobModal.classList.add(`gob-modal--${type}`);
+
+        gobModalTitle.textContent = title;
+        gobModalSubtitle.textContent = subtitle;
+        gobModalBody.textContent = body;
+
+        gobModalOk.textContent = okText;
+        gobModalCancel.textContent = cancelText;
+        gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+
+        modalOnOk = onOk;
+        gobModal.style.display = "flex";
+      }
+
+      function closeGobModal() {
+        gobModal.style.display = "none";
+        modalOnOk = null;
+      }
+
+      gobModal.addEventListener("click", (e) => {
+        const close = e.target.closest("[data-close='1']");
+        if (close) closeGobModal();
+      });
+      gobModalCancel.addEventListener("click", closeGobModal);
+      gobModalOk.addEventListener("click", async () => {
+        if (typeof modalOnOk === "function") await modalOnOk();
+        closeGobModal();
+      });
+
+      // ====== UI refs ======
+      const tbody = document.getElementById("postBody");
+      const searchInput = document.getElementById("searchPost");
+      const btnSearch = document.getElementById("btnSearchPost");
+
+      const detailsWrap = document.getElementById("postDetailsWrap");
+      const detailsBox = document.getElementById("postDetails");
+      const btnClose = document.getElementById("btnClosePostDetails");
+
+      let cache = [];
+
+      function buildCacheFromDOM() {
+        cache = [];
+        const rows = tbody.querySelectorAll("tr[data-row]");
+        rows.forEach(r => {
+          const id = Number(r.getAttribute("data-row"));
+          const cols = r.querySelectorAll("td");
+          if (!cols || cols.length < 4) return;
+
+          cache.push({
+            id,
+            vacante: cols[0]?.innerText?.trim() || "",
+            unidad: cols[1]?.innerText?.trim() || "—",
+            fecha: cols[2]?.innerText?.trim() || "—",
+            estatus: cols[3]?.innerText?.trim() || "—"
+          });
+        });
+      }
+
+      let selectedId = null;
+
+      function openDetails(p) {
+        if (!p) return;
+        selectedId = Number(p.id);
+
+        detailsBox.innerHTML = `
+          <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div><strong>Vacante:</strong><br>${p.vacante}</div>
+            <div><strong>Unidad:</strong><br>${p.unidad}</div>
+            <div><strong>Fecha:</strong><br>${p.fecha}</div>
+            <div><strong>Estatus:</strong><br>${p.estatus}</div>
+          </div>
+        `;
+
+        detailsWrap.style.display = "block";
+        detailsWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+
+      function closeDetails() {
+        selectedId = null;
+        detailsWrap.style.display = "none";
+      }
+      btnClose?.addEventListener("click", closeDetails);
+
+      function filtrar() {
+        const q = (searchInput?.value || "").toLowerCase().trim();
+        const rows = tbody.querySelectorAll("tr[data-row]");
+
+        rows.forEach(row => {
+          const tds = row.querySelectorAll("td");
+          const vacante = (tds[0]?.innerText || "").toLowerCase();
+          const unidad = (tds[1]?.innerText || "").toLowerCase();
+
+          const match = !q || vacante.includes(q) || unidad.includes(q);
+          row.style.display = match ? "" : "none";
+        });
+
+        if (selectedId != null) {
+          const selRow = tbody.querySelector(`tr[data-row='${selectedId}']`);
+          if (selRow && selRow.style.display === "none") closeDetails();
+        }
+      }
+
+      btnSearch?.addEventListener("click", filtrar);
+      searchInput?.addEventListener("input", filtrar);
+
+      tbody.addEventListener("click", (e) => {
+        const viewBtn = e.target.closest("[data-view]");
+        const welcomeBtn = e.target.closest("[data-welcome]");
+        const row = e.target.closest("tr[data-row]");
+
+        if (welcomeBtn) {
+          openGobModal({
+            type: "success",
+            title: "¡Postulación aceptada!",
+            body: "Tu postulación fue aceptada, ¡bienvenido! Ya puedes continuar con tu proceso en la plataforma.",
+            okText: "Entendido",
+            hideCancel: true
+          });
+          return;
+        }
+
+        if (viewBtn) {
+          const id = Number(viewBtn.getAttribute("data-view"));
+          const p = cache.find(x => Number(x.id) === id);
+          if (p) openDetails(p);
+          else openGobModal({ type:"info", title:"Aviso", body:"No se pudo cargar el detalle.", hideCancel:true });
+          return;
+        }
+
+        if (row) {
+          if (e.target.closest("button") || e.target.closest("form")) return;
+          const id = Number(row.getAttribute("data-row"));
+          const p = cache.find(x => Number(x.id) === id);
+          if (p) openDetails(p);
+        }
+      });
+
+      buildCacheFromDOM();
+    });
+</script>
+
+</body>
+</html>

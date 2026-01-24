@@ -93,23 +93,23 @@
                     </tr>
 
                     <tr th:each="v : ${vacantes}"
-                        th:attr="data-row=${v.id}">
-                        <td th:text="${v.nombrePuesto}">Título</td>
-                        <td th:text="${v.areasdgpIdarea != null ? v.areasdgpIdarea.nombre : '—'}">Unidad</td>
+                        th:attr="data-row=${v.idVacantes}">
+                    <td th:text="${v.nombrePuesto}">Título</td>
+                        <td th:text="${v.areaNombre != null ? v.areaNombre : '—'}">Unidad</td>
                         <td th:text="${v.numeroPlazas}">0</td>
                         <td>
                             <span th:if="${v.estatus == true}" class="pill pill--vigente">Publicado</span>
                             <span th:if="${v.estatus != true}" class="pill pill--cancelado">No publicado</span>
                         </td>
                         <td class="actions">
-                            <button class="btn btn--mini btn--outline" type="button"
-                                    th:attr="data-view=${v.id}">
-                                Ver
+                            <button class="btn btn--mini btn--outline"
+                                    th:attr="data-view=${v.idVacantes}">
+                            Ver
                             </button>
 
                             <!-- ✅ Botón de postulación -->
                             <form th:action="@{/postulaciones/postular-form}" method="post" style="display:inline;">
-                                <input type="hidden" name="vacanteId" th:value="${v.id}" />
+                                <input type="hidden" name="vacanteId" th:value="${v.idVacantes}" />
                                 <button class="btn btn--mini btn--primary" type="submit">
                                     Postularme
                                 </button>
