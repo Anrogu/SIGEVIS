@@ -20,8 +20,15 @@ public class AsignacionDto {
     private OffsetTime fechaFin;
 
     @NotNull
-    private Long postulacionesIdpostulacion; // Objeto para el ID
+    private Long postulacionesIdpostulacion;
 
     @NotNull
-    private Long vacantesIdvacante; // Según tu log, el campo se llama 'vacante'
+    private Long vacantesIdvacante;
+
+    // ✅ NUEVOS CAMPOS PARA MOSTRAR EN TABLA
+    private String prestadorNombre;
+    private String prestadorEmail;
+
+    private String vacanteNombre;
+    private String areaNombre;
 }

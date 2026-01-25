@@ -1,8 +1,13 @@
 package com.proyecto.SsYPp.Service.Impl;
 
 import com.proyecto.SsYPp.Dto.AsignacionDto;
-import com.proyecto.SsYPp.Entity.*;
-import com.proyecto.SsYPp.Repository.*;
+import com.proyecto.SsYPp.Entity.Asignacion;
+import com.proyecto.SsYPp.Entity.Postulacion;
+import com.proyecto.SsYPp.Entity.Usuario;
+import com.proyecto.SsYPp.Entity.Vacante;
+import com.proyecto.SsYPp.Repository.AsignacionRepository;
+import com.proyecto.SsYPp.Repository.PostulacionRepository;
+import com.proyecto.SsYPp.Repository.VacanteRepository;
 import com.proyecto.SsYPp.Service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,14 +18,17 @@ import java.util.stream.Collectors;
 
 @Service
 public class AsignacionServiceImpl implements AsignacionService {
+
     @Autowired
     private AsignacionRepository asignacionRepository;
+
     @Autowired
     private VacanteRepository vacantesRepository;
+
     @Autowired
     private PostulacionRepository postulacionRepository;
-    @Override
 
+    @Override
     public AsignacionDto create(AsignacionDto asignacionDto) {
         Asignacion asignacion = convertirDTOAEntidad(asignacionDto);
         Asignacion guardada = asignacionRepository.save(asignacion);
@@ -44,24 +52,65 @@ public class AsignacionServiceImpl implements AsignacionService {
 
     @Override
     public void delete(Long id) {
-    asignacionRepository.deleteById(id);
+        asignacionRepository.deleteById(id);
     }
 
     @Override
     public AsignacionDto update(AsignacionDto asignacionDto) {
-        Asignacion asignacion =  convertirDTOAEntidad(asignacionDto);
+        Asignacion asignacion = convertirDTOAEntidad(asignacionDto);
         Asignacion actualizada = asignacionRepository.save(asignacion);
         return convertirEntidadADTO(actualizada);
     }
-    public AsignacionDto convertirEntidadADTO(Asignacion  asignacion) {
-        AsignacionDto asignacionDto=new AsignacionDto();
-        asignacionDto.setId(asignacion.getId());
-        asignacionDto.setFechaFin(asignacion.getFechaFin());
-        asignacionDto.setFechaInicio(asignacion.getFechaInicio());
-        asignacionDto.setPostulacionesIdpostulacion(asignacion.getPostulacionesIdpostulacion().getId());
-        asignacionDto.setVacantesIdvacante(asignacion.getVacantesIdvacante().getId());
-        return asignacionDto;
 
+    // ✅ AQUÍ ENRIQUECEMOS EL DTO PARA MOSTRAR NOMBRES EN LA TABLA
+    public AsignacionDto convertirEntidadADTO(Asignacion asignacion) {
+        AsignacionDto dto = new AsignacionDto();
+
+        dto.setId(asignacion.getId());
+        dto.setFechaFin(asignacion.getFechaFin());
+        dto.setFechaInicio(asignacion.getFechaInicio());
+
+        // IDs
+        if (asignacion.getPostulacionesIdpostulacion() != null) {
+            dto.setPostulacionesIdpostulacion(asignacion.getPostulacionesIdpostulacion().getId());
+        }
+
+        if (asignacion.getVacantesIdvacante() != null) {
+            dto.setVacantesIdvacante(asignacion.getVacantesIdvacante().getId());
+        }
+
+        // ====== EXTRA: Prestador, Vacante y Área ======
+        Postulacion p = asignacion.getPostulacionesIdpostulacion();
+        Vacante v = asignacion.getVacantesIdvacante();
+
+        // Prestador (Postulación -> Usuario)
+        if (p != null && p.getUsuariosIdusuario() != null) {
+            Usuario u = p.getUsuariosIdusuario();
+
+            String nombreCompleto =
+                    safe(u.getNombre()) + " " +
+                            safe(u.getPrimerapellido()) + " " +
+                            safe(u.getSegundoapellido());
+
+            dto.setPrestadorNombre(nombreCompleto.trim());
+            dto.setPrestadorEmail(u.getEmail());
+        }
+
+        // Vacante
+        if (v != null) {
+            dto.setVacanteNombre(v.getNombrePuesto());
+
+            // Área
+            if (v.getAreasdgpIdarea() != null) {
+                dto.setAreaNombre(v.getAreasdgpIdarea().getNombre());
+            }
+        }
+
+        return dto;
+    }
+
+    private String safe(String s) {
+        return s == null ? "" : s;
     }
 
     public Asignacion convertirDTOAEntidad(AsignacionDto dto) {
@@ -88,30 +137,22 @@ public class AsignacionServiceImpl implements AsignacionService {
     public void crearAsignacionDesdePostulacion(Postulacion p) {
         Asignacion nueva = new Asignacion();
 
-        // 1. Relaciones (Usando los nombres exactos de tus entidades)
         nueva.setPostulacionesIdpostulacion(p);
-
-        // En tu entidad Asignacion tienes 'vacantesIdvacante', lo llenamos desde la postulación
         nueva.setVacantesIdvacante(p.getVacanteIdvacante());
 
-        // 2. Área (Corrigiendo el nombre del getter)
-        // En Vacante.java tienes: private AreaDgp areasdgpIdarea;
-        // Lombok genera: getAreasdgpIdarea()
-        if(p.getVacanteIdvacante().getAreasdgpIdarea() != null) {
-            // Asumiendo que Asignacion tiene un campo 'area' o similar.
-            // Si no lo tienes en Asignacion.java, borra estas 3 lineas.
-            // nueva.setArea(p.getVacanteIdvacante().getAreasdgpIdarea());
-        }
-
-        // 3. Fechas (OffsetTime)
-        // Tu entidad usa OffsetTime, así que usamos OffsetTime.now()
         nueva.setFechaInicio(OffsetTime.now());
 
-        // Ponemos fecha fin tentativa (ej. misma hora) o null si tu BD lo permite
+        // ⚠️ Si quieres que salga "Activa", mejor deja fechaFin = null (si tu BD lo permite)
         nueva.setFechaFin(OffsetTime.now().plusHours(1));
 
         asignacionRepository.save(nueva);
     }
 
+    @Override
+    public void crearAsignacionDesdePostulacionId(Long idPostulacion) {
+        Postulacion p = postulacionRepository.findById(idPostulacion)
+                .orElseThrow(() -> new RuntimeException("postulacion no encontrada"));
 
+        crearAsignacionDesdePostulacion(p);
+    }
 }

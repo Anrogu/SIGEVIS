@@ -16,4 +16,6 @@ public interface AsignacionService {
     public AsignacionDto update(AsignacionDto asignacion);
 
     void crearAsignacionDesdePostulacion(Postulacion p);
+    void crearAsignacionDesdePostulacionId(Long idPostulacion);
+
 }

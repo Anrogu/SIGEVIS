@@ -1,10 +1,267 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Coordinador | Asignaciones</title>
+
+    <!-- MISMO DISEÑO -->
+    <link rel="stylesheet" href="/css_admin/styles.css"/>
+    <link rel="stylesheet" href="/css_admin/index.css"/>
+
+    <style>
+        .th-actions {
+            width: 180px;
+            text-align: center;
+        }
+
+        td.actions {
+            text-align: center;
+        }
+
+        .actions-wrap {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn--mini {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+
+        .subtxt{
+            display:block;
+            font-size:12px;
+            opacity:.85;
+            margin-top:2px;
+        }
+    </style>
 </head>
+
 <body>
+<div class="app">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+        <div class="topbar__left">
+            <span class="topbar__title">COORDINADOR DE ÁREA</span>
+        </div>
+        <div class="topbar__right">
+            <div class="logos">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
+            </div>
+        </div>
+    </header>
+
+    <!-- TABS -->
+    <nav class="tabs">
+        <div class="tabs__left">
+            <a class="tab" th:href="@{/coordinador/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/coordinador/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/coordinador/postulaciones}">POSTULACIONES</a>
+            <a class="tab tab--active" th:href="@{/coordinador/asignaciones}">ASIGNACIONES</a>
+            <a class="tab" th:href="@{/coordinador/actividades}">ASIGNAR ACTIVIDAD</a>
+            <a class="tab" th:href="@{/coordinador/asistencias}">ASISTENCIA</a>
+        </div>
+        <div class="tabs__right">
+            <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESIÓN</button>
+        </div>
+    </nav>
+
+    <!-- TOOLBAR -->
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="searchAsignaciones" class="search__input" type="text"
+                   placeholder="Buscar por ID, prestador, vacante o área..."/>
+        </div>
+        <button class="btn btn--primary" type="button" id="btnSearch">Buscar</button>
+    </section>
+
+    <!-- CONTENIDO -->
+    <section class="content-grid">
+        <main class="panel panel--left">
+
+            <div class="panel__header">
+                <h2 class="panel__title">ASIGNACIONES</h2>
+                <div class="panel__actions">
+                    <a class="btn btn--primary" th:href="@{/coordinador/asignaciones}">Recargar</a>
+                </div>
+            </div>
+
+            <!-- MENSAJES -->
+            <div th:if="${mensajeExito}" style="margin:10px 0;">
+                <div class="pill pill--vigente" th:text="${mensajeExito}"></div>
+            </div>
+
+            <div th:if="${mensajeError}" style="margin:10px 0;">
+                <div class="pill pill--vencido" th:text="${mensajeError}"></div>
+            </div>
+
+            <!-- TABLA -->
+            <div class="table-wrap">
+                <table class="table" id="tablaAsignaciones">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
+                        <th>Prestador</th>
+                        <th>Vacante</th>
+                        <th>Área</th>
+                        <th>Estatus</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+
+                    <tbody id="asigBody">
+
+                    <tr th:each="a : ${asignaciones}"
+                        th:attr="data-row=${a.id}">
+                        <td th:text="${a.id}">1</td>
+                        <td th:text="${a.fechaInicio}">--</td>
+                        <td th:text="${a.fechaFin}">--</td>
+
+                        <!-- ✅ Prestador -->
+                        <td>
+                            <span th:text="${a.prestadorNombre != null ? a.prestadorNombre : '—'}">—</span>
+                            <a class="subtxt"
+                               th:if="${a.prestadorEmail != null}"
+                               th:href="'mailto:' + ${a.prestadorEmail}"
+                               th:text="${a.prestadorEmail}">correo</a>
+                            <span class="subtxt" th:if="${a.prestadorEmail == null}">Sin correo</span>
+                        </td>
+
+                        <!-- ✅ Vacante -->
+                        <td th:text="${a.vacanteNombre != null ? a.vacanteNombre : '—'}">—</td>
+
+                        <!-- ✅ Área -->
+                        <td th:text="${a.areaNombre != null ? a.areaNombre : '—'}">—</td>
+
+                        <!-- Estatus -->
+                        <td>
+                            <span th:if="${a.fechaFin == null}" class="pill pill--vigente">Activa</span>
+                            <span th:if="${a.fechaFin != null}" class="pill pill--vencido">Finalizada</span>
+                        </td>
+
+                        <td class="actions">
+                            <div class="actions-wrap">
+                                <button class="btn btn--mini" type="button"
+                                        th:attr="data-ver=${a.id}">
+                                    Ver
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+
+                    <tr th:if="${asignaciones == null || #lists.isEmpty(asignaciones)}">
+                        <td colspan="8" style="text-align:center; padding:20px;">
+                            No hay asignaciones registradas.
+                        </td>
+                    </tr>
+
+                    </tbody>
+                </table>
+            </div>
+
+        </main>
+    </section>
+</div>
+
+<!-- MODAL GOV -->
+<div id="gobModal" class="gob-modal gob-modal--info" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">i</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Detalle</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle"></p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body"></div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cerrar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // LOGOUT
+    const btnLogout = document.getElementById("btnLogout");
+    btnLogout?.addEventListener("click", async () => {
+        const res = await fetch("/logout", {method: "POST", credentials: "same-origin"});
+        if (res.ok || res.status === 302) window.location.href = "/login?logout";
+    });
+
+    // MODAL
+    const gobModal = document.getElementById("gobModal");
+    const gobModalTitle = document.getElementById("gobModalTitle");
+    const gobModalBody = document.getElementById("gobModalBody");
+    const gobModalCancel = document.getElementById("gobModalCancel");
+
+    function openModal(title, body) {
+        gobModalTitle.textContent = title;
+        gobModalBody.innerHTML = body;
+        gobModal.style.display = "flex";
+    }
+
+    function closeModal() {
+        gobModal.style.display = "none";
+    }
+
+    gobModal.addEventListener("click", e => {
+        if (e.target.closest("[data-close='1']")) closeModal();
+    });
+    gobModalCancel.addEventListener("click", closeModal);
+
+    // VER DETALLE
+    document.getElementById("asigBody").addEventListener("click", e => {
+        const btn = e.target.closest("[data-ver]");
+        if (!btn) return;
+
+        const row = btn.closest("tr");
+        const cells = row.querySelectorAll("td");
+
+        openModal(
+            "Detalle de Asignación",
+            `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div><strong>ID:</strong><br>${cells[0].innerText}</div>
+                <div><strong>Inicio:</strong><br>${cells[1].innerText}</div>
+                <div><strong>Fin:</strong><br>${cells[2].innerText}</div>
+
+                <div style="grid-column:1/-1;"><strong>Prestador:</strong><br>${cells[3].innerText}</div>
+                <div><strong>Vacante:</strong><br>${cells[4].innerText}</div>
+                <div><strong>Área:</strong><br>${cells[5].innerText}</div>
+
+                <div><strong>Estatus:</strong><br>${cells[6].innerText}</div>
+            </div>
+            `
+        );
+    });
+
+    // BUSCADOR
+    const searchInput = document.getElementById("searchAsignaciones");
+    const btnSearch = document.getElementById("btnSearch");
+    const rows = document.querySelectorAll("#asigBody tr[data-row]");
+
+    function filtrar() {
+        const q = (searchInput.value || "").toLowerCase().trim();
+        rows.forEach(r => {
+            r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+        });
+    }
+
+    btnSearch.addEventListener("click", filtrar);
+    searchInput.addEventListener("input", filtrar);
+</script>
 
 </body>
 </html>

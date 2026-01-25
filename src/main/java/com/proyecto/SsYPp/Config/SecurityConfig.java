@@ -12,7 +12,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.authentication.DisabledException;
 
-
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -55,6 +54,11 @@ public class SecurityConfig {
                                 "/noticias/publicadas",
                                 "/noticias/*"
                         ).permitAll()
+
+                        // ✅ EXCEPCIÓN: permitir "asignar" a ADMIN y COORDINADOR
+                        // (debe ir ANTES de /admin/** para que aplique la más específica)
+                        .requestMatchers("/admin/asignaciones/asignar/**")
+                        .hasAnyAuthority("ADMIN", "COORDINADOR")
 
                         // ADMIN
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")

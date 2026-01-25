@@ -172,6 +172,9 @@
         const API_DETALLE = (id) => `/postulaciones/coordinador/detalle/${id}`;
         const API_ESTATUS = (id, estatusId) => `/postulaciones/coordinador/${id}/estatus/${estatusId}`;
 
+        // ✅ NUEVO: endpoint para crear asignación desde postulación
+        const API_ASIGNAR = (idPostulacion) => `/admin/asignaciones/asignar/${idPostulacion}`;
+
         // UI
         const tbody = document.getElementById("postBody");
         const pagination = document.getElementById("pagination");
@@ -591,18 +594,34 @@
                 return;
             }
 
+            // ✅ CAMBIO AQUÍ: ahora sí crea la asignación en backend (POST)
             if (asigBtn) {
                 const id = Number(asigBtn.getAttribute("data-asig"));
-                const row = cache.find(x => Number(x?.id) === id);
-                const vacanteId = Number(row?.vacanteId ?? 0);
 
-                if (!vacanteId) {
-                    showError("No se detectó el ID de la vacante para asignar.");
-                    return;
-                }
+                openGobModal({
+                    type: "warning",
+                    title: "Crear asignación",
+                    subtitle: "Se asignará el prestador a la vacante",
+                    body: "¿Deseas crear la asignación con esta postulación aceptada?",
+                    okText: "Asignar",
+                    cancelText: "Cancelar",
+                    onOk: async () => {
+                        try {
+                            const res = await fetch(API_ASIGNAR(id), {method: "POST"});
+                            if (!res.ok) {
+                                console.error("Asignar:", await res.text());
+                                showError("No se pudo crear la asignación (¿ya estaba asignada?).");
+                                return;
+                            }
+                            await cargarPostulaciones();
+                            showSuccess("Asignación creada correctamente.");
+                        } catch (err) {
+                            console.error(err);
+                            showError("Error al intentar asignar.");
+                        }
+                    }
+                });
 
-                // ✅ Redirigir al módulo Asignaciones con ids
-                window.location.href = `/coordinador/asignaciones?postulacionId=${id}&vacanteId=${vacanteId}`;
                 return;
             }
         });

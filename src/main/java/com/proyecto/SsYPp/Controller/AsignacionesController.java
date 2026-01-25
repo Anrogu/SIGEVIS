@@ -45,6 +45,25 @@ public class AsignacionesController {
         return "redirect:/admin/asignaciones";
     }
 
+    // ✅ NUEVO: ASIGNAR DESDE POSTULACIÓN (para botón "Asignar")
+    // URL final: POST /admin/asignaciones/asignar/{idPostulacion}
+    @PostMapping("/asignar/{idPostulacion}")
+    public String asignarDesdePostulacion(@PathVariable Long idPostulacion,
+                                          RedirectAttributes redirectAttributes) {
+        try {
+            // Este método lo agregas en tu service (ver siguiente paso)
+            asignacionService.crearAsignacionDesdePostulacionId(idPostulacion);
+
+            redirectAttributes.addFlashAttribute("mensajeExito", "Asignación creada correctamente.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("mensajeError", "No se pudo asignar: " + e.getMessage());
+        }
+
+        // Por ahora regresa a la lista de asignaciones (no rompe nada)
+        // Si quieres que regrese a la vista de postulaciones, cambiamos este redirect cuando me digas la ruta.
+        return "redirect:/admin/asignaciones";
+    }
+
     // --- ELIMINAR ---
     @GetMapping("/eliminar/{id}")
     public String deleteAsignacion(@PathVariable Long id, RedirectAttributes redirectAttributes) {
