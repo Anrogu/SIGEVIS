@@ -7,7 +7,6 @@
 
     <!-- Reusa tus estilos -->
     <link rel="stylesheet" href="/css_admin/styles.css" />
-    <link rel="stylesheet" href="/css_admin/convenios.css" />
     <link rel="stylesheet" href="/css_admin/index.css" />
 
     <style>
@@ -121,8 +120,7 @@
                             <!-- Solo para mostrar un mensaje bonito si está aceptada -->
                             <button class="btn btn--mini btn--primary" type="button"
                                     th:if="${p.estatusId == 3}"
-                                    th:attr="data-welcome=${p.idPostulacion}">
-                                Ver mensaje
+                                    th:attr="data-welcome=${p.idPostulacion}, data-msg=${p.comentarios}"> Ver mensaje
                             </button>
                         </td>
                     </tr>
@@ -319,16 +317,23 @@
         const welcomeBtn = e.target.closest("[data-welcome]");
         const row = e.target.closest("tr[data-row]");
 
-        if (welcomeBtn) {
-          openGobModal({
-            type: "success",
-            title: "¡Postulación aceptada!",
-            body: "Tu postulación fue aceptada, ¡bienvenido! Ya puedes continuar con tu proceso en la plataforma.",
-            okText: "Entendido",
-            hideCancel: true
-          });
-          return;
-        }
+          if (welcomeBtn) {
+              const mensajeRaw = welcomeBtn.getAttribute("data-msg");
+
+              const mensajeFinal = (mensajeRaw && mensajeRaw.trim() !== "")
+                  ? mensajeRaw
+                  : "Tu postulación fue aceptada, pero el coordinador no dejó un mensaje adicional.";
+
+              openGobModal({
+                  type: "success", // O "info" si prefieres azul
+                  title: "Mensaje del Coordinador",
+                  subtitle: "Información sobre tu proceso",
+                  body: mensajeFinal, // ✅ Aquí se mostrará el link de Calendly
+                  okText: "Entendido",
+                  hideCancel: true
+              });
+              return;
+          }
 
         if (viewBtn) {
           const id = Number(viewBtn.getAttribute("data-view"));

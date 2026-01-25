@@ -8,13 +8,28 @@
     <!-- MISMO DISEÑO -->
     <link rel="stylesheet" href="/css_admin/styles.css"/>
     <link rel="stylesheet" href="/css_admin/index.css"/>
-    <link rel="stylesheet" href="/css_admin/convenios.css"/>
 
     <style>
-        .th-actions { width: 220px; text-align: center; }
-        td.actions { text-align: center; }
-        .actions-wrap { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }
-        .btn--mini { padding: 6px 10px; font-size: 12px; }
+        .th-actions {
+            width: 220px;
+            text-align: center;
+        }
+
+        td.actions {
+            text-align: center;
+        }
+
+        .actions-wrap {
+            display: flex;
+            justify-content: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .btn--mini {
+            padding: 6px 10px;
+            font-size: 12px;
+        }
     </style>
 </head>
 
@@ -80,6 +95,7 @@
                     <tr>
                         <th>Fecha</th>
                         <th>Prestador</th>
+                        <th>Contacto</th>
                         <th>Vacante</th>
                         <th>Estatus</th>
                         <th class="th-actions">Acciones</th>
@@ -141,159 +157,171 @@
     // ================= LOGOUT =================
     const btnLogout = document.getElementById("btnLogout");
     btnLogout?.addEventListener("click", async () => {
-      try {
-        const res = await fetch("/logout", { method: "POST", credentials: "same-origin" });
-        if (res.ok || res.status === 302) window.location.href = "/login?logout";
-      } catch (err) {
-        console.error(err);
-      }
+        try {
+            const res = await fetch("/logout", {method: "POST", credentials: "same-origin"});
+            if (res.ok || res.status === 302) window.location.href = "/login?logout";
+        } catch (err) {
+            console.error(err);
+        }
     });
 
     document.addEventListener("DOMContentLoaded", () => {
 
-      // ✅ ENDPOINTS ACORDADOS
-      const API_MIS = "/postulaciones/coordinador/mis-postulaciones";
-      const API_DETALLE = (id) => `/postulaciones/coordinador/detalle/${id}`;
-      const API_ESTATUS = (id, estatusId) => `/postulaciones/coordinador/${id}/estatus/${estatusId}`;
+        // ✅ ENDPOINTS ACORDADOS
+        const API_MIS = "/postulaciones/coordinador/mis-postulaciones";
+        const API_DETALLE = (id) => `/postulaciones/coordinador/detalle/${id}`;
+        const API_ESTATUS = (id, estatusId) => `/postulaciones/coordinador/${id}/estatus/${estatusId}`;
 
-      // UI
-      const tbody = document.getElementById("postBody");
-      const pagination = document.getElementById("pagination");
-      const btnReload = document.getElementById("btnReload");
-      const searchInput = document.getElementById("searchPost");
-      const btnSearch = document.getElementById("btnSearchPost");
+        // UI
+        const tbody = document.getElementById("postBody");
+        const pagination = document.getElementById("pagination");
+        const btnReload = document.getElementById("btnReload");
+        const searchInput = document.getElementById("searchPost");
+        const btnSearch = document.getElementById("btnSearchPost");
 
-      // Detalle
-      const postDetailsWrap = document.getElementById("postDetailsWrap");
-      const postDetails = document.getElementById("postDetails");
-      const btnCloseDetails = document.getElementById("btnCloseDetails");
+        // Detalle
+        const postDetailsWrap = document.getElementById("postDetailsWrap");
+        const postDetails = document.getElementById("postDetails");
+        const btnCloseDetails = document.getElementById("btnCloseDetails");
 
-      // Estado
-      let cache = [];
-      let currentList = [];
-      let selectedId = null;
+        // Estado
+        let cache = [];
+        let currentList = [];
+        let selectedId = null;
 
-      // Paginación
-      const PAGE_SIZE = 9;
-      let currentPage = 1;
+        // Paginación
+        const PAGE_SIZE = 9;
+        let currentPage = 1;
 
-      // ================= MODAL =================
-      const gobModal = document.getElementById("gobModal");
-      const gobModalTitle = document.getElementById("gobModalTitle");
-      const gobModalSubtitle = document.getElementById("gobModalSubtitle");
-      const gobModalBody = document.getElementById("gobModalBody");
-      const gobModalOk = document.getElementById("gobModalOk");
-      const gobModalCancel = document.getElementById("gobModalCancel");
-      let modalOnOk = null;
+        // ================= MODAL =================
+        const gobModal = document.getElementById("gobModal");
+        const gobModalTitle = document.getElementById("gobModalTitle");
+        const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+        const gobModalBody = document.getElementById("gobModalBody");
+        const gobModalOk = document.getElementById("gobModalOk");
+        const gobModalCancel = document.getElementById("gobModalCancel");
+        let modalOnOk = null;
 
-      function openGobModal({
-        type = "info",
-        title = "Aviso",
-        subtitle = "",
-        body = "",
-        okText = "Aceptar",
-        cancelText = "Cancelar",
-        onOk = null,
-        hideCancel = false
-      }) {
-        gobModal.classList.remove("gob-modal--info", "gob-modal--success", "gob-modal--warning", "gob-modal--danger");
-        gobModal.classList.add(`gob-modal--${type}`);
-        gobModalTitle.textContent = title;
-        gobModalSubtitle.textContent = subtitle;
-        gobModalBody.textContent = body;
-        gobModalOk.textContent = okText;
-        gobModalCancel.textContent = cancelText;
-        gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
-        modalOnOk = onOk;
-        gobModal.style.display = "flex";
-      }
+        function openGobModal({
+                                  type = "info",
+                                  title = "Aviso",
+                                  subtitle = "",
+                                  body = "",
+                                  okText = "Aceptar",
+                                  cancelText = "Cancelar",
+                                  onOk = null,
+                                  hideCancel = false
+                              }) {
+            gobModal.classList.remove("gob-modal--info", "gob-modal--success", "gob-modal--warning", "gob-modal--danger");
+            gobModal.classList.add(`gob-modal--${type}`);
+            gobModalTitle.textContent = title;
+            gobModalSubtitle.textContent = subtitle;
+            gobModalBody.textContent = body;
+            gobModalOk.textContent = okText;
+            gobModalCancel.textContent = cancelText;
+            gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+            modalOnOk = onOk;
+            gobModal.style.display = "flex";
+        }
 
-      function closeGobModal() {
-        gobModal.style.display = "none";
-        modalOnOk = null;
-      }
+        function closeGobModal() {
+            gobModal.style.display = "none";
+            modalOnOk = null;
+        }
 
-      gobModal.addEventListener("click", (e) => {
-        const close = e.target.closest("[data-close='1']");
-        if (close) closeGobModal();
-      });
-      gobModalCancel.addEventListener("click", closeGobModal);
-      gobModalOk.addEventListener("click", async () => {
-        if (typeof modalOnOk === "function") await modalOnOk();
-        closeGobModal();
-      });
+        gobModal.addEventListener("click", (e) => {
+            const close = e.target.closest("[data-close='1']");
+            if (close) closeGobModal();
+        });
+        gobModalCancel.addEventListener("click", closeGobModal);
+        gobModalOk.addEventListener("click", async () => {
+            if (typeof modalOnOk === "function") await modalOnOk();
+            closeGobModal();
+        });
 
-      function showSuccess(message) {
-        openGobModal({ type: "success", title: "Listo", body: message, okText: "OK", hideCancel: true });
-      }
-      function showError(message) {
-        openGobModal({ type: "danger", title: "Ocurrió un error", body: message, okText: "Entendido", hideCancel: true });
-      }
+        function showSuccess(message) {
+            openGobModal({type: "success", title: "Listo", body: message, okText: "OK", hideCancel: true});
+        }
 
-      // ================= HELPERS =================
-      const getId = (p) => Number(p?.id ?? 0);
-      const getEstatusId = (p) => Number(p?.estatusId ?? 1);
+        function showError(message) {
+            openGobModal({
+                type: "danger",
+                title: "Ocurrió un error",
+                body: message,
+                okText: "Entendido",
+                hideCancel: true
+            });
+        }
 
-      function fmtHora(ot) {
-        if (!ot) return "—";
-        const s = String(ot);
-        return s.length >= 8 ? s.substring(0, 8) : s;
-      }
+        // ================= HELPERS =================
+        const getId = (p) => Number(p?.id ?? 0);
+        const getEstatusId = (p) => Number(p?.estatusId ?? 1);
 
-      function pillEstatusByDto(p) {
-        const txt = (p?.estatusTexto || "").toLowerCase();
-        if (txt.includes("acept")) return `<span class="pill pill--vigente">Aceptado</span>`;
-        if (txt.includes("rech")) return `<span class="pill pill--vencido">Rechazado</span>`;
-        return `<span class="pill pill--por-vencer">Nuevo</span>`;
-      }
+        function fmtHora(ot) {
+            if (!ot) return "—";
+            const s = String(ot);
+            return s.length >= 8 ? s.substring(0, 8) : s;
+        }
 
-      function actionsHtml(p) {
-        const id = getId(p);
-        const estId = getEstatusId(p);
+        function pillEstatusByDto(p) {
+            const txt = (p?.estatusTexto || "").toLowerCase();
+            if (txt.includes("acept")) return `<span class="pill pill--vigente">Aceptado</span>`;
+            if (txt.includes("rech")) return `<span class="pill pill--vencido">Rechazado</span>`;
+            return `<span class="pill pill--por-vencer">Nuevo</span>`;
+        }
 
-        // 1=Nuevo, 2=Rechazado, 3=Aceptado
-        if (estId === 1) {
-          return `
+        function actionsHtml(p) {
+            const id = getId(p);
+            const estId = getEstatusId(p);
+
+            // 1=Nuevo, 2=Rechazado, 3=Aceptado
+            if (estId === 1) {
+                return `
             <div class="actions-wrap">
               <button class="btn btn--mini" type="button" data-det="${id}">Ver</button>
               <button class="btn btn--mini btn--primary" type="button" data-acept="${id}">Aceptar</button>
               <button class="btn btn--mini btn--wine" type="button" data-rech="${id}">Rechazar</button>
             </div>
           `;
-        }
+            }
 
-        if (estId === 3) {
-          return `
+            if (estId === 3) {
+                return `
             <div class="actions-wrap">
               <button class="btn btn--mini" type="button" data-det="${id}">Ver</button>
               <button class="btn btn--mini btn--primary" type="button" data-asig="${id}">Asignar</button>
             </div>
           `;
-        }
+            }
 
-        return `
+            return `
           <div class="actions-wrap">
             <button class="btn btn--mini" type="button" data-det="${id}">Ver</button>
           </div>
         `;
-      }
-
-      // Detalle: render
-      function renderDetalle(d) {
-        if (!d) return;
-
-        function pillOk(ok) {
-          return ok
-            ? `<span class="pill pill--vigente">Cumple</span>`
-            : `<span class="pill pill--vencido">No cumple</span>`;
         }
 
-        postDetails.innerHTML = `
+        // Detalle: render
+        function renderDetalle(d) {
+            if (!d) return;
+
+            function pillOk(ok) {
+                return ok
+                    ? `<span class="pill pill--vigente">Cumple</span>`
+                    : `<span class="pill pill--vencido">No cumple</span>`;
+            }
+
+            postDetails.innerHTML = `
           <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
             <div><strong>ID:</strong><br>${d.id ?? "—"}</div>
             <div><strong>Fecha:</strong><br>${fmtHora(d.fechaPostulacion)}</div>
 
             <div><strong>Prestador:</strong><br>${d.prestadorNombre ?? "—"}</div>
+            <div><strong>Email:</strong><br>
+                <a href="mailto:${d.prestadorEmail ?? ''}" style="text-decoration:none; font-weight:600;">
+                    ${d.prestadorEmail ?? "—"}
+                </a>
+            </div>
             <div><strong>Vacante:</strong><br>${d.vacanteNombre ?? "—"}</div>
 
             <div><strong>Estatus:</strong><br>${d.estatusTexto ?? "Nuevo"}</div>
@@ -327,249 +355,262 @@
           </div>
         `;
 
-        postDetailsWrap.style.display = "block";
-        postDetailsWrap.scrollIntoView({behavior: "smooth", block: "start"});
-      }
-
-      async function abrirDetalle(id) {
-        try {
-          const res = await fetch(API_DETALLE(id), { headers: { "Accept": "application/json" } });
-          if (!res.ok) {
-            console.error("Detalle:", await res.text());
-            showError("No se pudo cargar el detalle.");
-            return;
-          }
-          const d = await res.json();
-          selectedId = id;
-          renderDetalle(d);
-          renderTablaPaginada(currentList);
-        } catch (e) {
-          console.error(e);
-          showError("Error al consultar el detalle.");
-        }
-      }
-
-      function closeDetails() {
-        selectedId = null;
-        postDetailsWrap.style.display = "none";
-        renderTablaPaginada(currentList);
-      }
-      btnCloseDetails?.addEventListener("click", closeDetails);
-
-      // Paginación
-      function getTotalPages(list) { return Math.max(1, Math.ceil(list.length / PAGE_SIZE)); }
-      function getPageSlice(list, page) {
-        const start = (page - 1) * PAGE_SIZE;
-        return list.slice(start, start + PAGE_SIZE);
-      }
-
-      function renderPagination(totalPages) {
-        if (!pagination) return;
-        if (currentList.length === 0) { pagination.innerHTML = ""; return; }
-
-        let html = "";
-        html += (currentPage > 1)
-          ? `<button class="page" type="button" data-page="prev">‹</button>`
-          : `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">‹</button>`;
-
-        for (let p = 1; p <= totalPages; p++) {
-          const activeClass = p === currentPage ? "page--active" : "";
-          html += `<button class="page ${activeClass}" type="button" data-page="${p}">${p}</button>`;
+            postDetailsWrap.style.display = "block";
+            postDetailsWrap.scrollIntoView({behavior: "smooth", block: "start"});
         }
 
-        html += (currentPage < totalPages)
-          ? `<button class="page" type="button" data-page="next">›</button>`
-          : `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">›</button>`;
-
-        pagination.innerHTML = html;
-      }
-
-      function renderTablaPaginada(list) {
-        currentList = list || [];
-        const totalPages = getTotalPages(currentList);
-
-        if (currentPage > totalPages) currentPage = totalPages;
-        if (currentPage < 1) currentPage = 1;
-
-        renderRows(getPageSlice(currentList, currentPage));
-        renderPagination(totalPages);
-      }
-
-      pagination?.addEventListener("click", (e) => {
-        const btn = e.target.closest("button[data-page]");
-        if (!btn || btn.disabled) return;
-
-        const totalPages = getTotalPages(currentList);
-        const val = btn.dataset.page;
-
-        if (val === "prev" && currentPage > 1) currentPage--;
-        else if (val === "next" && currentPage < totalPages) currentPage++;
-        else {
-          const n = Number(val);
-          if (!isNaN(n)) currentPage = n;
-        }
-        renderTablaPaginada(currentList);
-      });
-
-      // Render tabla
-      function renderRows(lista) {
-        tbody.innerHTML = "";
-
-        if (!lista || lista.length === 0) {
-          tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
-          return;
+        async function abrirDetalle(id) {
+            try {
+                const res = await fetch(API_DETALLE(id), {headers: {"Accept": "application/json"}});
+                if (!res.ok) {
+                    console.error("Detalle:", await res.text());
+                    showError("No se pudo cargar el detalle.");
+                    return;
+                }
+                const d = await res.json();
+                selectedId = id;
+                renderDetalle(d);
+                renderTablaPaginada(currentList);
+            } catch (e) {
+                console.error(e);
+                showError("Error al consultar el detalle.");
+            }
         }
 
-        lista.forEach(p => {
-          const id = getId(p);
-          if (!id || Number.isNaN(id)) return;
+        function closeDetails() {
+            selectedId = null;
+            postDetailsWrap.style.display = "none";
+            renderTablaPaginada(currentList);
+        }
 
-          const tr = document.createElement("tr");
-          tr.setAttribute("data-row", String(id));
+        btnCloseDetails?.addEventListener("click", closeDetails);
 
-          if (selectedId != null && id === Number(selectedId)) {
-            tr.style.outline = "2px solid rgba(122,15,26,.35)";
-            tr.style.background = "rgba(122,15,26,.04)";
-          }
+        // Paginación
+        function getTotalPages(list) {
+            return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+        }
 
-          tr.innerHTML = `
+        function getPageSlice(list, page) {
+            const start = (page - 1) * PAGE_SIZE;
+            return list.slice(start, start + PAGE_SIZE);
+        }
+
+        function renderPagination(totalPages) {
+            if (!pagination) return;
+            if (currentList.length === 0) {
+                pagination.innerHTML = "";
+                return;
+            }
+
+            let html = "";
+            html += (currentPage > 1)
+                ? `<button class="page" type="button" data-page="prev">‹</button>`
+                : `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">‹</button>`;
+
+            for (let p = 1; p <= totalPages; p++) {
+                const activeClass = p === currentPage ? "page--active" : "";
+                html += `<button class="page ${activeClass}" type="button" data-page="${p}">${p}</button>`;
+            }
+
+            html += (currentPage < totalPages)
+                ? `<button class="page" type="button" data-page="next">›</button>`
+                : `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">›</button>`;
+
+            pagination.innerHTML = html;
+        }
+
+        function renderTablaPaginada(list) {
+            currentList = list || [];
+            const totalPages = getTotalPages(currentList);
+
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            renderRows(getPageSlice(currentList, currentPage));
+            renderPagination(totalPages);
+        }
+
+        pagination?.addEventListener("click", (e) => {
+            const btn = e.target.closest("button[data-page]");
+            if (!btn || btn.disabled) return;
+
+            const totalPages = getTotalPages(currentList);
+            const val = btn.dataset.page;
+
+            if (val === "prev" && currentPage > 1) currentPage--;
+            else if (val === "next" && currentPage < totalPages) currentPage++;
+            else {
+                const n = Number(val);
+                if (!isNaN(n)) currentPage = n;
+            }
+            renderTablaPaginada(currentList);
+        });
+
+        // Render tabla
+        function renderRows(lista) {
+            tbody.innerHTML = "";
+
+            if (!lista || lista.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(p => {
+                const id = getId(p);
+                if (!id || Number.isNaN(id)) return;
+
+                const tr = document.createElement("tr");
+                tr.setAttribute("data-row", String(id));
+
+                if (selectedId != null && id === Number(selectedId)) {
+                    tr.style.outline = "2px solid rgba(122,15,26,.35)";
+                    tr.style.background = "rgba(122,15,26,.04)";
+                }
+
+                tr.innerHTML = `
             <td>${fmtHora(p.fechaPostulacion)}</td>
             <td>${p.prestadorNombre ?? "—"}</td>
+
+            <td>
+<a href="mailto:${p.prestadorEmail}" style="text-decoration:none; font-weight:600;">                    ${p.prestadorEmail ?? "Sin correo"}
+                </a>
+            </td>
+
             <td>${p.vacanteNombre ?? "—"}</td>
             <td>${pillEstatusByDto(p)}</td>
             <td class="actions">${actionsHtml(p)}</td>
           `;
 
-          tbody.appendChild(tr);
+                tbody.appendChild(tr);
+            });
+        }
+
+        // Cargar
+        async function cargarPostulaciones() {
+            const res = await fetch(API_MIS, {headers: {"Accept": "application/json"}});
+            if (!res.ok) {
+                console.error("Error mis-postulaciones:", await res.text());
+                showError("No se pudieron cargar las postulaciones de tu área.");
+                return;
+            }
+
+            cache = await res.json();
+            currentPage = 1;
+            renderTablaPaginada(cache);
+
+            if (selectedId != null) {
+                await abrirDetalle(selectedId);
+            }
+        }
+
+        btnReload?.addEventListener("click", cargarPostulaciones);
+
+        // Filtros
+        function filtrar() {
+            const q = (searchInput?.value || "").toLowerCase().trim();
+            let filtradas = cache;
+
+            if (q) {
+                filtradas = cache.filter(p => {
+                    const prest = String(p?.prestadorNombre ?? "").toLowerCase();
+                    const vac = String(p?.vacanteNombre ?? "").toLowerCase();
+                    const est = String(p?.estatusTexto ?? "").toLowerCase();
+                    const fecha = String(p?.fechaPostulacion ?? "").toLowerCase();
+                    return (
+                        prest.includes(q) ||
+                        vac.includes(q) ||
+                        est.includes(q) ||
+                        fecha.includes(q)
+                    );
+                });
+            }
+
+            currentPage = 1;
+            renderTablaPaginada(filtradas);
+        }
+
+        btnSearch?.addEventListener("click", filtrar);
+        searchInput?.addEventListener("input", filtrar);
+
+        // Clicks tabla (acciones)
+        tbody.addEventListener("click", async (e) => {
+            const detBtn = e.target.closest("[data-det]");
+            const aceptBtn = e.target.closest("[data-acept]");
+            const rechBtn = e.target.closest("[data-rech]");
+            const asigBtn = e.target.closest("[data-asig]");
+
+            if (detBtn) {
+                const id = Number(detBtn.getAttribute("data-det"));
+                await abrirDetalle(id);
+                return;
+            }
+
+            if (aceptBtn) {
+                const id = Number(aceptBtn.getAttribute("data-acept"));
+                openGobModal({
+                    type: "success",
+                    title: "Aceptar postulación",
+                    subtitle: "Se marcará como ACEPTADA",
+                    body: "¿Deseas aceptar esta postulación?",
+                    okText: "Aceptar",
+                    cancelText: "Cancelar",
+                    onOk: async () => {
+                        const res = await fetch(API_ESTATUS(id, 3), {method: "PUT"});
+                        if (!res.ok) {
+                            console.error("Aceptar:", await res.text());
+                            showError("No se pudo aceptar la postulación.");
+                            return;
+                        }
+                        await cargarPostulaciones();
+                        showSuccess("Postulación aceptada.");
+                    }
+                });
+                return;
+            }
+
+            if (rechBtn) {
+                const id = Number(rechBtn.getAttribute("data-rech"));
+                openGobModal({
+                    type: "danger",
+                    title: "Rechazar postulación",
+                    subtitle: "Se marcará como RECHAZADA",
+                    body: "¿Deseas rechazar esta postulación?",
+                    okText: "Rechazar",
+                    cancelText: "Cancelar",
+                    onOk: async () => {
+                        const res = await fetch(API_ESTATUS(id, 2), {method: "PUT"});
+                        if (!res.ok) {
+                            console.error("Rechazar:", await res.text());
+                            showError("No se pudo rechazar la postulación.");
+                            return;
+                        }
+                        await cargarPostulaciones();
+                        showSuccess("Postulación rechazada.");
+                    }
+                });
+                return;
+            }
+
+            if (asigBtn) {
+                const id = Number(asigBtn.getAttribute("data-asig"));
+                const row = cache.find(x => Number(x?.id) === id);
+                const vacanteId = Number(row?.vacanteId ?? 0);
+
+                if (!vacanteId) {
+                    showError("No se detectó el ID de la vacante para asignar.");
+                    return;
+                }
+
+                // ✅ Redirigir al módulo Asignaciones con ids
+                window.location.href = `/coordinador/asignaciones?postulacionId=${id}&vacanteId=${vacanteId}`;
+                return;
+            }
         });
-      }
 
-      // Cargar
-      async function cargarPostulaciones() {
-        const res = await fetch(API_MIS, { headers: {"Accept": "application/json"} });
-        if (!res.ok) {
-          console.error("Error mis-postulaciones:", await res.text());
-          showError("No se pudieron cargar las postulaciones de tu área.");
-          return;
-        }
-
-        cache = await res.json();
-        currentPage = 1;
-        renderTablaPaginada(cache);
-
-        if (selectedId != null) {
-          await abrirDetalle(selectedId);
-        }
-      }
-
-      btnReload?.addEventListener("click", cargarPostulaciones);
-
-      // Filtros
-      function filtrar() {
-        const q = (searchInput?.value || "").toLowerCase().trim();
-        let filtradas = cache;
-
-        if (q) {
-          filtradas = cache.filter(p => {
-            const prest = String(p?.prestadorNombre ?? "").toLowerCase();
-            const vac = String(p?.vacanteNombre ?? "").toLowerCase();
-            const est = String(p?.estatusTexto ?? "").toLowerCase();
-            const fecha = String(p?.fechaPostulacion ?? "").toLowerCase();
-            return (
-              prest.includes(q) ||
-              vac.includes(q) ||
-              est.includes(q) ||
-              fecha.includes(q)
-            );
-          });
-        }
-
-        currentPage = 1;
-        renderTablaPaginada(filtradas);
-      }
-
-      btnSearch?.addEventListener("click", filtrar);
-      searchInput?.addEventListener("input", filtrar);
-
-      // Clicks tabla (acciones)
-      tbody.addEventListener("click", async (e) => {
-        const detBtn = e.target.closest("[data-det]");
-        const aceptBtn = e.target.closest("[data-acept]");
-        const rechBtn = e.target.closest("[data-rech]");
-        const asigBtn = e.target.closest("[data-asig]");
-
-        if (detBtn) {
-          const id = Number(detBtn.getAttribute("data-det"));
-          await abrirDetalle(id);
-          return;
-        }
-
-        if (aceptBtn) {
-          const id = Number(aceptBtn.getAttribute("data-acept"));
-          openGobModal({
-            type: "success",
-            title: "Aceptar postulación",
-            subtitle: "Se marcará como ACEPTADA",
-            body: "¿Deseas aceptar esta postulación?",
-            okText: "Aceptar",
-            cancelText: "Cancelar",
-            onOk: async () => {
-              const res = await fetch(API_ESTATUS(id, 3), { method: "PUT" });
-              if (!res.ok) {
-                console.error("Aceptar:", await res.text());
-                showError("No se pudo aceptar la postulación.");
-                return;
-              }
-              await cargarPostulaciones();
-              showSuccess("Postulación aceptada.");
-            }
-          });
-          return;
-        }
-
-        if (rechBtn) {
-          const id = Number(rechBtn.getAttribute("data-rech"));
-          openGobModal({
-            type: "danger",
-            title: "Rechazar postulación",
-            subtitle: "Se marcará como RECHAZADA",
-            body: "¿Deseas rechazar esta postulación?",
-            okText: "Rechazar",
-            cancelText: "Cancelar",
-            onOk: async () => {
-              const res = await fetch(API_ESTATUS(id, 2), { method: "PUT" });
-              if (!res.ok) {
-                console.error("Rechazar:", await res.text());
-                showError("No se pudo rechazar la postulación.");
-                return;
-              }
-              await cargarPostulaciones();
-              showSuccess("Postulación rechazada.");
-            }
-          });
-          return;
-        }
-
-        if (asigBtn) {
-          const id = Number(asigBtn.getAttribute("data-asig"));
-          const row = cache.find(x => Number(x?.id) === id);
-          const vacanteId = Number(row?.vacanteId ?? 0);
-
-          if (!vacanteId) {
-            showError("No se detectó el ID de la vacante para asignar.");
-            return;
-          }
-
-          // ✅ Redirigir al módulo Asignaciones con ids
-          window.location.href = `/coordinador/asignaciones?postulacionId=${id}&vacanteId=${vacanteId}`;
-          return;
-        }
-      });
-
-      // Init
-      (async () => {
-        await cargarPostulaciones();
-      })();
+        // Init
+        (async () => {
+            await cargarPostulaciones();
+        })();
     });
 </script>
 

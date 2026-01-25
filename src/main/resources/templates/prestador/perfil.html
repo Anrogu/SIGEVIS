@@ -7,7 +7,6 @@
 
     <!-- Reusa tus estilos -->
     <link rel="stylesheet" href="/css_admin/styles.css" />
-    <link rel="stylesheet" href="/css_admin/convenios.css" />
     <link rel="stylesheet" href="/css_admin/index.css" />
 </head>
 
@@ -249,12 +248,15 @@
         if (msgType === 'ok') {
             openGobModal({
                 type: "success",
-                title: "Postulación enviada",
-                body: "Tu postulación fue registrada correctamente. Está en proceso de revisión por el coordinador.",
+                title: "¡Postulación Enviada!",
+                // ✅ AQUÍ CAMBIAMOS EL MENSAJE
+                body: "Tu solicitud ha sido registrada correctamente.\n\n" +
+                    "⚠️ IMPORTANTE: Mantente pendiente de tu CORREO ELECTRÓNICO registrado.\n" +
+                    "El coordinador te contactará por ese medio para agendar tu entrevista.",
                 okText: "Entendido",
                 hideCancel: true
             });
-            // Limpiamos la URL para que no salga el modal al recargar
+            // Limpiamos la URL
             window.history.replaceState({}, document.title, window.location.pathname);
         }
 

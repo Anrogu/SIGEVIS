@@ -153,7 +153,7 @@ public class PostulacionServiceImpl implements PostulacionService {
         String prestadorNombre = (prestador == null) ? "—"
                 : (prestador.getNombre() + " " + prestador.getPrimerapellido()
                 + (prestador.getSegundoapellido() != null ? (" " + prestador.getSegundoapellido()) : ""));
-
+        String prestadorEmail = (prestador != null) ? prestador.getEmail() : "—";
         String estTexto = mapEstatusTexto(est != null ? est.getId() : null);
 
         // ===== COMPROBACIÓN (carrera / modalidad / horario) =====
@@ -220,6 +220,7 @@ public class PostulacionServiceImpl implements PostulacionService {
                 p.getFechaPostulacion(),
                 (prestador != null ? prestador.getId() : null),
                 prestadorNombre,
+                prestadorEmail,
                 (v != null ? v.getId() : null),
                 (v != null ? v.getNombrePuesto() : null),
                 (est != null ? est.getId() : null),

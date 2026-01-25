@@ -6,6 +6,8 @@ public interface PostulacionPrestadorRowDto {
     // 👇 OJO: String porque viene de to_char(...)
     String getFechaPostulacion();
 
+    String getComentarios();
+
     Long getVacanteId();
     String getVacanteNombre();
     Integer getNumeroPlazas();

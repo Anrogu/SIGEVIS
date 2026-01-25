@@ -8,6 +8,7 @@ public interface PostulacionCoordinadorRowDto {
 
     Long getPrestadorId();
     String getPrestadorNombre();
+    String getPrestadorEmail();
 
     Long getVacanteId();
     String getVacanteNombre();

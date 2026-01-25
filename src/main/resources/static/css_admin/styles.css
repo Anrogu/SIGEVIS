@@ -33,4 +33,438 @@
     --img-fondo-login: url('/img/Fondo_1.png');
     --img-degradado: url('/img/Degradado.png');
     --logo-mixto: url('/img/EscudosGEM.png');
+
+    --shadow: 0 2px 10px rgba(0,0,0,.08);
+
+}
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text);
+    background: #f6f6f6;
+}
+
+.app {
+    max-width: 1500px;
+    background: var(--bg);
+    border: 2px solid var(--border-2);
+    min-height: 100vh;
+}
+
+/* =========================================
+   2. ESTRUCTURA (TOPBAR, TABS, TOOLBAR)
+   ========================================= */
+
+/* TOPBAR */
+.topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+}
+
+.topbar__title {
+    font-weight: 700;
+    letter-spacing: .4px;
+    font-size: 12px;
+}
+
+.topbar__right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.logos {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.logo-img {
+    height: 24px;
+    width: auto;
+    object-fit: contain;
+}
+
+/* TABS (Menú de navegación) */
+.tabs {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 8px 14px;
+    border-bottom: 2px solid var(--border);
+}
+
+.tabs__left {
+    display: flex;
+    gap: 18px;
+    flex-wrap: nowrap;
+    overflow: hidden;
+}
+
+.tabs__right {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.tab {
+    text-decoration: none;
+    color: var(--text);
+    font-size: 11px;
+    font-weight: normal;
+    padding: 4px 8px;
+    border-radius: 6px;
+    white-space: nowrap;
+}
+
+.tab--active {
+    border: 1px solid var(--border);
+    background: #f2f2f2;
+    font-weight: 600;
+}
+
+.btn--logout {
+    height: 28px;
+    font-size: 11px;
+    padding: 5px 10px;
+}
+
+/* TOOLBAR */
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 2px solid var(--border);
+}
+
+.search {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px;
+    background: #fff;
+}
+
+.search__input {
+    border: none;
+    outline: none;
+    width: 100%;
+    font-size: 11px;
+}
+
+.search__icon { font-size: 12px; }
+
+/* =========================================
+   3. BOTONES
+   ========================================= */
+.btn {
+    border: 1px solid var(--border);
+    background: #fff;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 11px;
+    transition: all 0.2s ease;
+}
+
+.btn--primary {
+    background: var(--color-vino);
+    color: #fff;
+    border-color: var(--color-vino);
+}
+
+.btn--primary:hover {
+    filter: brightness(1.1);
+}
+
+.btn--outline {
+    background: #fff;
+    border: 1px solid var(--border);
+}
+
+.btn--mini {
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+}
+
+.icon { margin-left: 4px; }
+
+/* =========================================
+   4. LAYOUT (GRID Y PANELES)
+   ========================================= */
+.content-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 14px;
+    padding: 14px;
+    transition: grid-template-columns .25s ease;
+}
+
+.content-grid.is-split {
+    grid-template-columns: 1.55fr 1fr; /* División cuando se abre el formulario */
+}
+
+.panel {
+    border: 2px solid var(--border);
+    border-radius: 8px;
+    background: #fff;
+    padding: 10px;
+    height: fit-content;
+}
+
+.panel__header {
+    display:flex;
+    align-items:center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 6px 6px 12px 6px;
+}
+
+.panel__header--compact {
+    padding: 6px 6px 8px 6px;
+}
+
+.panel__title {
+    margin: 0;
+    font-size: 12px;
+    letter-spacing: .2px;
+    text-transform: uppercase;
+    font-weight: 700;
+}
+
+.panel__subtitle {
+    margin: 0;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+/* Panel Derecho (Formulario) */
+.panel--right {
+    display: none;
+    opacity: 0;
+    transform: translateX(14px);
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+}
+
+.content-grid.is-split .panel--right {
+    display: block;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: auto;
+}
+
+/* =========================================
+   5. TABLAS (Estilo corregido y centrado)
+   ========================================= */
+.table-wrap {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+
+.table thead th {
+    text-align: left;
+    padding: 10px 10px;
+    background: #f3f3f3;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+    font-weight: 600;
+    vertical-align: middle;
+}
+
+.table tbody td {
+    text-align: left;
+    padding: 10px;
+    border-bottom: 1px solid #e6e6e6;
+    vertical-align: middle;
+}
+
+.th-actions {
+    width: 140px !important;
+    text-align: center !important;
+}
+
+.actions {
+    display: inline-flex !important;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+}
+
+.actions .btn {
+    margin: 0;
+}
+
+/* =========================================
+   6. PAGINACIÓN
+   ========================================= */
+.pagination {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 0 2px 0;
+}
+
+.page {
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 28px;
+    height: 28px;
+
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+    font-size: 12px;
+
+    text-decoration: none;
+    color: inherit;
+    line-height: 1;
+}
+
+.page:hover {
+    background-color: #f2f2f2;
+}
+
+.page--active {
+    background: #f2f2f2;
+    font-weight: 700;
+    pointer-events: none;
+}
+
+/* =========================================
+   7. FORMULARIOS
+   ========================================= */
+.form label {
+    display: block;
+    font-size: 11px;
+    margin-bottom: 4px;
+    font-weight: 600;
+}
+
+.form input,
+.form select,
+.form textarea {
+    width: 100%;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 7px 8px;
+    font-size: 11px;
+    outline: none;
+    font-family: inherit;
+}
+
+.form input:focus,
+.form select:focus,
+.form textarea:focus {
+    border-color: var(--color-vino);
+}
+
+.form-row { margin-bottom: 12px; }
+
+.form-row--2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+    padding-top: 10px;
+    border-top: 1px solid #eee;
+}
+
+.form-actions--center {
+    justify-content: center;
+}
+
+
+/* =========================================
+   8. ESTILOS ESPECÍFICOS PARA CONVENIOS
+   ========================================= */
+
+.table td:nth-child(4),
+.table td:nth-child(5)
+{
+    min-width: 90px;
+    white-space: nowrap;
+}
+
+.pill {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 999px;
+    font-size: 10px;
+    border: 1px solid var(--border);
+    background: #fff;
+    white-space: nowrap;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+/* Colores específicos de Convenios */
+/* 1. Vigente (Verde) */
+.pill--vigente {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    border-color: #c8e6c9;
+}
+
+/* 2. Por vencer (Naranja) */
+.pill--por-vencer {
+    background-color: #fff8e1;
+    color: #ef6c00;
+    border-color: #ffe0b2;
+}
+
+/* 3. Vencido (Rojo) */
+.pill--vencido {
+    background-color: #ffebee;
+    color: #c62828;
+    border-color: #ffcdd2;
+}
+
+/* 4. Cancelado (Gris) */
+.pill--cancelado {
+    background-color: #eceff1;
+    color: #546e7a;
+    border-color: #cfd8dc;
+}
+
+/* =========================================
+   9. RESPONSIVE
+   ========================================= */
+@media (max-width: 1100px) {
+    .tabs__left { flex-wrap: wrap; }
+}
+
+@media (max-width: 980px) {
+    .content-grid { grid-template-columns: 1fr; }
+    .content-grid.is-split { grid-template-columns: 1fr; }
+    .panel--right { display: block; }
 }

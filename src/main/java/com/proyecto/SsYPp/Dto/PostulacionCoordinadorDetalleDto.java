@@ -18,6 +18,7 @@ public class PostulacionCoordinadorDetalleDto {
 
     private Long prestadorId;
     private String prestadorNombre;
+    private String prestadorEmail;
 
     private Long vacanteId;
     private String vacanteNombre;

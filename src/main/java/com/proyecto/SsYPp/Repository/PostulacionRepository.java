@@ -30,8 +30,8 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
         SELECT
             p."idPostulacion" AS id,
             p."fechaPostulacion" AS fechaPostulacion,
-
             u."idusuario" AS prestadorId,
+            u."email" AS prestadorEmail,
             CONCAT(
                 u."nombre", ' ', u."primerapellido",
                 COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
@@ -71,6 +71,8 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
         p."idPostulacion" AS idPostulacion,
         to_char(p."fechaPostulacion"::time, 'HH24:MI') AS fechaPostulacion,
 
+        p."comentarios" AS comentarios,
+        
         v."idVacantes" AS vacanteId,
         v."nombrePuesto" AS vacanteNombre,
         v."numeroPlazas" AS numeroPlazas,
