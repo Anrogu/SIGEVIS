@@ -1,376 +1,232 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
     <title>Administrador | Asignaciones</title>
 
-    <link rel="stylesheet" href="/css_admin/styles.css" />
+    <!-- MISMO DISEÑO -->
+    <link rel="stylesheet" href="/css_admin/styles.css"/>
+    <link rel="stylesheet" href="/css_admin/index.css"/>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <style>
+        .th-actions { width: 220px; text-align: center; }
+        td.actions { text-align: center; }
+        .actions-wrap { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }
+        .btn--mini { padding: 6px 10px; font-size: 12px; }
+        .subtxt{ display:block; font-size:12px; opacity:.85; margin-top:2px; }
+    </style>
 </head>
 
 <body>
 <div class="app">
 
+    <!-- TOPBAR -->
     <header class="topbar">
         <div class="topbar__left">
             <span class="topbar__title">ADMINISTRADOR</span>
         </div>
         <div class="topbar__right">
             <div class="logos">
-                <img src="/img/EscudosGEM.png" alt="Escudo GEM" class="logo-img">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
             </div>
         </div>
     </header>
 
+    <!-- TABS -->
     <nav class="tabs">
         <div class="tabs__left">
-            <a class="tab" th:href="@{/admin/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/admin/index}">INICIO</a>
+            <a class="tab" th:href="@{/admin/noticias}">NOTICIAS</a>
             <a class="tab" th:href="@{/admin/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/admin/postulaciones}">POSTULACIONES</a>
             <a class="tab tab--active" th:href="@{/admin/asignaciones}">ASIGNACIONES</a>
-            <a class="tab" th:href="@{/admin/actividades}">ACTIVIDADES Y EVIDENCIAS</a>
-            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS Y ROLES</a>
+            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS</a>
         </div>
         <div class="tabs__right">
-            <button class="btn btn--outline btn--logout" id="btnLogout">CERRAR SESIÓN</button>
+            <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESIÓN</button>
         </div>
     </nav>
 
+    <!-- TOOLBAR -->
     <section class="toolbar">
         <div class="search">
             <span class="search__icon">🔎</span>
-            <input id="searchAsig" class="search__input" type="text" placeholder="Buscar por prestador, vacante o área..." />
+            <input id="searchAsignaciones" class="search__input" type="text"
+                   placeholder="Buscar por ID, prestador o vacante..."/>
         </div>
-        <button class="btn btn--primary" type="button" id="btnSearchAsig">Buscar</button>
+        <button class="btn btn--primary" type="button" id="btnSearch">Buscar</button>
     </section>
 
-    <section class="content-grid" id="asigLayout">
-
+    <!-- CONTENIDO -->
+    <section class="content-grid">
         <main class="panel panel--left">
+
             <div class="panel__header">
                 <h2 class="panel__title">ASIGNACIONES</h2>
                 <div class="panel__actions">
-                    <button class="btn btn--primary" type="button" id="btnNewAsig">
-                        Nueva Asignación
-                    </button>
+                    <a class="btn btn--primary" th:href="@{/admin/asignaciones}">Recargar</a>
                 </div>
             </div>
 
+            <!-- MENSAJES (flash del controller) -->
+            <div th:if="${mensajeExito}" style="margin:10px 0;">
+                <div class="pill pill--vigente" th:text="${mensajeExito}"></div>
+            </div>
+
+            <div th:if="${mensajeError}" style="margin:10px 0;">
+                <div class="pill pill--vencido" th:text="${mensajeError}"></div>
+            </div>
+
+            <!-- TABLA -->
             <div class="table-wrap">
-                <table class="table">
+                <table class="table" id="tablaAsignaciones">
                     <thead>
                     <tr>
+                        <th>ID</th>
+                        <th>Inicio</th>
+                        <th>Fin</th>
                         <th>Prestador</th>
-                        <th>Carrera</th>
                         <th>Vacante</th>
-                        <th>Unidad</th>
-                        <th>Periodo</th>
-                        <th>Estatus</th>
                         <th class="th-actions">Acciones</th>
                     </tr>
                     </thead>
-                    <tbody id="asignacionesBody">
+
+                    <tbody id="asigBody">
+
+                    <!-- Lista -->
+                    <tr th:each="a : ${asignaciones}"
+                        th:attr="data-row=${a.idAsignacion}">
+                        <td th:text="${a.idAsignacion}">1</td>
+
+                        <!-- Si tus fechas son OffsetTime y te marca raro, cámbialo a HH:mm -->
+                        <td th:text="${a.fechaInicio != null ? #temporals.format(a.fechaInicio,'dd/MM/yyyy') : '—'}">—</td>
+                        <td th:text="${a.fechaFin != null ? #temporals.format(a.fechaFin,'dd/MM/yyyy') : '—'}">—</td>
+
+                        <td th:text="${#strings.isEmpty(a.nombrePrestador) ? '—' : a.nombrePrestador}">—</td>
+                        <td th:text="${#strings.isEmpty(a.nombreVacante) ? '—' : a.nombreVacante}">—</td>
+
+                        <td class="actions">
+                            <div class="actions-wrap">
+
+                                <!-- VER (MODAL) -->
+                                <button class="btn btn--mini" type="button"
+                                        th:attr="data-ver=${a.idAsignacion}">
+                                    Ver
+                                </button>
+
+                                <!-- ELIMINAR -->
+                                <a class="btn btn--mini btn--danger"
+                                   th:href="@{/admin/asignaciones/eliminar/{id}(id=${a.idAsignacion})}"
+                                   onclick="return confirm('¿Seguro que deseas eliminar esta asignación?');">
+                                    <i class="fa-solid fa-trash"></i>
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+
+                    <!-- Si NO hay registros -->
+                    <tr th:if="${asignaciones == null || #lists.isEmpty(asignaciones)}">
+                        <td colspan="6" style="text-align:center; padding:20px;">
+                            No hay asignaciones registradas.
+                        </td>
+                    </tr>
+
                     </tbody>
                 </table>
             </div>
 
-            <div class="pagination" id="pagination"></div>
         </main>
-
-        <aside id="asigFormPanel" class="panel panel--right">
-            <div class="panel__header panel__header--compact">
-                <h3 class="panel__subtitle">DATOS DE ASIGNACIÓN</h3>
-            </div>
-
-            <form class="form" id="asigForm">
-                <input type="hidden" id="idAsignacion" />
-
-                <div class="form-row">
-                    <label>ID Usuario (Prestador)</label>
-                    <input id="Usuarios_idUsuario" type="number" min="1" placeholder="Ej. 10" required />
-                </div>
-
-                <div class="form-row">
-                    <label>ID Postulación</label>
-                    <input id="Postulaciones_idPostulacion" type="number" min="1" placeholder="Ej. 3" required />
-                </div>
-
-                <div class="form-row form-row--2">
-                    <div>
-                        <label>Fecha Inicio</label>
-                        <input id="fechaInicio" type="date" required />
-                    </div>
-                    <div>
-                        <label>Fecha Fin</label>
-                        <input id="fechaFin" type="date" required />
-                    </div>
-                </div>
-
-                <div class="form-row">
-                    <label>Estatus</label>
-                    <select id="estatus">
-                        <option value="true">Activa</option>
-                        <option value="false">Inactiva</option>
-                    </select>
-                </div>
-
-                <div class="form-actions form-actions--center">
-                    <button type="submit" class="btn btn--primary">Guardar</button>
-                    <button type="button" class="btn btn--wine" id="btnCancelAsig">Cancelar</button>
-                </div>
-            </form>
-        </aside>
-
     </section>
+</div>
 
+<!-- MODAL GOV -->
+<div id="gobModal" class="gob-modal gob-modal--info" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">i</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Detalle</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle"></p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body"></div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cerrar</button>
+        </div>
+    </div>
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const API = "/asignaciones";
-
-        // Refs UI
-        const layout = document.getElementById("asigLayout");
-        const tbody = document.getElementById("asignacionesBody");
-        const form = document.getElementById("asigForm");
-        const pagination = document.getElementById("pagination");
-        const searchInput = document.getElementById("searchAsig");
-
-        const btnNew = document.getElementById("btnNewAsig");
-        const btnCancel = document.getElementById("btnCancelAsig");
-        const btnSearch = document.getElementById("btnSearchAsig");
-        const btnLogout = document.getElementById("btnLogout");
-
-        // Estado
-        let asignacionesCache = [];
-        let currentList = [];
-        let editing = null;
-
-        const PAGE_SIZE = 9;
-        let currentPage = 1;
-
-        // Logout
-        btnLogout?.addEventListener("click", async () => {
-            try {
-                const res = await fetch("/logout", { method: "POST" });
-                if (res.ok || res.status === 302) window.location.href = "/login?logout";
-            } catch (e) { console.error(e); }
-        });
-
-        // --- 1. FORMATO FECHA (Mes Año) ---
-        function formatMonthYear(dateString) {
-            if (!dateString) return "";
-            const date = new Date(dateString);
-            if (isNaN(date)) return "";
-
-            // "enero 2025"
-            const options = { month: 'long', year: 'numeric', timeZone: 'UTC' };
-            // Ajuste simple de zona horaria o uso directo
-            const formatted = date.toLocaleDateString('es-ES', options);
-            return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-        }
-
-        // --- 2. RENDER TABLA ---
-        function renderAsignaciones(lista) {
-            tbody.innerHTML = "";
-
-            if (!lista || lista.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding:20px; color:#666;">No hay asignaciones registradas.</td></tr>`;
-                return;
-            }
-
-            lista.forEach(a => {
-                // Obtención de datos con validación de nulos
-                const nombre = a.usuario
-                    ? `${a.usuario.nombre || ''} ${a.usuario.primerapellido || ''} ${a.usuario.segundoapellido || ''}`.trim()
-                    : "";
-
-                const carrera = a.usuario?.carrera?.nombre || "";
-                const vacante = a.vacante?.nombrePuesto || "";
-                const unidad = a.vacante?.area?.nombre || "";
-
-                // Periodo
-                const fIni = formatMonthYear(a.fechaInicio);
-                const fFin = formatMonthYear(a.fechaFin);
-                const periodo = (fIni && fFin) ? `${fIni} - ${fFin}` : "";
-
-                // Estatus (Colores de Vacantes: pill--vigente (verde), pill--cancelado (rojo/gris))
-                const estatusClass = a.estatus ? "pill--vigente" : "pill--cancelado";
-                const estatusText = a.estatus ? "Asignada" : "Inactiva";
-
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td>${nombre}</td>
-                    <td>${carrera}</td>
-                    <td>${vacante}</td>
-                    <td>${unidad}</td>
-                    <td>${periodo}</td>
-                    <td><span class="pill ${estatusClass}">${estatusText}</span></td>
-                    <td class="actions">
-                        <button class="btn btn--mini" type="button" data-edit="${a.idAsignacion}">Editar</button>
-                        <button class="btn btn--mini btn--outline" type="button" data-del="${a.idAsignacion}">Eliminar</button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
-
-        // --- 3. PAGINACIÓN ---
-        function getTotalPages(list) { return Math.max(1, Math.ceil(list.length / PAGE_SIZE)); }
-        function getPageSlice(list, page) { const start = (page - 1) * PAGE_SIZE; return list.slice(start, start + PAGE_SIZE); }
-
-        function renderPagination(totalPages) {
-            if (!pagination) return;
-            if (currentList.length === 0) { pagination.innerHTML = ""; return; }
-
-            let html = "";
-            const prevDis = currentPage === 1 ? "disabled style='opacity:0.5; cursor:default'" : "";
-            const nextDis = currentPage === totalPages ? "disabled style='opacity:0.5; cursor:default'" : "";
-
-            html += `<button class="page" type="button" data-page="prev" ${prevDis}>‹</button>`;
-            for (let p = 1; p <= totalPages; p++) {
-                const active = p === currentPage ? "page--active" : "";
-                html += `<button class="page ${active}" type="button" data-page="${p}">${p}</button>`;
-            }
-            html += `<button class="page" type="button" data-page="next" ${nextDis}>›</button>`;
-            pagination.innerHTML = html;
-        }
-
-        function renderTablaPaginada(list) {
-            currentList = list || [];
-            const totalPages = getTotalPages(currentList);
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
-
-            renderAsignaciones(getPageSlice(currentList, currentPage));
-            renderPagination(totalPages);
-        }
-
-        pagination.addEventListener("click", (e) => {
-            const btn = e.target.closest("button[data-page]");
-            if (!btn || btn.disabled) return;
-            const val = btn.dataset.page;
-
-            if (val === "prev" && currentPage > 1) currentPage--;
-            else if (val === "next" && currentPage < getTotalPages(currentList)) currentPage++;
-            else {
-                const n = Number(val);
-                if (!isNaN(n)) currentPage = n;
-            }
-            renderTablaPaginada(currentList);
-        });
-
-        // --- 4. API & FORM ---
-        function openForm() { layout.classList.add("is-split"); }
-        function closeForm() {
-            layout.classList.remove("is-split");
-            editing = null;
-            form.reset();
-            document.getElementById("idAsignacion").value = "";
-        }
-
-        async function cargarAsignaciones() {
-            try {
-                const res = await fetch(`${API}/getAll`, { headers: { "Accept": "application/json" } });
-                if (res.ok) {
-                    asignacionesCache = await res.json();
-                    currentPage = 1;
-                    renderTablaPaginada(asignacionesCache);
-                } else {
-                    console.error("Error cargando asignaciones");
-                }
-            } catch (err) { console.error(err); }
-        }
-
-        // Crear / Editar
-        btnNew.addEventListener("click", () => { editing = null; form.reset(); openForm(); });
-        btnCancel.addEventListener("click", closeForm);
-
-        tbody.addEventListener("click", async (e) => {
-            const editBtn = e.target.closest("[data-edit]");
-            const delBtn = e.target.closest("[data-del]");
-
-            if (editBtn) {
-                const id = Number(editBtn.dataset.edit);
-                editing = asignacionesCache.find(x => x.idAsignacion === id);
-                if (!editing) return;
-
-                document.getElementById("idAsignacion").value = editing.idAsignacion;
-                document.getElementById("Usuarios_idUsuario").value = editing.Usuarios_idUsuario || (editing.usuario?.idUsuario) || "";
-                document.getElementById("Postulaciones_idPostulacion").value = editing.Postulaciones_idPostulacion || (editing.postulacion?.idPostulacion) || "";
-
-                const fIni = String(editing.fechaInicio).substring(0, 10);
-                const fFin = String(editing.fechaFin).substring(0, 10);
-                document.getElementById("fechaInicio").value = fIni;
-                document.getElementById("fechaFin").value = fFin;
-                document.getElementById("estatus").value = String(editing.estatus);
-
-                openForm();
-            }
-
-            if (delBtn) {
-                const id = delBtn.dataset.del;
-                if (confirm("¿Eliminar esta asignación?")) {
-                    try {
-                        const res = await fetch(`${API}/delete/${id}`, { method: "DELETE" });
-                        if (res.ok) cargarAsignaciones();
-                        else alert("No se pudo eliminar.");
-                    } catch(err) { console.error(err); }
-                }
-            }
-        });
-
-        form.addEventListener("submit", async (e) => {
-            e.preventDefault();
-
-            const payload = {
-                idAsignacion: editing ? editing.idAsignacion : null,
-                Usuarios_idUsuario: Number(document.getElementById("Usuarios_idUsuario").value),
-                Postulaciones_idPostulacion: Number(document.getElementById("Postulaciones_idPostulacion").value),
-                fechaInicio: document.getElementById("fechaInicio").value,
-                fechaFin: document.getElementById("fechaFin").value,
-                estatus: document.getElementById("estatus").value === "true"
-            };
-
-            const url = editing ? `${API}/update/${payload.idAsignacion}` : `${API}/create`;
-            const method = editing ? "PUT" : "POST";
-
-            try {
-                const res = await fetch(url, {
-                    method: method,
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload)
-                });
-                if (res.ok) {
-                    await cargarAsignaciones();
-                    closeForm();
-                } else {
-                    alert("Error al guardar.");
-                }
-            } catch (err) { console.error(err); }
-        });
-
-        // --- 5. BUSQUEDA ---
-        function filtrar() {
-            const q = searchInput.value.toLowerCase().trim();
-            if (!q) { renderTablaPaginada(asignacionesCache); return; }
-
-            const filtrados = asignacionesCache.filter(a => {
-                const nombre = (a.usuario?.nombre || "").toLowerCase();
-                const vacante = (a.vacante?.nombrePuesto || "").toLowerCase();
-                const area = (a.vacante?.area?.nombre || "").toLowerCase();
-                return nombre.includes(q) || vacante.includes(q) || area.includes(q);
-            });
-            currentPage = 1;
-            renderTablaPaginada(filtrados);
-        }
-
-        btnSearch.addEventListener("click", filtrar);
-        searchInput.addEventListener("keyup", (e) => { if(e.key === "Enter") filtrar(); });
-
-        // Inicial
-        cargarAsignaciones();
+    // LOGOUT
+    const btnLogout = document.getElementById("btnLogout");
+    btnLogout?.addEventListener("click", async () => {
+        const res = await fetch("/logout", {method: "POST", credentials: "same-origin"});
+        if (res.ok || res.status === 302) window.location.href = "/login?logout";
     });
+
+    // MODAL
+    const gobModal = document.getElementById("gobModal");
+    const gobModalTitle = document.getElementById("gobModalTitle");
+    const gobModalBody = document.getElementById("gobModalBody");
+    const gobModalCancel = document.getElementById("gobModalCancel");
+
+    function openModal(title, body) {
+        gobModalTitle.textContent = title;
+        gobModalBody.innerHTML = body;
+        gobModal.style.display = "flex";
+    }
+
+    function closeModal() { gobModal.style.display = "none"; }
+
+    gobModal.addEventListener("click", e => {
+        if (e.target.closest("[data-close='1']")) closeModal();
+    });
+    gobModalCancel.addEventListener("click", closeModal);
+
+    // VER DETALLE
+    document.getElementById("asigBody").addEventListener("click", e => {
+        const btn = e.target.closest("[data-ver]");
+        if (!btn) return;
+
+        const row = btn.closest("tr");
+        const cells = row.querySelectorAll("td");
+
+        openModal(
+            "Detalle de Asignación",
+            `
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                <div><strong>ID:</strong><br>${cells[0].innerText}</div>
+                <div><strong>Inicio:</strong><br>${cells[1].innerText}</div>
+                <div><strong>Fin:</strong><br>${cells[2].innerText}</div>
+                <div style="grid-column:1/-1;"><strong>Prestador:</strong><br>${cells[3].innerText}</div>
+                <div style="grid-column:1/-1;"><strong>Vacante:</strong><br>${cells[4].innerText}</div>
+            </div>
+            `
+        );
+    });
+
+    // BUSCADOR
+    const searchInput = document.getElementById("searchAsignaciones");
+    const btnSearch = document.getElementById("btnSearch");
+
+    function filtrar() {
+        const q = (searchInput.value || "").toLowerCase().trim();
+        const rows = document.querySelectorAll("#asigBody tr[data-row]");
+        rows.forEach(r => {
+            r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
+        });
+    }
+
+    btnSearch.addEventListener("click", filtrar);
+    searchInput.addEventListener("input", filtrar);
 </script>
 
 </body>

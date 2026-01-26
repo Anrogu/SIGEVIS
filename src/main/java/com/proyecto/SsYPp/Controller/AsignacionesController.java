@@ -1,5 +1,6 @@
 package com.proyecto.SsYPp.Controller;
 
+import com.proyecto.SsYPp.Dto.AsignacionAdminRowDto;
 import com.proyecto.SsYPp.Dto.AsignacionDto;
 import com.proyecto.SsYPp.Service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,8 +11,8 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-@Controller // 1. Ahora es un Controlador de Vistas
-@RequestMapping("/admin/asignaciones") // 2. Ruta protegida bajo Admin
+@Controller
+@RequestMapping("/admin/asignaciones")
 public class AsignacionesController {
 
     @Autowired
@@ -20,9 +21,15 @@ public class AsignacionesController {
     // --- LISTAR (Vista Principal) ---
     @GetMapping
     public String index(Model model) {
-        List<AsignacionDto> listaAsignaciones = asignacionService.getAll();
+
+        // ✅ Lista global para admin (tabla)
+        List<AsignacionAdminRowDto> listaAsignaciones = asignacionService.listarAsignacionesAdmin();
         model.addAttribute("asignaciones", listaAsignaciones);
+
+        // ✅ Esto lo dejamos SOLO si tu vista tiene formulario de crear/editar
+        // (si tu vista nueva ya no usa formulario, lo puedes quitar)
         model.addAttribute("asignacion", new AsignacionDto());
+
         return "admin/asignaciones";
     }
 
@@ -40,27 +47,19 @@ public class AsignacionesController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensajeError", "Error al guardar: " + e.getMessage());
         }
-
-        // Redirige a la misma página para recargar la tabla
         return "redirect:/admin/asignaciones";
     }
 
-    // ✅ NUEVO: ASIGNAR DESDE POSTULACIÓN (para botón "Asignar")
-    // URL final: POST /admin/asignaciones/asignar/{idPostulacion}
+    // ✅ ASIGNAR DESDE POSTULACIÓN
     @PostMapping("/asignar/{idPostulacion}")
     public String asignarDesdePostulacion(@PathVariable Long idPostulacion,
                                           RedirectAttributes redirectAttributes) {
         try {
-            // Este método lo agregas en tu service (ver siguiente paso)
             asignacionService.crearAsignacionDesdePostulacionId(idPostulacion);
-
             redirectAttributes.addFlashAttribute("mensajeExito", "Asignación creada correctamente.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("mensajeError", "No se pudo asignar: " + e.getMessage());
         }
-
-        // Por ahora regresa a la lista de asignaciones (no rompe nada)
-        // Si quieres que regrese a la vista de postulaciones, cambiamos este redirect cuando me digas la ruta.
         return "redirect:/admin/asignaciones";
     }
 

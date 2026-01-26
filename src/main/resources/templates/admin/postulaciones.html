@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Administrador | Postulaciones</title>
+
+    <link rel="stylesheet" href="/css_admin/styles.css"/>
+    <link rel="stylesheet" href="/css_admin/index.css"/>
+
+    <style>
+        .th-actions { width: 220px; text-align: center; }
+        td.actions { text-align: center; }
+        .actions-wrap { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }
+        .btn--mini { padding:6px 10px; font-size:12px; }
+    </style>
+</head>
+
+<body>
+<div class="app">
+
+    <input type="hidden" id="currentUser"
+           th:value="${#authentication != null ? #authentication.name : ''}"/>
+
+    <header class="topbar">
+        <div class="topbar__left">
+            <span class="topbar__title">ADMINISTRADOR</span>
+        </div>
+        <div class="topbar__right">
+            <div class="logos">
+                <img src="/img/EscudosGEM.png" alt="EscudosGEM" class="logo-img">
+            </div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <div class="tabs__left">
+            <a class="tab" th:href="@{/admin/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/admin/vacantes}">VACANTES</a>
+            <a class="tab tab--active" th:href="@{/admin/postulaciones}">POSTULACIONES</a>
+            <a class="tab" th:href="@{/admin/asignaciones}">ASIGNACIONES</a>
+            <a class="tab" th:href="@{/admin/actividades}">ASIGNAR ACTIVIDAD</a>
+            <a class="tab" th:href="@{/admin/asistencias}">ASISTENCIA</a>
+            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS</a>
+        </div>
+        <div class="tabs__right">
+            <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESIÓN</button>
+        </div>
+    </nav>
+
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="searchPost" class="search__input" type="text"
+                   placeholder="Buscar por prestador, vacante, estatus o fecha..."/>
+        </div>
+        <button class="btn btn--primary" type="button" id="btnSearchPost">Buscar</button>
+    </section>
+
+    <section class="content-grid" id="postLayout">
+
+        <main class="panel panel--left">
+            <div class="panel__header">
+                <h2 class="panel__title">POSTULACIONES (TODAS)</h2>
+                <div class="panel__actions">
+                    <button class="btn btn--primary" type="button" id="btnReload">Recargar</button>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Prestador</th>
+                        <th>Contacto</th>
+                        <th>Vacante</th>
+                        <th>Estatus</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="postBody"></tbody>
+                </table>
+            </div>
+
+            <div class="pagination" id="pagination"></div>
+
+            <div id="postDetailsWrap" style="display:none; margin-top:14px;">
+                <div class="panel" style="border:1px solid var(--border, #ddd); background:#fff;">
+                    <div class="panel__header panel__header--compact"
+                         style="display:flex; align-items:center; justify-content:space-between;">
+                        <h3 class="panel__subtitle" style="margin:0;">DETALLE DE POSTULACIÓN</h3>
+                        <button type="button" id="btnCloseDetails" class="btn btn--outline btn--mini">Cerrar</button>
+                    </div>
+
+                    <div id="postDetails" style="padding:14px;"></div>
+                </div>
+            </div>
+        </main>
+
+        <aside id="postFormPanel" class="panel panel--right" style="display:none;"></aside>
+    </section>
+</div>
+
+<div id="gobModal" class="gob-modal gob-modal--danger" style="display:none;">
+    <div class="gob-modal__backdrop" data-close="1"></div>
+
+    <div class="gob-modal__card" role="dialog" aria-modal="true" aria-labelledby="gobModalTitle">
+        <div class="gob-modal__header">
+            <div class="gob-modal__icon">!</div>
+            <div class="gob-modal__titles">
+                <p id="gobModalTitle" class="gob-modal__title">Título</p>
+                <p id="gobModalSubtitle" class="gob-modal__subtitle">Subtítulo</p>
+            </div>
+            <button class="gob-modal__x" type="button" data-close="1">×</button>
+        </div>
+
+        <div id="gobModalBody" class="gob-modal__body">Contenido</div>
+
+        <div class="gob-modal__footer">
+            <button id="gobModalCancel" type="button" class="btn">Cancelar</button>
+            <button id="gobModalOk" type="button" class="btn btn--primary">Aceptar</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const btnLogout = document.getElementById("btnLogout");
+    btnLogout?.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/logout", {method: "POST", credentials: "same-origin"});
+            if (res.ok || res.status === 302) window.location.href = "/login?logout";
+        } catch (err) { console.error(err); }
+    });
+
+    document.addEventListener("DOMContentLoaded", () => {
+
+        const API_ALL = "/postulaciones/admin/todas";
+        const API_DETALLE = (id) => `/postulaciones/admin/detalle/${id}`;
+
+        const tbody = document.getElementById("postBody");
+        const pagination = document.getElementById("pagination");
+        const btnReload = document.getElementById("btnReload");
+        const searchInput = document.getElementById("searchPost");
+        const btnSearch = document.getElementById("btnSearchPost");
+
+        // Detalle
+        const postDetailsWrap = document.getElementById("postDetailsWrap");
+        const postDetails = document.getElementById("postDetails");
+        const btnCloseDetails = document.getElementById("btnCloseDetails");
+
+        let cache = [];
+        let currentList = [];
+        let selectedId = null;
+
+        const PAGE_SIZE = 9;
+        let currentPage = 1;
+
+        const gobModal = document.getElementById("gobModal");
+        const gobModalTitle = document.getElementById("gobModalTitle");
+        const gobModalSubtitle = document.getElementById("gobModalSubtitle");
+        const gobModalBody = document.getElementById("gobModalBody");
+        const gobModalOk = document.getElementById("gobModalOk");
+        const gobModalCancel = document.getElementById("gobModalCancel");
+        let modalOnOk = null;
+
+        function openGobModal({type="info", title="Aviso", subtitle="", body="", okText="Aceptar", cancelText="Cancelar", onOk=null, hideCancel=false}) {
+            gobModal.classList.remove("gob-modal--info", "gob-modal--success", "gob-modal--warning", "gob-modal--danger");
+            gobModal.classList.add(`gob-modal--${type}`);
+            gobModalTitle.textContent = title;
+            gobModalSubtitle.textContent = subtitle;
+            gobModalBody.textContent = body;
+            gobModalOk.textContent = okText;
+            gobModalCancel.textContent = cancelText;
+            gobModalCancel.style.display = hideCancel ? "none" : "inline-flex";
+            modalOnOk = onOk;
+            gobModal.style.display = "flex";
+        }
+        function closeGobModal(){ gobModal.style.display="none"; modalOnOk=null; }
+        gobModal.addEventListener("click", (e)=>{ if(e.target.closest("[data-close='1']")) closeGobModal(); });
+        gobModalCancel.addEventListener("click", closeGobModal);
+        gobModalOk.addEventListener("click", async ()=>{ if(typeof modalOnOk==="function") await modalOnOk(); closeGobModal(); });
+
+        function showError(message){
+            openGobModal({type:"danger", title:"Ocurrió un error", body:message, okText:"Entendido", hideCancel:true});
+        }
+
+        const getTotalPages = (list)=> Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+        const getPageSlice = (list, page)=> list.slice((page-1)*PAGE_SIZE, (page-1)*PAGE_SIZE + PAGE_SIZE);
+
+        function fmtHora(ot){
+            if(!ot) return "—";
+            const s = String(ot);
+            return s.length >= 8 ? s.substring(0, 8) : s;
+        }
+
+        function pillEstatusByDto(p){
+            const txt = (p?.estatusTexto || "").toLowerCase();
+            if(txt.includes("acept")) return `<span class="pill pill--vigente">Aceptado</span>`;
+            if(txt.includes("rech")) return `<span class="pill pill--vencido">Rechazado</span>`;
+            return `<span class="pill pill--por-vencer">Nuevo</span>`;
+        }
+
+        function actionsHtml(p){
+            const id = Number(p?.id ?? 0);
+            return `<div class="actions-wrap">
+                      <button class="btn btn--mini" type="button" data-det="${id}">Ver</button>
+                    </div>`;
+        }
+
+        function renderRows(lista){
+            tbody.innerHTML = "";
+            if(!lista || lista.length === 0){
+                tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:20px;">No se encontraron registros.</td></tr>`;
+                return;
+            }
+
+            lista.forEach(p=>{
+                const tr = document.createElement("tr");
+
+                // resaltar selección
+                const id = Number(p?.id ?? 0);
+                if(selectedId != null && id === Number(selectedId)){
+                    tr.style.outline = "2px solid rgba(122,15,26,.35)";
+                    tr.style.background = "rgba(122,15,26,.04)";
+                }
+
+                tr.innerHTML = `
+                    <td>${fmtHora(p.fechaPostulacion)}</td>
+                    <td>${p.prestadorNombre ?? "—"}</td>
+                    <td>
+                      <a href="mailto:${p.prestadorEmail}" style="text-decoration:none; font-weight:600;">
+                        ${p.prestadorEmail ?? "Sin correo"}
+                      </a>
+                    </td>
+                    <td>${p.vacanteNombre ?? "—"}</td>
+                    <td>${pillEstatusByDto(p)}</td>
+                    <td class="actions">${actionsHtml(p)}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function renderPagination(totalPages){
+            if(!pagination) return;
+            if(currentList.length === 0){ pagination.innerHTML=""; return; }
+
+            let html = "";
+            html += (currentPage > 1)
+                ? `<button class="page" type="button" data-page="prev">‹</button>`
+                : `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">‹</button>`;
+
+            for(let p=1; p<=totalPages; p++){
+                const active = p===currentPage ? "page--active" : "";
+                html += `<button class="page ${active}" type="button" data-page="${p}">${p}</button>`;
+            }
+
+            html += (currentPage < totalPages)
+                ? `<button class="page" type="button" data-page="next">›</button>`
+                : `<button class="page" type="button" disabled style="opacity:0.5; cursor:default">›</button>`;
+
+            pagination.innerHTML = html;
+        }
+
+        function renderTablaPaginada(list){
+            currentList = list || [];
+            const totalPages = getTotalPages(currentList);
+            if(currentPage > totalPages) currentPage = totalPages;
+            if(currentPage < 1) currentPage = 1;
+
+            renderRows(getPageSlice(currentList, currentPage));
+            renderPagination(totalPages);
+        }
+
+        pagination?.addEventListener("click", (e)=>{
+            const btn = e.target.closest("button[data-page]");
+            if(!btn || btn.disabled) return;
+
+            const totalPages = getTotalPages(currentList);
+            const val = btn.dataset.page;
+
+            if(val==="prev" && currentPage>1) currentPage--;
+            else if(val==="next" && currentPage<totalPages) currentPage++;
+            else {
+                const n = Number(val);
+                if(!isNaN(n)) currentPage=n;
+            }
+            renderTablaPaginada(currentList);
+        });
+
+        function filtrar(){
+            const q = (searchInput?.value || "").toLowerCase().trim();
+            let filtradas = cache;
+
+            if(q){
+                filtradas = cache.filter(p=>{
+                    const prest = String(p?.prestadorNombre ?? "").toLowerCase();
+                    const vac = String(p?.vacanteNombre ?? "").toLowerCase();
+                    const est = String(p?.estatusTexto ?? "").toLowerCase();
+                    const fecha = String(p?.fechaPostulacion ?? "").toLowerCase();
+                    return prest.includes(q) || vac.includes(q) || est.includes(q) || fecha.includes(q);
+                });
+            }
+            currentPage = 1;
+            renderTablaPaginada(filtradas);
+        }
+
+        btnSearch?.addEventListener("click", filtrar);
+        searchInput?.addEventListener("input", filtrar);
+
+        // ===================== DETALLE =====================
+        function renderDetalle(d){
+            if(!d) return;
+
+            postDetails.innerHTML = `
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                    <div><strong>ID:</strong><br>${d.id ?? "—"}</div>
+                    <div><strong>Fecha:</strong><br>${fmtHora(d.fechaPostulacion)}</div>
+
+                    <div><strong>Prestador:</strong><br>${d.prestadorNombre ?? "—"}</div>
+                    <div><strong>Email:</strong><br>
+                        <a href="mailto:${d.prestadorEmail ?? ''}" style="text-decoration:none; font-weight:600;">
+                            ${d.prestadorEmail ?? "—"}
+                        </a>
+                    </div>
+
+                    <div><strong>Vacante:</strong><br>${d.vacanteNombre ?? "—"}</div>
+                    <div><strong>Estatus:</strong><br>${d.estatusTexto ?? "Nuevo"}</div>
+
+                    <div style="grid-column:1 / -1;">
+                        <strong>Comentarios:</strong><br>
+                        <span style="white-space:pre-wrap;">${d.comentarios ?? ""}</span>
+                    </div>
+
+                    <div style="grid-column:1 / -1;">
+                        <strong>Requisitos (texto):</strong><br>
+                        <span style="white-space:pre-wrap;">${d.requisitosVacante ?? "—"}</span>
+                    </div>
+                </div>
+            `;
+
+            postDetailsWrap.style.display = "block";
+            postDetailsWrap.scrollIntoView({behavior:"smooth", block:"start"});
+        }
+
+        async function abrirDetalle(id){
+            try{
+                const res = await fetch(API_DETALLE(id), {headers: {"Accept":"application/json"}});
+                if(!res.ok){
+                    console.error("Detalle:", await res.text());
+                    showError("No se pudo cargar el detalle.");
+                    return;
+                }
+                const d = await res.json();
+                selectedId = id;
+                renderDetalle(d);
+                renderTablaPaginada(currentList); // para resaltar fila
+            }catch(err){
+                console.error(err);
+                showError("Error al consultar el detalle.");
+            }
+        }
+
+        btnCloseDetails?.addEventListener("click", ()=>{
+            selectedId = null;
+            postDetailsWrap.style.display = "none";
+            renderTablaPaginada(currentList);
+        });
+
+        // Click acciones (Ver)
+        tbody.addEventListener("click", async (e)=>{
+            const detBtn = e.target.closest("[data-det]");
+            if(detBtn){
+                const id = Number(detBtn.getAttribute("data-det"));
+                await abrirDetalle(id);
+            }
+        });
+
+        // ===================== CARGA =====================
+        async function cargarPostulaciones(){
+            const res = await fetch(API_ALL, {headers: {"Accept":"application/json"}});
+            if(!res.ok){
+                console.error("Error todas:", await res.text());
+                showError("No se pudieron cargar las postulaciones.");
+                return;
+            }
+            cache = await res.json();
+            currentPage = 1;
+            renderTablaPaginada(cache);
+
+            // si ya había un detalle seleccionado, lo reabre
+            if(selectedId != null){
+                await abrirDetalle(selectedId);
+            }
+        }
+
+        btnReload?.addEventListener("click", cargarPostulaciones);
+
+        (async ()=>{ await cargarPostulaciones(); })();
+    });
+</script>
+
+</body>
+</html>

@@ -1,6 +1,8 @@
 package com.proyecto.SsYPp.Repository;
 
+import com.proyecto.SsYPp.Dto.PostulacionAdminRowDto;
 import com.proyecto.SsYPp.Dto.PostulacionCoordinadorRowDto;
+import com.proyecto.SsYPp.Dto.PostulacionPrestadorRowDto;
 import com.proyecto.SsYPp.Entity.Postulacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -36,19 +38,15 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
                 u."nombre", ' ', u."primerapellido",
                 COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
             ) AS prestadorNombre,
-
             v."idVacantes" AS vacanteId,
             v."nombrePuesto" AS vacanteNombre,
-
             COALESCE(sp."idPostulacion", 1) AS estatusId,
             CASE
-            WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Nuevo'
-            WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazado'
-            WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptado'
-            ELSE 'Nuevo'
+                WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Nuevo'
+                WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazado'
+                WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptado'
+                ELSE 'Nuevo'
             END AS estatusTexto
-            
-
         FROM "Postulaciones" p
         JOIN "usuarios" u ON u."idusuario" = p."Usuarios_idUsuario"
         JOIN "Vacantes" v ON v."idVacantes" = p."Vacante_IdVacante"
@@ -60,39 +58,94 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
 
     // ✅ IDs de vacantes ya postuladas por el prestador (para filtrar "Vacantes para tu perfil")
     @Query(value = """
-    SELECT p."Vacante_IdVacante"
-    FROM "Postulaciones" p
-    WHERE p."Usuarios_idUsuario" = :usuarioId
+        SELECT p."Vacante_IdVacante"
+        FROM "Postulaciones" p
+        WHERE p."Usuarios_idUsuario" = :usuarioId
     """, nativeQuery = true)
     List<Long> findVacanteIdsPostuladasByUsuario(@Param("usuarioId") Long usuarioId);
+
     // ✅ LISTADO PRESTADOR: postulaciones por usuario (projection)
     @Query(value = """
-    SELECT
-        p."idPostulacion" AS idPostulacion,
-        to_char(p."fechaPostulacion"::time, 'HH24:MI') AS fechaPostulacion,
+        SELECT
+            p."idPostulacion" AS idPostulacion,
+            to_char(p."fechaPostulacion"::time, 'HH24:MI') AS fechaPostulacion,
+            p."comentarios" AS comentarios,
+            v."idVacantes" AS vacanteId,
+            v."nombrePuesto" AS vacanteNombre,
+            v."numeroPlazas" AS numeroPlazas,
+            a."nombre" AS areaNombre,
+            COALESCE(sp."idPostulacion", 1) AS estatusId,
+            CASE
+                WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Enviada'
+                WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazada'
+                WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptada'
+                ELSE 'Enviada'
+            END AS estatusTexto
+        FROM "Postulaciones" p
+        JOIN "Vacantes" v ON v."idVacantes" = p."Vacante_IdVacante"
+        LEFT JOIN "AreasDgp" a ON a."idArea" = v."AreasDgp_idArea"
+        LEFT JOIN "StatusPostulacion" sp ON sp."idPostulacion" = p."Estatus_IdEstatus"
+        WHERE p."Usuarios_idUsuario" = :usuarioId
+        ORDER BY p."fechaPostulacion" DESC
+    """, nativeQuery = true)
+    List<PostulacionPrestadorRowDto> findRowsByUsuario(@Param("usuarioId") Long usuarioId);
 
+    // ✅ LISTADO ADMIN: TODAS las postulaciones (projection)
+    @Query(value = """
+        SELECT
+            p."idPostulacion" AS id,
+            p."fechaPostulacion" AS fechaPostulacion,
+            CONCAT(
+                u."nombre", ' ', u."primerapellido",
+                COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
+            ) AS prestadorNombre,
+            u."email" AS prestadorEmail,
+            v."nombrePuesto" AS vacanteNombre,
+            COALESCE(sp."idPostulacion", 1) AS estatusId,
+            CASE
+                WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Nuevo'
+                WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazado'
+                WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptado'
+                ELSE 'Nuevo'
+            END AS estatusTexto
+        FROM "Postulaciones" p
+        JOIN "usuarios" u ON u."idusuario" = p."Usuarios_idUsuario"
+        JOIN "Vacantes" v ON v."idVacantes" = p."Vacante_IdVacante"
+        LEFT JOIN "StatusPostulacion" sp ON sp."idPostulacion" = p."Estatus_IdEstatus"
+        ORDER BY p."fechaPostulacion" DESC
+    """, nativeQuery = true)
+    List<PostulacionAdminRowDto> findAllAdminRows();
+
+    @Query(value = """
+    SELECT
+        p."idPostulacion" AS id,
+        p."fechaPostulacion" AS fechaPostulacion,
         p."comentarios" AS comentarios,
-        
+
+        u."idusuario" AS prestadorId,
+        CONCAT(
+            u."nombre", ' ', u."primerapellido",
+            COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
+        ) AS prestadorNombre,
+        u."email" AS prestadorEmail,
+
         v."idVacantes" AS vacanteId,
         v."nombrePuesto" AS vacanteNombre,
-        v."numeroPlazas" AS numeroPlazas,
-
-        a."nombre" AS areaNombre,
+        v."requisitos" AS requisitosVacante,
 
         COALESCE(sp."idPostulacion", 1) AS estatusId,
         CASE
-            WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Enviada'
-            WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazada'
-            WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptada'
-            ELSE 'Enviada'
+            WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Nuevo'
+            WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazado'
+            WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptado'
+            ELSE 'Nuevo'
         END AS estatusTexto
-
     FROM "Postulaciones" p
+    JOIN "usuarios" u ON u."idusuario" = p."Usuarios_idUsuario"
     JOIN "Vacantes" v ON v."idVacantes" = p."Vacante_IdVacante"
-    LEFT JOIN "AreasDgp" a ON a."idArea" = v."AreasDgp_idArea"
     LEFT JOIN "StatusPostulacion" sp ON sp."idPostulacion" = p."Estatus_IdEstatus"
-    WHERE p."Usuarios_idUsuario" = :usuarioId
-    ORDER BY p."fechaPostulacion" DESC
+    WHERE p."idPostulacion" = :id
+    LIMIT 1
 """, nativeQuery = true)
-    List<com.proyecto.SsYPp.Dto.PostulacionPrestadorRowDto> findRowsByUsuario(@Param("usuarioId") Long usuarioId);
+    com.proyecto.SsYPp.Dto.PostulacionAdminDetalleDto findAdminDetalleById(@Param("id") Long id);
 }

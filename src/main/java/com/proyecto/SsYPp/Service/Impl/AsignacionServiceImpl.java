@@ -1,5 +1,6 @@
 package com.proyecto.SsYPp.Service.Impl;
 
+import com.proyecto.SsYPp.Dto.AsignacionAdminRowDto;
 import com.proyecto.SsYPp.Dto.AsignacionDto;
 import com.proyecto.SsYPp.Entity.Asignacion;
 import com.proyecto.SsYPp.Entity.Postulacion;
@@ -60,6 +61,12 @@ public class AsignacionServiceImpl implements AsignacionService {
         Asignacion asignacion = convertirDTOAEntidad(asignacionDto);
         Asignacion actualizada = asignacionRepository.save(asignacion);
         return convertirEntidadADTO(actualizada);
+    }
+
+    // ✅ NUEVO: para la tabla global del ADMIN
+    @Override
+    public List<AsignacionAdminRowDto> listarAsignacionesAdmin() {
+        return asignacionRepository.findAllAdminRows();
     }
 
     // ✅ AQUÍ ENRIQUECEMOS EL DTO PARA MOSTRAR NOMBRES EN LA TABLA
@@ -142,7 +149,7 @@ public class AsignacionServiceImpl implements AsignacionService {
 
         nueva.setFechaInicio(OffsetTime.now());
 
-        // ⚠️ Si quieres que salga "Activa", mejor deja fechaFin = null (si tu BD lo permite)
+        // ⚠️ Tu BD marca fechaFin NOT NULL, así que por ahora dejamos algo válido
         nueva.setFechaFin(OffsetTime.now().plusHours(1));
 
         asignacionRepository.save(nueva);
