@@ -69,6 +69,9 @@ public class SecurityConfig {
                         // USUARIO (si tienes prefijo para usuario)
                         .requestMatchers("/usuario/**").hasAuthority("USUARIO")
 
+                        .requestMatchers("/asistencias/**").hasAuthority("USUARIO")
+
+
                         .anyRequest().authenticated()
                 )
 

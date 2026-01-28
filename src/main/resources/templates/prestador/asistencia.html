@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Prestador | Asistencia</title>
+
+    <!-- ✅ TUS ESTILOS -->
+    <link rel="stylesheet" href="/css_admin/styles.css"/>
+    <link rel="stylesheet" href="/css_admin/index.css"/>
+
+    <style>
+        .right-actions{
+            display:flex;
+            gap:8px;
+            align-items:center;
+            flex-wrap: wrap;
+        }
+        .msg{
+            margin-top:10px;
+            font-size: 11px;
+        }
+        .msg.ok{ color: var(--color-Texto-verde); }
+        .msg.bad{ color: var(--color-Texto-rojo); }
+        .muted{ color: var(--muted); font-size: 11px; }
+        .kpi{
+            display:flex;
+            gap:10px;
+            align-items:center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar__title">PRESTADOR</div>
+
+        <div class="topbar__right">
+            <div class="logos">
+                <!-- Ajusta rutas según tus imágenes -->
+                <img class="logo-img" src="/img/EscudosGEM.png" alt="Gobierno del Estado de México"/>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS -->
+    <div class="tabs">
+        <div class="tabs__left">
+            <!-- Ajusta estas rutas a las que uses en prestador -->
+            <a class="tab" href="/usuario/perfil">PERFIL</a>
+            <a class="tab" href="/usuario/vacantes">VACANTES</a>
+            <a class="tab" href="/usuario/actividades">ACTIVIDADES</a>
+            <a class="tab tab--active" href="/usuario/asistencia">ASISTENCIA</a>
+        </div>
+
+        <div class="tabs__right">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn--outline btn--logout">CERRAR SESIÓN</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input class="search__input" type="text" value="Registro de asistencia del prestador" readonly/>
+        </div>
+
+        <div class="right-actions">
+            <button id="btnEntrada" class="btn btn--primary">Registrar entrada</button>
+            <button id="btnSalida" class="btn btn--outline">Registrar salida</button>
+            <button id="btnTotal" class="btn btn--outline">Ver horas</button>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-grid">
+        <div class="panel">
+            <div class="panel__header">
+                <h3 class="panel__title">ASISTENCIA</h3>
+
+                <div class="kpi">
+                    <span class="muted">Total acumulado:</span>
+                    <span id="pillTotal" class="pill">—</span>
+                </div>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Último registro</th>
+                        <th>Hora entrada</th>
+                        <th>Hora salida</th>
+                        <th>Estatus</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr>
+                        <td id="tdUltimo">—</td>
+                        <td id="tdEntrada">—</td>
+                        <td id="tdSalida">—</td>
+                        <td id="tdEstatus"><span class="pill">Sin registro</span></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="msg" class="msg muted">Usa los botones para registrar tu entrada y salida.</div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const msg = document.getElementById("msg");
+    const pillTotal = document.getElementById("pillTotal");
+
+    const tdUltimo = document.getElementById("tdUltimo");
+    const tdEntrada = document.getElementById("tdEntrada");
+    const tdSalida  = document.getElementById("tdSalida");
+    const tdEstatus = document.getElementById("tdEstatus");
+
+    function setMsg(text, ok=true){
+        msg.className = "msg " + (ok ? "ok" : "bad");
+        msg.textContent = text;
+    }
+
+    function fmtDate(iso){
+        if(!iso) return "—";
+        try{
+            const d = new Date(iso);
+            return d.toLocaleString();
+        }catch(e){
+            return iso;
+        }
+    }
+
+    async function post(url){
+        const res = await fetch(url, { method: "POST" });
+        if(!res.ok){
+            const t = await res.text().catch(()=> "");
+            throw new Error("Error " + res.status + (t ? " - " + t : ""));
+        }
+        return res.json();
+    }
+
+    async function get(url){
+        const res = await fetch(url);
+        if(!res.ok){
+            const t = await res.text().catch(()=> "");
+            throw new Error("Error " + res.status + (t ? " - " + t : ""));
+        }
+        return res.json();
+    }
+
+    async function cargarTotal(){
+        try{
+            const horas = await get("/asistencias/total");
+            pillTotal.textContent = (horas ?? 0) + " hrs";
+            pillTotal.className = "pill pill--ok";
+        }catch(e){
+            pillTotal.textContent = "—";
+            pillTotal.className = "pill";
+        }
+    }
+
+    document.getElementById("btnEntrada").addEventListener("click", async () => {
+        try{
+            const a = await post("/asistencias/entrada");
+            tdUltimo.textContent = "Entrada registrada";
+            tdEntrada.textContent = fmtDate(a.horaEntrada);
+            tdSalida.textContent  = fmtDate(a.horaSalida);
+            tdEstatus.innerHTML = `<span class="pill pill--warn">Entrada activa</span>`;
+            setMsg("✅ Entrada registrada correctamente.", true);
+            await cargarTotal();
+        }catch(e){
+            setMsg("❌ " + e.message, false);
+        }
+    });
+
+    document.getElementById("btnSalida").addEventListener("click", async () => {
+        try{
+            const a = await post("/asistencias/salida");
+            tdUltimo.textContent = "Salida registrada";
+            tdEntrada.textContent = fmtDate(a.horaEntrada);
+            tdSalida.textContent  = fmtDate(a.horaSalida);
+            tdEstatus.innerHTML = `<span class="pill pill--ok">Cerrada</span>`;
+            setMsg("✅ Salida registrada correctamente.", true);
+            await cargarTotal();
+        }catch(e){
+            setMsg("❌ " + e.message, false);
+        }
+    });
+
+    document.getElementById("btnTotal").addEventListener("click", async () => {
+        await cargarTotal();
+        setMsg("✅ Total actualizado.", true);
+    });
+
+    // Carga inicial
+    cargarTotal();
+</script>
+
+</body>
+</html>

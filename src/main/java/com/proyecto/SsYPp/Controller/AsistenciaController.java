@@ -1,9 +1,10 @@
 package com.proyecto.SsYPp.Controller;
 
 import com.proyecto.SsYPp.Entity.Asistencia;
-import com.proyecto.SsYPp.Repository.AsistenciaRepository;
+import com.proyecto.SsYPp.Entity.Usuario;
+import com.proyecto.SsYPp.Repository.UsuarioRepository;
 import com.proyecto.SsYPp.Service.AsistenciaService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
@@ -12,27 +13,40 @@ import java.math.BigDecimal;
 @RequestMapping("/asistencias")
 public class AsistenciaController {
 
-    @Autowired
-    AsistenciaService service;
-    @Autowired
-    AsistenciaRepository asistenciaRepository;
-    @Autowired
-    private AsistenciaService asistenciaService;
+    private final AsistenciaService asistenciaService;
+    private final UsuarioRepository usuarioRepository;
 
-    @PostMapping("/entrada/{UsuarioIdusuario}")
-    public Asistencia entrada(@PathVariable Long UsuarioIdusuario) {
-        return service.registrarEntrada(UsuarioIdusuario);
+    public AsistenciaController(AsistenciaService asistenciaService,
+                                UsuarioRepository usuarioRepository) {
+        this.asistenciaService = asistenciaService;
+        this.usuarioRepository = usuarioRepository;
     }
 
+    private Long getUsuarioId(Authentication auth) {
+        String email = auth.getName(); // login usa usernameParameter("email")
+        Usuario u = usuarioRepository.findByEmail(email);
 
-    @PostMapping("/salida/{UsuarioIdusuario}")
-    public Asistencia salida(@PathVariable Long UsuarioIdusuario) {
-        return service.registrarSalida(UsuarioIdusuario);
+        if (u == null) {
+            throw new RuntimeException("Usuario no encontrado: " + email);
+        }
+        return u.getId();
     }
 
-    @GetMapping("/total/{idUsuario}")
-    public BigDecimal totalHoras(@PathVariable Long idUsuario) {
-        return asistenciaService.totalHoras(idUsuario);
+    // ✅ POST /asistencias/entrada
+    @PostMapping("/entrada")
+    public Asistencia entrada(Authentication auth) {
+        return asistenciaService.registrarEntrada(getUsuarioId(auth));
     }
 
+    // ✅ POST /asistencias/salida
+    @PostMapping("/salida")
+    public Asistencia salida(Authentication auth) {
+        return asistenciaService.registrarSalida(getUsuarioId(auth));
+    }
+
+    // ✅ GET /asistencias/total
+    @GetMapping("/total")
+    public BigDecimal totalHoras(Authentication auth) {
+        return asistenciaService.totalHoras(getUsuarioId(auth));
+    }
 }
