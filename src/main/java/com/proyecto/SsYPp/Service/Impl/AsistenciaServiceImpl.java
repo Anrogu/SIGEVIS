@@ -39,15 +39,18 @@ public class AsistenciaServiceImpl implements AsistenciaService {
         Usuario usuario = usuarioRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        asistenciaRepository
-                .findFirstByUsuario_IdAndHoraSalidaIsNull(usuarioId)
-                .ifPresent(a -> {
-                    throw new RuntimeException("El usuario ya tiene una entrada activa");
-                });
+        // ✅ RANGO DE HOY (00:00 a 23:59:59)
+        OffsetDateTime now = OffsetDateTime.now();
+        OffsetDateTime inicio = now.toLocalDate().atStartOfDay().atOffset(now.getOffset());
+        OffsetDateTime fin = inicio.plusDays(1);
+
+        // ✅ si ya hay registro hoy (aunque ya esté cerrado), no crear otro
+        asistenciaRepository.findFirstByUsuario_IdAndHoraEntradaBetween(usuarioId, inicio, fin)
+                .ifPresent(a -> { throw new RuntimeException("Ya tienes una asistencia registrada hoy"); });
 
         Asistencia asistencia = new Asistencia();
         asistencia.setUsuario(usuario);
-        asistencia.setHoraEntrada(OffsetDateTime.now());
+        asistencia.setHoraEntrada(now);
 
         return asistenciaRepository.save(asistencia);
     }
@@ -55,13 +58,25 @@ public class AsistenciaServiceImpl implements AsistenciaService {
     @Override
     public Asistencia registrarSalida(Long usuarioId) {
 
-        Asistencia asistencia = asistenciaRepository
-                .findFirstByUsuario_IdAndHoraSalidaIsNull(usuarioId)
-                .orElseThrow(() -> new RuntimeException("No existe entrada activa"));
+        OffsetDateTime now = OffsetDateTime.now();
 
-        asistencia.setHoraSalida(OffsetDateTime.now());
+        // ✅ RANGO DE HOY (00:00 a 24:00)
+        OffsetDateTime inicio = now.toLocalDate()
+                .atStartOfDay()
+                .atOffset(now.getOffset());
+
+        OffsetDateTime fin = inicio.plusDays(1);
+
+        // ✅ buscar SOLO la asistencia de HOY que esté activa (sin salida)
+        Asistencia asistencia = asistenciaRepository
+                .findFirstByUsuario_IdAndHoraEntradaBetweenAndHoraSalidaIsNull(usuarioId, inicio, fin)
+                .orElseThrow(() -> new RuntimeException("No existe entrada activa hoy"));
+
+        // ✅ registrar salida
+        asistencia.setHoraSalida(now);
         asistenciaRepository.save(asistencia);
 
+        // ✅ cálculo de horas (igual que ya lo tienes)
         Duration duracion = Duration.between(
                 asistencia.getHoraEntrada(),
                 asistencia.getHoraSalida()
@@ -71,11 +86,12 @@ public class AsistenciaServiceImpl implements AsistenciaService {
                 .valueOf(duracion.toMinutes())
                 .divide(BigDecimal.valueOf(60), 2, RoundingMode.HALF_UP);
 
+        // ✅ guardar contador (igual que ya lo tienes)
         Contador contador = new Contador();
         contador.setIdusuario(asistencia.getUsuario());
         contador.setIdasistencia(asistencia);
         contador.setHorasTotales(horas);
-        contador.setFecha(OffsetDateTime.now());
+        contador.setFecha(now);
 
         contadorRepository.save(contador);
 

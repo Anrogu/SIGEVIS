@@ -29,6 +29,12 @@
             align-items:center;
             flex-wrap: wrap;
         }
+        .rule{
+            margin: 6px 6px 12px;
+            font-size: 11px;
+            color: var(--muted);
+            line-height: 1.4;
+        }
     </style>
 </head>
 
@@ -41,7 +47,6 @@
 
         <div class="topbar__right">
             <div class="logos">
-                <!-- Ajusta rutas según tus imágenes -->
                 <img class="logo-img" src="/img/EscudosGEM.png" alt="Gobierno del Estado de México"/>
             </div>
         </div>
@@ -50,7 +55,6 @@
     <!-- TABS -->
     <div class="tabs">
         <div class="tabs__left">
-            <!-- Ajusta estas rutas a las que uses en prestador -->
             <a class="tab" href="/usuario/perfil">PERFIL</a>
             <a class="tab" href="/usuario/vacantes">VACANTES</a>
             <a class="tab" href="/usuario/actividades">ACTIVIDADES</a>
@@ -89,6 +93,12 @@
                     <span id="pillTotal" class="pill">—</span>
                 </div>
             </div>
+
+            <!-- ✅ MENSAJE FIJO (REGLA) -->
+            <p class="rule">
+                ℹ️ <strong>Solo se permite un registro de asistencia por día.</strong>
+                Evita registrar entrada y salida varias veces; primero registra tu <strong>entrada</strong> y al finalizar tu jornada registra tu <strong>salida</strong>.
+            </p>
 
             <div class="table-wrap">
                 <table class="table">
@@ -145,7 +155,7 @@
         const res = await fetch(url, { method: "POST" });
         if(!res.ok){
             const t = await res.text().catch(()=> "");
-            throw new Error("Error " + res.status + (t ? " - " + t : ""));
+            throw new Error(t || ("Error " + res.status));
         }
         return res.json();
     }
@@ -154,7 +164,7 @@
         const res = await fetch(url);
         if(!res.ok){
             const t = await res.text().catch(()=> "");
-            throw new Error("Error " + res.status + (t ? " - " + t : ""));
+            throw new Error(t || ("Error " + res.status));
         }
         return res.json();
     }
@@ -180,7 +190,15 @@
             setMsg("✅ Entrada registrada correctamente.", true);
             await cargarTotal();
         }catch(e){
-            setMsg("❌ " + e.message, false);
+            // ✅ MENSAJE AMIGABLE (1 asistencia por día)
+            const txt = (e.message || "").toLowerCase();
+            if (txt.includes("ya tienes una asistencia registrada hoy")) {
+                setMsg("⚠️ Ya existe un registro de asistencia para hoy. Solo se permite una asistencia por día.", false);
+            } else if (txt.includes("ya tiene una entrada activa")) {
+                setMsg("⚠️ Ya tienes una entrada activa hoy. Registra tu salida para completar la asistencia.", false);
+            } else {
+                setMsg("❌ " + e.message, false);
+            }
         }
     });
 
@@ -190,11 +208,17 @@
             tdUltimo.textContent = "Salida registrada";
             tdEntrada.textContent = fmtDate(a.horaEntrada);
             tdSalida.textContent  = fmtDate(a.horaSalida);
-            tdEstatus.innerHTML = `<span class="pill pill--ok">Cerrada</span>`;
+            tdEstatus.innerHTML = `<span class="pill pill--ok">Asistencia completada</span>`;
             setMsg("✅ Salida registrada correctamente.", true);
             await cargarTotal();
         }catch(e){
-            setMsg("❌ " + e.message, false);
+            // ✅ MENSAJE AMIGABLE (no hay entrada hoy)
+            const txt = (e.message || "").toLowerCase();
+            if (txt.includes("no existe entrada activa hoy") || txt.includes("no existe entrada activa")) {
+                setMsg("⚠️ No existe una entrada activa para hoy. Primero registra tu entrada.", false);
+            } else {
+                setMsg("❌ " + e.message, false);
+            }
         }
     });
 
