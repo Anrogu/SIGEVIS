@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.math.BigDecimal;
 
 @Repository
@@ -14,4 +15,6 @@ public interface ContadorRepository extends JpaRepository<Contador, Long> {
 
     @Query("SELECT COALESCE(SUM(c.horasTotales),0) FROM Contador c WHERE c.idusuario.id = :idUsuario")
     BigDecimal totalHorasPorUsuario(@Param("idUsuario") Long idUsuario);
+
+    List<Contador> findByIdusuario_IdOrderByFechaDesc(Long usuarioId);
 }

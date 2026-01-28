@@ -35,6 +35,10 @@
             color: var(--muted);
             line-height: 1.4;
         }
+        .hist-empty{
+            color: var(--muted);
+            font-size: 11px;
+        }
     </style>
 </head>
 
@@ -91,6 +95,7 @@
                 <div class="kpi">
                     <span class="muted">Total acumulado:</span>
                     <span id="pillTotal" class="pill">—</span>
+                    <span id="pillMeta" class="pill pill--warn">Meta: 480 hrs</span>
                 </div>
             </div>
 
@@ -100,6 +105,7 @@
                 Evita registrar entrada y salida varias veces; primero registra tu <strong>entrada</strong> y al finalizar tu jornada registra tu <strong>salida</strong>.
             </p>
 
+            <!-- ✅ TABLA RESUMEN (HOY / ÚLTIMO REGISTRO) -->
             <div class="table-wrap">
                 <table class="table">
                     <thead>
@@ -122,19 +128,55 @@
             </div>
 
             <div id="msg" class="msg muted">Usa los botones para registrar tu entrada y salida.</div>
+
+            <!-- ✅ MENSAJE CUANDO ALCANCE LA META -->
+            <div id="msgMeta" class="msg muted"></div>
+
+            <hr class="divider"/>
+
+            <!-- ✅ HISTORIAL -->
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">HISTORIAL DE ASISTENCIAS</h3>
+            </div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th>Horas</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbodyHistorial">
+                    <tr>
+                        <td colspan="4" class="hist-empty">Sin registros aún.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
         </div>
     </div>
 
 </div>
 
 <script>
+    // ✅ META
+    const META_HORAS = 480;
+
+    // UI refs
     const msg = document.getElementById("msg");
+    const msgMeta = document.getElementById("msgMeta");
     const pillTotal = document.getElementById("pillTotal");
 
     const tdUltimo = document.getElementById("tdUltimo");
     const tdEntrada = document.getElementById("tdEntrada");
     const tdSalida  = document.getElementById("tdSalida");
     const tdEstatus = document.getElementById("tdEstatus");
+
+    const tbodyHistorial = document.getElementById("tbodyHistorial");
 
     function setMsg(text, ok=true){
         msg.className = "msg " + (ok ? "ok" : "bad");
@@ -146,6 +188,16 @@
         try{
             const d = new Date(iso);
             return d.toLocaleString();
+        }catch(e){
+            return iso;
+        }
+    }
+
+    function fmtOnlyDate(iso){
+        if(!iso) return "—";
+        try{
+            const d = new Date(iso);
+            return d.toLocaleDateString();
         }catch(e){
             return iso;
         }
@@ -172,11 +224,47 @@
     async function cargarTotal(){
         try{
             const horas = await get("/asistencias/total");
-            pillTotal.textContent = (horas ?? 0) + " hrs";
+            const totalNum = Number(horas ?? 0);
+
+            pillTotal.textContent = totalNum.toFixed(2) + "/" + META_HORAS + " hrs";
             pillTotal.className = "pill pill--ok";
+
+            if(totalNum >= META_HORAS){
+                msgMeta.className = "msg ok";
+                msgMeta.textContent = "✅ Ya alcanzaste la meta de " + META_HORAS + " horas. Ya puedes solicitar tu carta de término.";
+            } else {
+                msgMeta.className = "msg muted";
+                msgMeta.textContent = "";
+            }
+
         }catch(e){
             pillTotal.textContent = "—";
             pillTotal.className = "pill";
+            msgMeta.className = "msg muted";
+            msgMeta.textContent = "";
+        }
+    }
+
+    async function cargarHistorial(){
+        try{
+            const rows = await get("/asistencias/historial");
+
+            if(!rows || rows.length === 0){
+                tbodyHistorial.innerHTML = `<tr><td colspan="4" class="hist-empty">Sin registros aún.</td></tr>`;
+                return;
+            }
+
+            tbodyHistorial.innerHTML = rows.map(r => `
+                <tr>
+                    <td>${fmtOnlyDate(r.fecha)}</td>
+                    <td>${fmtDate(r.horaEntrada)}</td>
+                    <td>${fmtDate(r.horaSalida)}</td>
+                    <td>${(r.horas ?? 0)} hrs</td>
+                </tr>
+            `).join("");
+
+        }catch(e){
+            tbodyHistorial.innerHTML = `<tr><td colspan="4" class="hist-empty">No se pudo cargar el historial.</td></tr>`;
         }
     }
 
@@ -188,9 +276,11 @@
             tdSalida.textContent  = fmtDate(a.horaSalida);
             tdEstatus.innerHTML = `<span class="pill pill--warn">Entrada activa</span>`;
             setMsg("✅ Entrada registrada correctamente.", true);
+
             await cargarTotal();
+            await cargarHistorial();
+
         }catch(e){
-            // ✅ MENSAJE AMIGABLE (1 asistencia por día)
             const txt = (e.message || "").toLowerCase();
             if (txt.includes("ya tienes una asistencia registrada hoy")) {
                 setMsg("⚠️ Ya existe un registro de asistencia para hoy. Solo se permite una asistencia por día.", false);
@@ -210,9 +300,11 @@
             tdSalida.textContent  = fmtDate(a.horaSalida);
             tdEstatus.innerHTML = `<span class="pill pill--ok">Asistencia completada</span>`;
             setMsg("✅ Salida registrada correctamente.", true);
+
             await cargarTotal();
+            await cargarHistorial();
+
         }catch(e){
-            // ✅ MENSAJE AMIGABLE (no hay entrada hoy)
             const txt = (e.message || "").toLowerCase();
             if (txt.includes("no existe entrada activa hoy") || txt.includes("no existe entrada activa")) {
                 setMsg("⚠️ No existe una entrada activa para hoy. Primero registra tu entrada.", false);
@@ -224,11 +316,13 @@
 
     document.getElementById("btnTotal").addEventListener("click", async () => {
         await cargarTotal();
-        setMsg("✅ Total actualizado.", true);
+        await cargarHistorial();
+        setMsg("✅ Información actualizada.", true);
     });
 
     // Carga inicial
     cargarTotal();
+    cargarHistorial();
 </script>
 
 </body>

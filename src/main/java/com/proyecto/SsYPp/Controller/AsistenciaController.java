@@ -1,13 +1,16 @@
 package com.proyecto.SsYPp.Controller;
 
+import com.proyecto.SsYPp.Dto.AsistenciaHistorialRowDto;
 import com.proyecto.SsYPp.Entity.Asistencia;
 import com.proyecto.SsYPp.Entity.Usuario;
+import com.proyecto.SsYPp.Repository.ContadorRepository;
 import com.proyecto.SsYPp.Repository.UsuarioRepository;
 import com.proyecto.SsYPp.Service.AsistenciaService;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @RestController
 @RequestMapping("/asistencias")
@@ -15,11 +18,14 @@ public class AsistenciaController {
 
     private final AsistenciaService asistenciaService;
     private final UsuarioRepository usuarioRepository;
+    private final ContadorRepository contadorRepository;
 
     public AsistenciaController(AsistenciaService asistenciaService,
-                                UsuarioRepository usuarioRepository) {
+                                UsuarioRepository usuarioRepository,
+                                ContadorRepository contadorRepository) {
         this.asistenciaService = asistenciaService;
         this.usuarioRepository = usuarioRepository;
+        this.contadorRepository = contadorRepository;
     }
 
     private Long getUsuarioId(Authentication auth) {
@@ -48,5 +54,21 @@ public class AsistenciaController {
     @GetMapping("/total")
     public BigDecimal totalHoras(Authentication auth) {
         return asistenciaService.totalHoras(getUsuarioId(auth));
+    }
+
+    // ✅ GET /asistencias/historial
+    @GetMapping("/historial")
+    public List<AsistenciaHistorialRowDto> historial(Authentication auth) {
+        Long usuarioId = getUsuarioId(auth);
+
+        return contadorRepository.findByIdusuario_IdOrderByFechaDesc(usuarioId)
+                .stream()
+                .map(c -> new AsistenciaHistorialRowDto(
+                        c.getFecha(),
+                        c.getIdasistencia().getHoraEntrada(),
+                        c.getIdasistencia().getHoraSalida(),
+                        c.getHorasTotales()
+                ))
+                .toList();
     }
 }
