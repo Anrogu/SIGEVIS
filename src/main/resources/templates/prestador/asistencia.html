@@ -46,32 +46,34 @@
 <div class="app">
 
     <!-- TOPBAR -->
-    <div class="topbar">
-        <div class="topbar__title">PRESTADOR</div>
+    <header class="public-header">
 
-        <div class="topbar__right">
-            <div class="logos">
-                <img class="logo-img" src="/img/EscudosGEM.png" alt="Gobierno del Estado de México"/>
+        <div class="public-header__row1">
+            <div></div>
+
+            <div class="public-header__title">PLATAFORMA SERVICIO SOCIAL</div>
+
+            <div class="public-header__logos">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
             </div>
         </div>
-    </div>
 
-    <!-- TABS -->
-    <div class="tabs">
-        <div class="tabs__left">
-            <a class="tab" href="/usuario/perfil">PERFIL</a>
-            <a class="tab" href="/usuario/vacantes">VACANTES</a>
-            <a class="tab" href="/usuario/actividades">ACTIVIDADES</a>
-            <a class="tab tab--active" href="/usuario/asistencia">ASISTENCIA</a>
+        <div class="tabs">
+            <div class="tabs__left">
+                <a class="tab tab--active" href="/usuario/perfil">PERFIL</a>
+                <a class="tab" href="/usuario/actividades">ACTIVIDADES</a>
+                <a class="tab" href="/usuario/postulaciones">POSTULACIONES</a>
+            </div>
+            </nav>
+
+            <div class="public-actions" style="display:flex; gap:10px; align-items:center;">
+                <span style="color:#111827; font-weight:600;"
+                      th:text="'Hola, ' + ${usuario.nombre}">Hola</span>
+                <a class="btn btn--outline" th:href="@{/logout}" style="text-decoration:none;">Cerrar sesión</a>
+            </div>
         </div>
 
-        <div class="tabs__right">
-            <form th:action="@{/logout}" method="post">
-                <button type="submit" class="btn btn--outline btn--logout">CERRAR SESIÓN</button>
-            </form>
-        </div>
-    </div>
-
+    </header>
     <!-- TOOLBAR -->
     <div class="toolbar">
         <div class="search">

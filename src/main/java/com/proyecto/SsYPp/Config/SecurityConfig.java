@@ -59,13 +59,14 @@ public class SecurityConfig {
                         // (debe ir ANTES de /admin/** para que aplique la más específica)
                         .requestMatchers("/admin/asignaciones/asignar/**")
                         .hasAnyAuthority("ADMIN", "COORDINADOR")
-
+                        .requestMatchers("/admin/usuarios/getAll")
+                        .hasAnyAuthority("ADMIN", "COORDINADOR")
                         // ADMIN
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
-
+                        .requestMatchers("/coordinador/actividades/update-status/**")
+                        .hasAnyAuthority("COORDINADOR", "USUARIO", "ADMIN")
                         // COORDINADOR
                         .requestMatchers("/coordinador/**").hasAuthority("COORDINADOR")
-
                         // USUARIO (si tienes prefijo para usuario)
                         .requestMatchers("/usuario/**").hasAuthority("USUARIO")
 

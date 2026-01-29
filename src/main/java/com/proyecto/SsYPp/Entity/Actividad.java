@@ -19,14 +19,14 @@ public class Actividad {
     @Column(name = "\"idActividad\"", nullable = false)
     private Long id;
 
+    @Size(max = 255)
     @NotNull
     @Column(name = "descripcion", nullable = false)
-    private Long descripcion;
+    private String descripcion;
 
     @NotNull
     @Column(name = "\"horasDestinadas\"", nullable = false, precision = 4, scale = 1)
     private BigDecimal horasDestinadas;
-
     @NotNull
     @Column(name = "\"fechaActividad\"", nullable = false)
     private LocalDate fechaActividad;    @NotNull
@@ -40,15 +40,10 @@ public class Actividad {
     @Column(name = "\"tipoActividad\"")
     private String tipoActividad;
 
-    @NotNull
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "\"IdUsuario\"", nullable = false)
     private Usuario idUsuario;
-
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "\"IdAsignacion\"", nullable = false)
-    private Asignacion idAsignacion;
 
 
 }

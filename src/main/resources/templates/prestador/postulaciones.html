@@ -26,6 +26,7 @@
 
     <!-- HEADER -->
     <header class="public-header">
+
         <div class="public-header__row1">
             <div></div>
 
@@ -36,18 +37,21 @@
             </div>
         </div>
 
-        <div class="public-header__row2">
-            <nav class="public-nav">
-                <a class="public-nav__link" href="/usuario/perfil">Mi Perfil</a>
-                <a class="public-nav__link public-nav__link--active" href="/usuario/postulaciones">Mis Postulaciones</a>
+        <div class="tabs">
+            <div class="tabs__left">
+                <a class="tab" href="/usuario/perfil">PERFIL</a>
+                <a class="tab" href="/usuario/actividades">ACTIVIDADES</a>
+                <a class="tab page--active" href="/usuario/asistencia">POSTULACIONES</a>
+            </div>
             </nav>
 
             <div class="public-actions" style="display:flex; gap:10px; align-items:center;">
-        <span style="color:#111827; font-weight:600;"
-              th:text="'Hola, ' + ${usuario.nombre}">Hola</span>
+                <span style="color:#111827; font-weight:600;"
+                      th:text="'Hola, ' + ${usuario.nombre}">Hola</span>
                 <a class="btn btn--outline" th:href="@{/logout}" style="text-decoration:none;">Cerrar sesión</a>
             </div>
         </div>
+
     </header>
 
     <!-- TOOLBAR -->
