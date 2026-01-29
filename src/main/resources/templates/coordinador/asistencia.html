@@ -226,8 +226,7 @@
             setMsg("Cargando prestadores…", null);
 
             // ✅ Cambia esta URL si tu backend usa otra
-            const list = await get("/coordinador/prestadores/aceptados");
-
+            const list = await get("/coordinador/asistencias/prestadores-hoy");
             data = Array.isArray(list) ? list : [];
             render(data);
             setMsg(`Listo. Prestadores: ${data.length}`, true);

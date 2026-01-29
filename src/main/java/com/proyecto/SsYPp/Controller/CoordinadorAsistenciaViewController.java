@@ -10,6 +10,6 @@ public class CoordinadorAsistenciaViewController {
 
     @GetMapping("/asistencia")
     public String asistencia() {
-        return "coordinador/asistencia"; // 👈 este debe existir como HTML
+        return "coordinador/asistencia";
     }
 }

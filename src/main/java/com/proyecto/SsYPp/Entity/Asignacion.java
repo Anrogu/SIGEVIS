@@ -12,6 +12,7 @@ import java.time.OffsetTime;
 @Entity
 @Table(name = "\"Asignaciones\"")
 public class Asignacion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "\"idAsignacion\"", nullable = false)
@@ -21,19 +22,26 @@ public class Asignacion {
     @Column(name = "\"fechaInicio\"", nullable = false)
     private OffsetTime fechaInicio;
 
-    @NotNull
-    @Column(name = "\"fechaFin\"", nullable = false)
+    @Column(name = "\"fechaFin\"")
     private OffsetTime fechaFin;
 
-    // CAMBIO: Debe ser el objeto Postulacion, no un Long
+    @Column(name = "activo")
+    private Boolean activo;
+
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "\"postulaciones_idpostulacion\"", nullable = false)
     private Postulacion postulacionesIdpostulacion;
 
-    // CAMBIO: Debe ser el objeto Vacante, no un long
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "\"vacantes_idvacante\"", nullable = false)
     private Vacante vacantesIdvacante;
+
+    public Usuario getUsuariosIdusuario() {
+        if (this.postulacionesIdpostulacion != null) {
+            return this.postulacionesIdpostulacion.getUsuariosIdusuario();
+        }
+        return null;
+    }
 }
