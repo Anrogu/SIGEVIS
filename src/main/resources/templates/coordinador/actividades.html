@@ -1,10 +1,211 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>Title</title>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Coordinador | Asignar Actividad</title>
+    <link rel="stylesheet" href="/css_admin/styles.css" />
+    <link rel="stylesheet" href="/css_admin/index.css" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body>
 
+<body>
+<div class="app">
+    <header class="topbar">
+        <div class="topbar__left"><span class="topbar__title">COORDINADOR</span></div>
+        <div class="topbar__right">
+            <div class="logos"><img src="/img/EscudosGEM.png" alt="Escudo GEM" class="logo-img"></div>
+        </div>
+    </header>
+
+    <nav class="tabs">
+        <div class="tabs__left">
+            <a class="tab" th:href="@{/coordinador/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/coordinador/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/coordinador/postulaciones}">POSTULACIONES</a>
+            <a class="tab" th:href="@{/coordinador/asignaciones}">ASIGNACIONES</a>
+            <a class="tab tab--active" th:href="@{/coordinador/actividades}">ASIGNAR ACTIVIDAD</a>
+            <a class="tab" th:href="@{/coordinador/asistencias}">ASISTENCIA</a>
+        </div>
+        <div class="tabs__right">
+            <button class="btn btn--outline btn--logout" type="button" id="btnLogout">CERRAR SESIÓN</button>
+        </div>
+    </nav>
+
+    <main class="content-grid" style="padding: 20px;">
+        <div class="panel">
+            <div class="panel__header"><h2 class="panel__title">GESTIÓN DE ACTIVIDADES</h2></div>
+
+            <div class="row" style="display: flex; gap: 20px; margin-top: 20px;">
+                <aside class="panel" style="flex: 1; min-width: 350px;">
+                    <form class="form" id="formActividad" style="padding: 20px;">
+                        <input type="hidden" id="estatusActividad" value="PENDIENTE" />
+
+                        <div class="form-row">
+                            <label>Vacante / Puesto</label>
+                            <select id="selectVacante" required>
+                                <option value="">Cargando vacantes...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <label>Becario Responsable</label>
+                            <select id="selectUsuario" required>
+                                <option value="">Seleccione el becario...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <label>Descripción</label>
+                            <input type="text" id="descripcion" placeholder="Ej: la Actividad se basa en..." required />
+                        </div>
+
+                        <div class="form-row form-row--2">
+                            <div>
+                                <label>Horas</label>
+                                <input type="number" step="0.01" id="horasDestinadas" placeholder="0.00" required />
+                            </div>
+                            <div>
+                                <label>Fecha</label>
+                                <input type="date" id="fechaActividad" required />
+                            </div>
+                        </div>
+                        <div class="form-actions" style="margin-top: 20px;">
+                            <button type="submit" class="btn btn--primary" style="width: 100%;">GUARDAR ACTIVIDAD</button>
+                        </div>
+                    </form>
+                </aside>
+
+                <section class="panel" style="flex: 2;">
+                    <div class="table-wrap">
+                        <table class="table">
+                            <thead>
+                            <tr>
+                                <th>Becario</th>
+                                <th>Fecha</th>
+                                <th>Horas</th>
+                                <th>Estatus</th>
+                                <th class="th-actions">Acciones</th>
+                            </tr>
+                            </thead>
+                            <tbody id="listaCuerpo"></tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </main>
+</div>
+
+<script>
+    const API_ACTIVIDADES = '/coordinador/actividades';
+    const API_USUARIOS = '/admin/usuarios/getAll';
+    const API_VACANTES = '/coordinador/vacantes/getAll';
+
+    let cacheUsuarios = [];
+
+    document.addEventListener("DOMContentLoaded", () => {
+        cargarCombosIniciales();
+
+        const inputFecha = document.getElementById('fechaActividad');
+        if (inputFecha) inputFecha.valueAsDate = new Date();
+
+        document.getElementById("btnLogout")?.addEventListener("click", async () => {
+            const res = await fetch("/logout", { method: "POST" });
+            if (res.ok || res.status === 302) window.location.href = "/login?logout";
+        });
+
+        document.getElementById('formActividad').addEventListener('submit', guardarActividad);
+    });
+
+    async function cargarCombosIniciales() {
+        try {
+            const [resVac, resUser] = await Promise.all([fetch(API_VACANTES), fetch(API_USUARIOS)]);
+            const vacantes = await resVac.json();
+            cacheUsuarios = await resUser.json();
+
+            const selectVacante = document.getElementById('selectVacante');
+            selectVacante.innerHTML = '<option value="">Seleccione una vacante...</option>';
+            vacantes.forEach(v => {
+                const opt = document.createElement('option');
+                opt.value = v.id;
+                opt.textContent = v.nombrePuesto || `Vacante #${v.id}`;
+                selectVacante.appendChild(opt);
+            });
+
+            const selectUser = document.getElementById('selectUsuario');
+            selectUser.innerHTML = '<option value="">Seleccione el becario...</option>';
+            cacheUsuarios.forEach(u => {
+                const opt = document.createElement('option');
+                opt.value = u.idusuario; // Usando el campo exacto del UsuarioDto
+                opt.textContent = `${u.nombre} ${u.primerapellido}`.trim();
+                selectUser.appendChild(opt);
+            });
+
+            listarActividades();
+        } catch (err) { console.error("Error cargando combos:", err); }
+    }
+
+    async function guardarActividad(e) {
+        e.preventDefault();
+
+        const payload = {
+            idUsuario: Number(document.getElementById('selectUsuario').value),
+            descripcion: String(document.getElementById('descripcion').value),
+            horasDestinadas: parseFloat(document.getElementById('horasDestinadas').value),
+            fechaActividad: document.getElementById('fechaActividad').value,
+            estatusActividad: document.getElementById('estatusActividad').value,
+            tipoActividad: "GENERAL"
+        };
+
+        // El backend debe estar configurado con @RequestBody para recibir este JSON
+        try {
+            const res = await fetch(`${API_ACTIVIDADES}/create`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert("Actividad registrada con éxito");
+                e.target.reset();
+                document.getElementById('fechaActividad').valueAsDate = new Date();
+                listarActividades();
+            } else {
+                alert("Error de validación: Verifique que todos los campos obligatorios estén llenos.");
+            }
+        } catch (err) { console.error("Error de red:", err); }
+    }
+
+    async function listarActividades() {
+        try {
+            const res = await fetch(`${API_ACTIVIDADES}/getAll`);
+            const datos = await res.json();
+
+            document.getElementById('listaCuerpo').innerHTML = datos.map(a => {
+                const user = cacheUsuarios.find(u => Number(u.idusuario) === Number(a.idUsuario));
+                const nombreBecario = user ? `${user.nombre} ${user.primerapellido}` : `ID: ${a.idUsuario}`;
+
+                return `
+                    <tr>
+                        <td><strong>${nombreBecario}</strong></td>
+                        <td>${a.fechaActividad}</td>
+                        <td>${a.horasDestinadas} hrs</td>
+                        <td><span class="pill">${a.estatusActividad}</span></td>
+                        <td class="actions">
+                            <button class="btn btn--mini btn--outline" onclick="eliminar(${a.id})">Borrar</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        } catch (err) { console.error("Error en tabla:", err); }
+    }
+
+    async function eliminar(id) {
+        if (!confirm("¿Eliminar actividad?")) return;
+        const res = await fetch(`${API_ACTIVIDADES}/delete/${id}`, { method: 'DELETE' });
+        if (res.ok) listarActividades();
+    }
+</script>
 </body>
 </html>

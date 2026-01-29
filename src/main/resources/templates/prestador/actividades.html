@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis Actividades | SIGEVIS</title>
+    <link rel="stylesheet" href="/css_admin/styles.css">
+    <link rel="stylesheet" href="/css_admin/index.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+<div class="app">
+    <header class="public-header">
+
+        <div class="public-header__row1">
+            <div></div>
+
+            <div class="public-header__title">PLATAFORMA SERVICIO SOCIAL</div>
+
+            <div class="public-header__logos">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
+            </div>
+        </div>
+
+        <div class="tabs">
+            <div class="tabs__left">
+                <a class="tab" href="/usuario/perfil">PERFIL</a>
+                <a class="tab" href="/usuario/postulaciones">MIS POSTULACIONES</a>
+                <a class="tab tab--active" href="/usuario/asistencia">ASISTENCIA</a>
+                <a class="tab" href="/usuario/actividades">ACTIVIDADES</a>
+            </div>
+            </nav>
+
+            <div class="public-actions" style="display:flex; gap:10px; align-items:center;">
+                <span style="color:#111827; font-weight:600;"
+                      th:text="'Hola, ' + ${usuario.nombre}">Hola</span>
+                <a class="btn btn--outline" th:href="@{/logout}" style="text-decoration:none;">Cerrar sesión</a>
+            </div>
+        </div>
+
+    </header>
+
+    <section class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="searchVac" class="search__input" type="text"
+                   placeholder="Buscar por título o unidad..." />
+        </div>
+        <button class="btn btn--primary" type="button" id="btnSearchVac">Buscar</button>
+    </section>
+    <main class="content-grid" style="padding: 20px;">
+        <div class="panel">
+            <div class="panel__header">
+                <h2 class="panel__title">HISTORIAL DE ACTIVIDADES ASIGNADAS</h2>
+            </div>
+
+            <div class="table-wrap" style="margin-top: 20px;">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Folio</th>
+                        <th>Hora Actividad</th>
+                        <th>Descripción</th>
+                        <th>Horas</th>
+                        <th>Tipo</th>
+                        <th>Estatus</th>
+                        <th>Acciones</th> </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="act : ${postulaciones}">
+                        <td th:text="${act.idActividad}">1</td>
+                        <td th:text="${act.fechaActividad}">08:00</td>
+                        <td th:text="${act.descripcion}">Descripción</td>
+                        <td th:text="${act.horasDestinadas + ' hrs'}">4.5 hrs</td>
+                        <td th:text="${act.tipoActividad}">GENERAL</td>
+                        <td>
+                <span th:classappend="${act.estatusActividad == 'COMPLETADA' ? 'pill--ok' : 'pill--warn'}"
+                      class="pill" th:text="${act.estatusActividad}">PENDIENTE</span>
+                        </td>
+                        <td>
+                            <button th:if="${act.estatusActividad != 'COMPLETADA'}"
+                                    class="btn btn--mini btn--primary"
+                                    th:onclick="'completarActividad(' + ${act.idActividad} + ')'">
+                                <i class="fas fa-check"></i> Completar
+                            </button>
+                            <span th:if="${act.estatusActividad == 'COMPLETADA'}" style="color: #059669;">
+                    <i class="fas fa-check-double"></i> Finalizado
+                </span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+</div>
+<script>
+    async function completarActividad(id) {
+        if (!confirm("¿Deseas marcar esta actividad como COMPLETADA?")) return;
+
+        try {
+            const response = await fetch(`/coordinador/actividades/update-status/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (response.ok) {
+                alert("¡Estatus actualizado!");
+                location.reload();
+            } else {
+                alert("Error al actualizar el estatus.");
+            }
+        } catch (err) {
+            console.error("Error:", err);
+        }
+    }
+</script>
+</body>
+</html>

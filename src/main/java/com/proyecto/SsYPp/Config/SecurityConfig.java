@@ -62,18 +62,21 @@ public class SecurityConfig {
                         // ✅ EXCEPCIÓN: permitir "asignar" a ADMIN y COORDINADOR
                         .requestMatchers("/admin/asignaciones/asignar/**")
                         .hasAnyAuthority("ADMIN", "COORDINADOR")
-
+                        .requestMatchers("/admin/usuarios/getAll")
+                        .hasAnyAuthority("ADMIN", "COORDINADOR")
                         // ADMIN
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
 
                         // COORDINADOR
+                        .requestMatchers("/coordinador/actividades/update-status/**").hasAnyAuthority("COORDINADOR","USUARIO")
+                        .requestMatchers("/coordinador/asistencias/**").hasAuthority("COORDINADOR")
+                        .requestMatchers("/coordinador/prestadores/**").hasAuthority("COORDINADOR")
                         .requestMatchers("/coordinador/**").hasAuthority("COORDINADOR")
+
 
                         // USUARIO
                         .requestMatchers("/usuario/**").hasAuthority("USUARIO")
 
-                        .requestMatchers("/coordinador/asistencias/**").hasAuthority("COORDINADOR")
-                        .requestMatchers("/coordinador/prestadores/**").hasAuthority("COORDINADOR")
 
                         .anyRequest().authenticated()
                 )
