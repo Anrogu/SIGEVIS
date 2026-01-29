@@ -5,7 +5,7 @@ import com.proyecto.SsYPp.Dto.NoticiaDto;
 import com.proyecto.SsYPp.Entity.Postulacion;
 import org.springframework.stereotype.Service;
 import com.proyecto.SsYPp.Dto.AsignacionAdminRowDto;
-
+import com.proyecto.SsYPp.Dto.AsignacionCoordinadorRowDto;
 import java.util.List;
 
 @Service
@@ -20,5 +20,7 @@ public interface AsignacionService {
     void crearAsignacionDesdePostulacionId(Long idPostulacion);
 
     List<AsignacionAdminRowDto> listarAsignacionesAdmin();
+    List<AsignacionAdminRowDto> listarAceptadasParaVistaAdmin();
+    List<AsignacionCoordinadorRowDto> listarAsignacionesCoordinadorVista(Long areaId);
 
 }

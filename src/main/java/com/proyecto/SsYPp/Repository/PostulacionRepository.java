@@ -3,11 +3,14 @@ package com.proyecto.SsYPp.Repository;
 import com.proyecto.SsYPp.Dto.PostulacionAdminRowDto;
 import com.proyecto.SsYPp.Dto.PostulacionCoordinadorRowDto;
 import com.proyecto.SsYPp.Dto.PostulacionPrestadorRowDto;
+import com.proyecto.SsYPp.Dto.PostulacionAdminDetalleDto;
 import com.proyecto.SsYPp.Entity.Postulacion;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.proyecto.SsYPp.Dto.AsignacionAdminRowDto;
+import com.proyecto.SsYPp.Dto.AsignacionCoordinadorRowDto;
 
 import java.util.List;
 
@@ -17,7 +20,14 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     // ✅ Evitar postulación duplicada (usuario + vacante)
     boolean existsByUsuariosIdusuario_IdAndVacanteIdvacante_Id(Long usuarioId, Long vacanteId);
 
-    // ✅ Postulaciones por área (COORDINADOR) - entity completo (NO lo quitamos)
+    // ✅ VALIDAR SI EL PRESTADOR YA FUE ACEPTADO (estatus = 3)
+    boolean existsByUsuariosIdusuario_IdAndEstatusIdestatus_Id(Long usuarioId, Long estatusId);
+
+    // =========================
+    // COORDINADOR
+    // =========================
+
+    // Entity completo
     @Query(value = """
         SELECT p.*
         FROM "Postulaciones" p
@@ -27,7 +37,7 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     """, nativeQuery = true)
     List<Postulacion> findPostulacionesByArea(@Param("areaId") Long areaId);
 
-    // ✅ LISTADO COORDINADOR (projection)
+    // Projection
     @Query(value = """
         SELECT
             p."idPostulacion" AS id,
@@ -56,7 +66,11 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     """, nativeQuery = true)
     List<PostulacionCoordinadorRowDto> findRowsByArea(@Param("areaId") Long areaId);
 
-    // ✅ IDs de vacantes ya postuladas por el prestador (para filtrar "Vacantes para tu perfil")
+    // =========================
+    // PRESTADOR
+    // =========================
+
+    // Vacantes ya postuladas
     @Query(value = """
         SELECT p."Vacante_IdVacante"
         FROM "Postulaciones" p
@@ -64,7 +78,7 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     """, nativeQuery = true)
     List<Long> findVacanteIdsPostuladasByUsuario(@Param("usuarioId") Long usuarioId);
 
-    // ✅ LISTADO PRESTADOR: postulaciones por usuario (projection)
+    // Listado del prestador
     @Query(value = """
         SELECT
             p."idPostulacion" AS idPostulacion,
@@ -90,7 +104,10 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     """, nativeQuery = true)
     List<PostulacionPrestadorRowDto> findRowsByUsuario(@Param("usuarioId") Long usuarioId);
 
-    // ✅ LISTADO ADMIN: TODAS las postulaciones (projection)
+    // =========================
+    // ADMIN
+    // =========================
+
     @Query(value = """
         SELECT
             p."idPostulacion" AS id,
@@ -117,35 +134,86 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     List<PostulacionAdminRowDto> findAllAdminRows();
 
     @Query(value = """
-    SELECT
-        p."idPostulacion" AS id,
-        p."fechaPostulacion" AS fechaPostulacion,
-        p."comentarios" AS comentarios,
+        SELECT
+            p."idPostulacion" AS id,
+            p."fechaPostulacion" AS fechaPostulacion,
+            p."comentarios" AS comentarios,
+            u."idusuario" AS prestadorId,
+            CONCAT(
+                u."nombre", ' ', u."primerapellido",
+                COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
+            ) AS prestadorNombre,
+            u."email" AS prestadorEmail,
+            v."idVacantes" AS vacanteId,
+            v."nombrePuesto" AS vacanteNombre,
+            v."requisitos" AS requisitosVacante,
+            COALESCE(sp."idPostulacion", 1) AS estatusId,
+            CASE
+                WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Nuevo'
+                WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazado'
+                WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptado'
+                ELSE 'Nuevo'
+            END AS estatusTexto
+        FROM "Postulaciones" p
+        JOIN "usuarios" u ON u."idusuario" = p."Usuarios_idUsuario"
+        JOIN "Vacantes" v ON v."idVacantes" = p."Vacante_IdVacante"
+        LEFT JOIN "StatusPostulacion" sp ON sp."idPostulacion" = p."Estatus_IdEstatus"
+        WHERE p."idPostulacion" = :id
+        LIMIT 1
+    """, nativeQuery = true)
+    PostulacionAdminDetalleDto findAdminDetalleById(@Param("id") Long id);
 
-        u."idusuario" AS prestadorId,
+    @Query(value = """
+    SELECT
+        a."idAsignacion" AS idAsignacion,
+        a."fechaInicio"  AS fechaInicio,
+        a."fechaFin"     AS fechaFin,
         CONCAT(
             u."nombre", ' ', u."primerapellido",
             COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
-        ) AS prestadorNombre,
-        u."email" AS prestadorEmail,
-
-        v."idVacantes" AS vacanteId,
-        v."nombrePuesto" AS vacanteNombre,
-        v."requisitos" AS requisitosVacante,
-
-        COALESCE(sp."idPostulacion", 1) AS estatusId,
-        CASE
-            WHEN COALESCE(sp."idPostulacion", 1) = 1 THEN 'Nuevo'
-            WHEN COALESCE(sp."idPostulacion", 1) = 2 THEN 'Rechazado'
-            WHEN COALESCE(sp."idPostulacion", 1) = 3 THEN 'Aceptado'
-            ELSE 'Nuevo'
-        END AS estatusTexto
+        ) AS nombrePrestador,
+        v."nombrePuesto" AS nombreVacante
     FROM "Postulaciones" p
-    JOIN "usuarios" u ON u."idusuario" = p."Usuarios_idUsuario"
-    JOIN "Vacantes" v ON v."idVacantes" = p."Vacante_IdVacante"
-    LEFT JOIN "StatusPostulacion" sp ON sp."idPostulacion" = p."Estatus_IdEstatus"
-    WHERE p."idPostulacion" = :id
-    LIMIT 1
+    JOIN "StatusPostulacion" sp
+      ON sp."idPostulacion" = p."Estatus_IdEstatus"
+    JOIN "usuarios" u
+      ON u."idusuario" = p."Usuarios_idUsuario"
+    JOIN "Vacantes" v
+      ON v."idVacantes" = p."Vacante_IdVacante"
+    LEFT JOIN "Asignaciones" a
+      ON a.postulaciones_idpostulacion = p."idPostulacion"
+    WHERE sp."status" = 'A'
+    ORDER BY p."idPostulacion" DESC
 """, nativeQuery = true)
-    com.proyecto.SsYPp.Dto.PostulacionAdminDetalleDto findAdminDetalleById(@Param("id") Long id);
+    List<AsignacionAdminRowDto> findAceptadasParaAsignacionesAdminVista();
+
+    @Query(value = """
+    SELECT
+        a."idAsignacion" AS idAsignacion,
+        a."fechaInicio"  AS fechaInicio,
+        a."fechaFin"     AS fechaFin,
+        CONCAT(
+            u."nombre", ' ', u."primerapellido",
+            COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
+        ) AS nombrePrestador,
+        u."email" AS prestadorEmail,
+        v."nombrePuesto" AS nombreVacante,
+        ad."nombre" AS areaNombre
+    FROM "Postulaciones" p
+    JOIN "StatusPostulacion" sp
+      ON sp."idPostulacion" = p."Estatus_IdEstatus"
+    JOIN "usuarios" u
+      ON u."idusuario" = p."Usuarios_idUsuario"
+    JOIN "Vacantes" v
+      ON v."idVacantes" = p."Vacante_IdVacante"
+    JOIN "AreasDgp" ad
+      ON ad."idArea" = v."AreasDgp_idArea"
+    LEFT JOIN "Asignaciones" a
+      ON a.postulaciones_idpostulacion = p."idPostulacion"
+    WHERE sp."status" = 'A'
+      AND v."AreasDgp_idArea" = :areaId
+    ORDER BY p."idPostulacion" DESC
+""", nativeQuery = true)
+    List<AsignacionCoordinadorRowDto> findAceptadasParaAsignacionesCoordinadorVista(@Param("areaId") Long areaId);
+
 }

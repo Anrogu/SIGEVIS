@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Coordinador | Asistencia</title>
+
+    <!-- ✅ TUS ESTILOS -->
+    <link rel="stylesheet" href="/css_admin/styles.css"/>
+    <link rel="stylesheet" href="/css_admin/index.css"/>
+
+    <style>
+        .right-actions{
+            display:flex;
+            gap:8px;
+            align-items:center;
+            flex-wrap: wrap;
+        }
+        .msg{
+            margin-top:10px;
+            font-size: 11px;
+        }
+        .msg.ok{ color: var(--color-Texto-verde); }
+        .msg.bad{ color: var(--color-Texto-rojo); }
+        .muted{ color: var(--muted); font-size: 11px; }
+
+        .th-actions { width: 220px; text-align:center; }
+        td.actions { text-align:center; }
+        .actions-wrap{
+            display:flex;
+            justify-content:center;
+            gap:6px;
+            flex-wrap: wrap;
+        }
+        .btn--mini{
+            padding: 6px 10px;
+            font-size: 12px;
+        }
+        .subtxt{
+            display:block;
+            font-size:12px;
+            opacity:.85;
+            margin-top:2px;
+        }
+        .hist-empty{
+            color: var(--muted);
+            font-size: 11px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="app">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar__title">COORDINADOR</div>
+        <div class="topbar__right">
+            <div class="logos">
+                <img class="logo-img" src="/img/EscudosGEM.png" alt="Gobierno del Estado de México"/>
+            </div>
+        </div>
+    </div>
+
+    <!-- TABS (ajusta rutas si las tuyas difieren) -->
+    <div class="tabs">
+        <div class="tabs__left">
+            <a class="tab" th:href="@{/coordinador/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/coordinador/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/coordinador/postulaciones}">POSTULACIONES</a>
+            <a class="tab" th:href="@{/coordinador/asignaciones}">ASIGNACIONES</a>
+            <a class="tab" th:href="@{/coordinador/actividades}">ASIGNAR ACTIVIDAD</a>
+            <a class="tab tab--active" th:href="@{/coordinador/asistencia}">ASISTENCIA</a>
+        </div>
+
+        <div class="tabs__right">
+            <form th:action="@{/logout}" method="post">
+                <button type="submit" class="btn btn--outline btn--logout">CERRAR SESIÓN</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="search">
+            <span class="search__icon">🔎</span>
+            <input id="q" class="search__input" type="text" placeholder="Buscar prestador por nombre o correo..."/>
+        </div>
+
+        <div class="right-actions">
+            <button id="btnRecargar" class="btn btn--outline">Recargar</button>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-grid">
+        <div class="panel">
+            <div class="panel__header">
+                <h3 class="panel__title">CONTROL DE ASISTENCIA</h3>
+                <span class="muted">Registra entrada/salida de prestadores aceptados en tu área.</span>
+            </div>
+
+            <div id="msg" class="msg muted">Cargando prestadores…</div>
+
+            <div class="table-wrap">
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Prestador</th>
+                        <th>Correo</th>
+                        <th>Hoy</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody">
+                    <tr>
+                        <td colspan="6" class="hist-empty">Sin datos.</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p class="muted" style="margin-top:10px;">
+                Nota: Si un prestador ya tiene registro del día, el sistema no permitirá duplicados.
+            </p>
+
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const msg = document.getElementById("msg");
+    const tbody = document.getElementById("tbody");
+    const q = document.getElementById("q");
+
+    let data = []; // lista original
+
+    function setMsg(text, ok=null){
+        msg.className = "msg " + (ok === null ? "muted" : (ok ? "ok" : "bad"));
+        msg.textContent = text;
+    }
+
+    async function get(url){
+        const res = await fetch(url);
+        if(!res.ok){
+            const t = await res.text().catch(()=> "");
+            throw new Error(t || ("Error " + res.status));
+        }
+        return res.json();
+    }
+
+    async function post(url){
+        const res = await fetch(url, { method: "POST" });
+        if(!res.ok){
+            const t = await res.text().catch(()=> "");
+            throw new Error(t || ("Error " + res.status));
+        }
+        return res.json();
+    }
+
+    function pill(estado){
+        if(estado === "COMPLETA") return `<span class="pill pill--ok">Completa</span>`;
+        if(estado === "PENDIENTE_SALIDA") return `<span class="pill pill--warn">Entrada activa</span>`;
+        return `<span class="pill">Sin registro</span>`;
+    }
+
+    function safe(v){ return (v === null || v === undefined || v === "") ? "—" : v; }
+
+    // Render tabla
+    function render(list){
+        if(!list || list.length === 0){
+            tbody.innerHTML = `<tr><td colspan="6" class="hist-empty">No hay prestadores aceptados para mostrar.</td></tr>`;
+            return;
+        }
+
+        tbody.innerHTML = list.map(p => {
+            // Esperado del backend en cada prestador:
+            // { id, nombre, email, hoy: { estado, horaEntrada, horaSalida } }
+            const hoy = p.hoy || { estado: "SIN_REGISTRO", horaEntrada: null, horaSalida: null };
+
+            const disableEntrada = (hoy.estado === "PENDIENTE_SALIDA" || hoy.estado === "COMPLETA");
+            const disableSalida  = (hoy.estado !== "PENDIENTE_SALIDA");
+
+            return `
+                <tr data-id="${p.id}">
+                    <td>
+                        <strong>${safe(p.nombre)}</strong>
+                        <span class="subtxt muted">${safe(p.carrera)}</span>
+                    </td>
+                    <td>${safe(p.email)}</td>
+                    <td>${pill(hoy.estado)}</td>
+                    <td class="td-entrada">${safe(hoy.horaEntrada)}</td>
+                    <td class="td-salida">${safe(hoy.horaSalida)}</td>
+                    <td class="actions">
+                        <div class="actions-wrap">
+                            <button class="btn btn--primary btn--mini btn-entrada" ${disableEntrada ? "disabled" : ""}>
+                                Entrada
+                            </button>
+                            <button class="btn btn--outline btn--mini btn-salida" ${disableSalida ? "disabled" : ""}>
+                                Salida
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }).join("");
+    }
+
+    // Filtro buscador
+    function filtrar(){
+        const term = (q.value || "").toLowerCase().trim();
+        if(!term){ render(data); return; }
+        const filtered = data.filter(p =>
+            (p.nombre || "").toLowerCase().includes(term) ||
+            (p.email || "").toLowerCase().includes(term)
+        );
+        render(filtered);
+    }
+
+    // Cargar prestadores aceptados
+    async function cargar(){
+        try{
+            setMsg("Cargando prestadores…", null);
+
+            // ✅ Cambia esta URL si tu backend usa otra
+            const list = await get("/coordinador/prestadores/aceptados");
+
+            data = Array.isArray(list) ? list : [];
+            render(data);
+            setMsg(`Listo. Prestadores: ${data.length}`, true);
+
+        }catch(e){
+            data = [];
+            render(data);
+            setMsg("❌ No se pudo cargar la lista: " + e.message, false);
+        }
+    }
+
+    // Click handlers (delegación)
+    tbody.addEventListener("click", async (ev) => {
+        const tr = ev.target.closest("tr[data-id]");
+        if(!tr) return;
+
+        const id = tr.getAttribute("data-id");
+
+        // Entrada
+        if(ev.target.classList.contains("btn-entrada")){
+            try{
+                ev.target.disabled = true;
+                setMsg("Registrando entrada…", null);
+
+                const a = await post(`/coordinador/asistencias/entrada/${id}`);
+
+                // Actualiza UI fila
+                tr.querySelector(".td-entrada").textContent = safe(a.horaEntrada ? new Date(a.horaEntrada).toLocaleTimeString() : null);
+                tr.querySelector(".td-salida").textContent  = safe(a.horaSalida ? new Date(a.horaSalida).toLocaleTimeString() : null);
+                tr.children[2].innerHTML = `<span class="pill pill--warn">Entrada activa</span>`;
+
+                // Botones
+                tr.querySelector(".btn-entrada").disabled = true;
+                tr.querySelector(".btn-salida").disabled  = false;
+
+                setMsg("✅ Entrada registrada.", true);
+
+            }catch(e){
+                setMsg("❌ " + e.message, false);
+                // Rehabilita si falló
+                tr.querySelector(".btn-entrada").disabled = false;
+            }
+        }
+
+        // Salida
+        if(ev.target.classList.contains("btn-salida")){
+            try{
+                ev.target.disabled = true;
+                setMsg("Registrando salida…", null);
+
+                const a = await post(`/coordinador/asistencias/salida/${id}`);
+
+                tr.querySelector(".td-entrada").textContent = safe(a.horaEntrada ? new Date(a.horaEntrada).toLocaleTimeString() : null);
+                tr.querySelector(".td-salida").textContent  = safe(a.horaSalida ? new Date(a.horaSalida).toLocaleTimeString() : null);
+                tr.children[2].innerHTML = `<span class="pill pill--ok">Completa</span>`;
+
+                tr.querySelector(".btn-entrada").disabled = true;
+                tr.querySelector(".btn-salida").disabled  = true;
+
+                setMsg("✅ Salida registrada y asistencia completada.", true);
+
+            }catch(e){
+                setMsg("❌ " + e.message, false);
+                // Rehabilita si falló
+                tr.querySelector(".btn-salida").disabled = false;
+            }
+        }
+    });
+
+    // Eventos UI
+    document.getElementById("btnRecargar").addEventListener("click", async () => {
+        await cargar();
+    });
+
+    q.addEventListener("input", filtrar);
+
+    // Init
+    cargar();
+</script>
+
+</body>
+</html>

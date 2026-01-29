@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <title>Prestador | Pendiente de aprobación</title>
+
+    <link rel="stylesheet" href="/css_admin/styles.css"/>
+    <link rel="stylesheet" href="/css_admin/index.css"/>
+</head>
+
+<body>
+<div class="app">
+
+    <!-- TOPBAR -->
+    <div class="topbar">
+        <div class="topbar__title">PRESTADOR</div>
+
+        <div class="topbar__right">
+            <div class="logos">
+                <img class="logo-img" src="/img/EscudosGEM.png" alt="Gobierno del Estado de México"/>
+            </div>
+        </div>
+    </div>
+
+    <!-- CONTENT -->
+    <div class="content-grid">
+        <div class="panel" style="max-width:700px; margin:40px auto; text-align:center;">
+
+            <h3 class="panel__title">ACCESO RESTRINGIDO</h3>
+
+            <p class="muted" style="margin-top:14px; font-size:13px;">
+                Tu postulación <strong>aún no ha sido aprobada</strong> por el Coordinador de Área.
+            </p>
+
+            <p class="muted" style="margin-top:10px;">
+                El módulo de <strong>Asistencia</strong> se habilitará automáticamente
+                cuando tu solicitud sea <strong>ACEPTADA</strong>.
+            </p>
+
+            <div style="margin-top:20px;">
+                <span class="pill pill--warn">Estatus: Pendiente</span>
+            </div>
+
+            <div class="form-actions form-actions--center" style="margin-top:30px;">
+                <a href="/usuario/perfil" class="btn btn--outline">Volver al perfil</a>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+</body>
+</html>

@@ -1,6 +1,7 @@
 package com.proyecto.SsYPp.Service.Impl;
 
 import com.proyecto.SsYPp.Dto.AsignacionAdminRowDto;
+import com.proyecto.SsYPp.Dto.AsignacionCoordinadorRowDto;
 import com.proyecto.SsYPp.Dto.AsignacionDto;
 import com.proyecto.SsYPp.Entity.Asignacion;
 import com.proyecto.SsYPp.Entity.Postulacion;
@@ -12,6 +13,7 @@ import com.proyecto.SsYPp.Repository.VacanteRepository;
 import com.proyecto.SsYPp.Service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 import java.time.OffsetTime;
 import java.util.List;
@@ -63,13 +65,20 @@ public class AsignacionServiceImpl implements AsignacionService {
         return convertirEntidadADTO(actualizada);
     }
 
-    // ✅ NUEVO: para la tabla global del ADMIN
+    // ✅ Tabla global del ADMIN (basada en tabla Asignaciones)
     @Override
     public List<AsignacionAdminRowDto> listarAsignacionesAdmin() {
         return asignacionRepository.findAllAdminRows();
     }
 
-    // ✅ AQUÍ ENRIQUECEMOS EL DTO PARA MOSTRAR NOMBRES EN LA TABLA
+    // ✅ Vista ADMIN de "Asignaciones" basada en Postulaciones ACEPTADAS (status='A')
+    // (trae todas las aceptadas aunque aún no exista fila en Asignaciones)
+    @Override
+    public List<AsignacionAdminRowDto> listarAceptadasParaVistaAdmin() {
+        return postulacionRepository.findAceptadasParaAsignacionesAdminVista();
+    }
+
+    // ✅ Enriquecemos el DTO para mostrar nombres en la tabla (cuando sí hay Asignación)
     public AsignacionDto convertirEntidadADTO(Asignacion asignacion) {
         AsignacionDto dto = new AsignacionDto();
 
@@ -123,6 +132,7 @@ public class AsignacionServiceImpl implements AsignacionService {
     public Asignacion convertirDTOAEntidad(AsignacionDto dto) {
         Postulacion postulacion = postulacionRepository.findById(dto.getPostulacionesIdpostulacion())
                 .orElseThrow(() -> new RuntimeException("postulacion no encontrada"));
+
         Vacante vacante = vacantesRepository.findById(dto.getVacantesIdvacante())
                 .orElseThrow(() -> new RuntimeException("vacante no encontrada"));
 
@@ -149,7 +159,7 @@ public class AsignacionServiceImpl implements AsignacionService {
 
         nueva.setFechaInicio(OffsetTime.now());
 
-        // ⚠️ Tu BD marca fechaFin NOT NULL, así que por ahora dejamos algo válido
+        // ⚠️ si tu BD marca fechaFin NOT NULL, dejamos algo válido
         nueva.setFechaFin(OffsetTime.now().plusHours(1));
 
         asignacionRepository.save(nueva);
@@ -162,4 +172,10 @@ public class AsignacionServiceImpl implements AsignacionService {
 
         crearAsignacionDesdePostulacion(p);
     }
+    // ✅ Vista COORDINADOR de "Asignaciones" basada en Postulaciones ACEPTADAS (status='A') filtradas por área
+    @Override
+    public List<AsignacionCoordinadorRowDto> listarAsignacionesCoordinadorVista(Long areaId) {
+        return postulacionRepository.findAceptadasParaAsignacionesCoordinadorVista(areaId);
+    }
+
 }

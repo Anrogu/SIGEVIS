@@ -22,12 +22,10 @@ public class AsignacionesController {
     @GetMapping
     public String index(Model model) {
 
-        // ✅ Lista global para admin (tabla)
-        List<AsignacionAdminRowDto> listaAsignaciones = asignacionService.listarAsignacionesAdmin();
-        model.addAttribute("asignaciones", listaAsignaciones);
+        // ✅ Ahora la vista se alimenta de postulaciones aceptadas (A)
+        model.addAttribute("asignaciones", asignacionService.listarAceptadasParaVistaAdmin());
 
-        // ✅ Esto lo dejamos SOLO si tu vista tiene formulario de crear/editar
-        // (si tu vista nueva ya no usa formulario, lo puedes quitar)
+        // si tu vista usa formulario, lo dejas
         model.addAttribute("asignacion", new AsignacionDto());
 
         return "admin/asignaciones";
@@ -74,4 +72,10 @@ public class AsignacionesController {
         }
         return "redirect:/admin/asignaciones";
     }
+    @GetMapping("/test")
+    @ResponseBody
+    public List<AsignacionAdminRowDto> test() {
+        return asignacionService.listarAceptadasParaVistaAdmin();
+    }
+
 }

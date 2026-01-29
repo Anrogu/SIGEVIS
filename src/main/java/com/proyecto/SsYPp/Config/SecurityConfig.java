@@ -1,16 +1,15 @@
 package com.proyecto.SsYPp.Config;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -20,12 +19,17 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final PasswordEncoder passwordEncoder;
 
+    // ✅ NUEVO: filtro para bloquear asistencia si no está aceptado
+    private final PrestadorAsistenciaFilter prestadorAsistenciaFilter;
+
     public SecurityConfig(CustomSuccessHandler customSuccessHandler,
                           UserDetailsService userDetailsService,
-                          PasswordEncoder passwordEncoder) {
+                          PasswordEncoder passwordEncoder,
+                          PrestadorAsistenciaFilter prestadorAsistenciaFilter) {
         this.customSuccessHandler = customSuccessHandler;
         this.userDetailsService = userDetailsService;
         this.passwordEncoder = passwordEncoder;
+        this.prestadorAsistenciaFilter = prestadorAsistenciaFilter;
     }
 
     @Bean
@@ -56,36 +60,30 @@ public class SecurityConfig {
                         ).permitAll()
 
                         // ✅ EXCEPCIÓN: permitir "asignar" a ADMIN y COORDINADOR
-                        // (debe ir ANTES de /admin/** para que aplique la más específica)
                         .requestMatchers("/admin/asignaciones/asignar/**")
                         .hasAnyAuthority("ADMIN", "COORDINADOR")
-                        .requestMatchers("/admin/usuarios/getAll")
-                        .hasAnyAuthority("ADMIN", "COORDINADOR")
+
                         // ADMIN
                         .requestMatchers("/admin/**").hasAuthority("ADMIN")
-                        .requestMatchers("/coordinador/actividades/update-status/**")
-                        .hasAnyAuthority("COORDINADOR", "USUARIO", "ADMIN")
+
                         // COORDINADOR
                         .requestMatchers("/coordinador/**").hasAuthority("COORDINADOR")
-                        // USUARIO (si tienes prefijo para usuario)
+
+                        // USUARIO
                         .requestMatchers("/usuario/**").hasAuthority("USUARIO")
 
-                        .requestMatchers("/asistencias/**").hasAuthority("USUARIO")
-
+                        .requestMatchers("/coordinador/asistencias/**").hasAuthority("COORDINADOR")
+                        .requestMatchers("/coordinador/prestadores/**").hasAuthority("COORDINADOR")
 
                         .anyRequest().authenticated()
                 )
 
-                //---------------------------------------------------------------
                 .authenticationProvider(authenticationProvider())
 
                 .formLogin(form -> form
                         .loginPage("/login")
                         .usernameParameter("email")
                         .successHandler(customSuccessHandler)
-
-                        // AHORA: si el usuario está desactivado -> /login?disabled=true
-                        // (y si es otro error -> /login?error=true)
                         .failureHandler((request, response, exception) -> {
                             if (exception instanceof DisabledException) {
                                 response.sendRedirect("/login?disabled=true");
@@ -93,19 +91,19 @@ public class SecurityConfig {
                                 response.sendRedirect("/login?error=true");
                             }
                         })
-                        // ---------------------------------------------------------------------------------
                         .permitAll()
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/login?logout")
-                        .invalidateHttpSession(true) // Limpia la sesión al salir
+                        .invalidateHttpSession(true)
                         .clearAuthentication(true)
                         .deleteCookies("JSESSIONID")
                         .permitAll()
                 )
 
-                //-------------------------------------------------------------------------------------------
-                //.exceptionHandling(ex -> ex.accessDeniedPage("/error/403"))
+                // ✅ AQUÍ ENTRA EL FILTRO (bloquea /usuario/asistencia y /asistencias/** si no está aceptado)
+                .addFilterBefore(prestadorAsistenciaFilter, UsernamePasswordAuthenticationFilter.class)
+
                 .build();
     }
 }
