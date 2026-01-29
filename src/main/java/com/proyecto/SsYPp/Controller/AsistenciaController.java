@@ -1,6 +1,7 @@
 package com.proyecto.SsYPp.Controller;
 
 import com.proyecto.SsYPp.Dto.AsistenciaHistorialRowDto;
+import com.proyecto.SsYPp.Dto.AsistenciaHoyDto; // ✅ NUEVO
 import com.proyecto.SsYPp.Entity.Asistencia;
 import com.proyecto.SsYPp.Entity.Usuario;
 import com.proyecto.SsYPp.Repository.ContadorRepository;
@@ -38,6 +39,13 @@ public class AsistenciaController {
         return u.getId();
     }
 
+    // =========================================================
+    // ✅ (OPCIONAL / TRANSICIÓN)
+    // Si ya vas a mover el registro al coordinador,
+    // lo ideal es quitar estos POST para el prestador.
+    // =========================================================
+
+    /*
     // ✅ POST /asistencias/entrada
     @PostMapping("/entrada")
     public Asistencia entrada(Authentication auth) {
@@ -49,6 +57,7 @@ public class AsistenciaController {
     public Asistencia salida(Authentication auth) {
         return asistenciaService.registrarSalida(getUsuarioId(auth));
     }
+    */
 
     // ✅ GET /asistencias/total
     @GetMapping("/total")
@@ -70,5 +79,11 @@ public class AsistenciaController {
                         c.getHorasTotales()
                 ))
                 .toList();
+    }
+
+    // ✅ NUEVO: GET /asistencias/hoy (estatus del día, SOLO lectura)
+    @GetMapping("/hoy")
+    public AsistenciaHoyDto hoy(Authentication auth) {
+        return asistenciaService.obtenerEstatusHoy(getUsuarioId(auth));
     }
 }

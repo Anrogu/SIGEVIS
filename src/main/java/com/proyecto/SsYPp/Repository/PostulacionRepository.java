@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import com.proyecto.SsYPp.Dto.AsignacionAdminRowDto;
 
 import java.util.List;
 
@@ -160,5 +161,29 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
         LIMIT 1
     """, nativeQuery = true)
     PostulacionAdminDetalleDto findAdminDetalleById(@Param("id") Long id);
+
+    @Query(value = """
+    SELECT
+        a."idAsignacion" AS idAsignacion,
+        a."fechaInicio"  AS fechaInicio,
+        a."fechaFin"     AS fechaFin,
+        CONCAT(
+            u."nombre", ' ', u."primerapellido",
+            COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
+        ) AS nombrePrestador,
+        v."nombrePuesto" AS nombreVacante
+    FROM "Postulaciones" p
+    JOIN "StatusPostulacion" sp
+      ON sp."idPostulacion" = p."Estatus_IdEstatus"
+    JOIN "usuarios" u
+      ON u."idusuario" = p."Usuarios_idUsuario"
+    JOIN "Vacantes" v
+      ON v."idVacantes" = p."Vacante_IdVacante"
+    LEFT JOIN "Asignaciones" a
+      ON a.postulaciones_idpostulacion = p."idPostulacion"
+    WHERE sp."status" = 'A'
+    ORDER BY p."idPostulacion" DESC
+""", nativeQuery = true)
+    List<AsignacionAdminRowDto> findAceptadasParaAsignacionesAdminVista();
 
 }

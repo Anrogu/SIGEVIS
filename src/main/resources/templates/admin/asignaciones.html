@@ -11,7 +11,7 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <style>
-        .th-actions { width: 220px; text-align: center; }
+        .th-actions { width: 160px; text-align: center; }
         td.actions { text-align: center; }
         .actions-wrap { display:flex; justify-content:center; gap:6px; flex-wrap:wrap; }
         .btn--mini { padding: 6px 10px; font-size: 12px; }
@@ -54,7 +54,7 @@
         <div class="search">
             <span class="search__icon">🔎</span>
             <input id="searchAsignaciones" class="search__input" type="text"
-                   placeholder="Buscar por ID, prestador o vacante..."/>
+                   placeholder="Buscar por prestador o vacante..."/>
         </div>
         <button class="btn btn--primary" type="button" id="btnSearch">Buscar</button>
     </section>
@@ -70,7 +70,7 @@
                 </div>
             </div>
 
-            <!-- MENSAJES (flash del controller) -->
+            <!-- MENSAJES -->
             <div th:if="${mensajeExito}" style="margin:10px 0;">
                 <div class="pill pill--vigente" th:text="${mensajeExito}"></div>
             </div>
@@ -79,58 +79,43 @@
                 <div class="pill pill--vencido" th:text="${mensajeError}"></div>
             </div>
 
-            <!-- TABLA -->
+            <!-- TABLA (solo visual) -->
             <div class="table-wrap">
                 <table class="table" id="tablaAsignaciones">
                     <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Inicio</th>
-                        <th>Fin</th>
                         <th>Prestador</th>
                         <th>Vacante</th>
+                        <th>Estatus</th>
                         <th class="th-actions">Acciones</th>
                     </tr>
                     </thead>
 
                     <tbody id="asigBody">
 
-                    <!-- Lista -->
-                    <tr th:each="a : ${asignaciones}"
-                        th:attr="data-row=${a.idAsignacion}">
-                        <td th:text="${a.idAsignacion}">1</td>
-
-                        <!-- Si tus fechas son OffsetTime y te marca raro, cámbialo a HH:mm -->
-                        <td th:text="${a.fechaInicio != null ? #temporals.format(a.fechaInicio,'dd/MM/yyyy') : '—'}">—</td>
-                        <td th:text="${a.fechaFin != null ? #temporals.format(a.fechaFin,'dd/MM/yyyy') : '—'}">—</td>
-
+                    <tr th:each="a, st : ${asignaciones}"
+                        th:attr="data-row=${'row-' + st.index}">
                         <td th:text="${#strings.isEmpty(a.nombrePrestador) ? '—' : a.nombrePrestador}">—</td>
                         <td th:text="${#strings.isEmpty(a.nombreVacante) ? '—' : a.nombreVacante}">—</td>
 
+                        <!-- Como aquí solo se listan aceptados, lo mostramos fijo -->
+                        <td>
+                            <span class="pill pill--vigente">Aceptado</span>
+                        </td>
+
                         <td class="actions">
                             <div class="actions-wrap">
-
-                                <!-- VER (MODAL) -->
                                 <button class="btn btn--mini" type="button"
-                                        th:attr="data-ver=${a.idAsignacion}">
+                                        th:attr="data-ver=${st.index}">
                                     Ver
                                 </button>
-
-                                <!-- ELIMINAR -->
-                                <a class="btn btn--mini btn--danger"
-                                   th:href="@{/admin/asignaciones/eliminar/{id}(id=${a.idAsignacion})}"
-                                   onclick="return confirm('¿Seguro que deseas eliminar esta asignación?');">
-                                    <i class="fa-solid fa-trash"></i>
-                                </a>
-
                             </div>
                         </td>
                     </tr>
 
-                    <!-- Si NO hay registros -->
                     <tr th:if="${asignaciones == null || #lists.isEmpty(asignaciones)}">
-                        <td colspan="6" style="text-align:center; padding:20px;">
-                            No hay asignaciones registradas.
+                        <td colspan="4" style="text-align:center; padding:20px;">
+                            No hay prestadores aceptados.
                         </td>
                     </tr>
 
@@ -142,7 +127,7 @@
     </section>
 </div>
 
-<!-- MODAL GOV -->
+<!-- MODAL -->
 <div id="gobModal" class="gob-modal gob-modal--info" style="display:none;">
     <div class="gob-modal__backdrop" data-close="1"></div>
 
@@ -183,7 +168,6 @@
         gobModalBody.innerHTML = body;
         gobModal.style.display = "flex";
     }
-
     function closeModal() { gobModal.style.display = "none"; }
 
     gobModal.addEventListener("click", e => {
@@ -200,14 +184,12 @@
         const cells = row.querySelectorAll("td");
 
         openModal(
-            "Detalle de Asignación",
+            "Detalle de Prestador Aceptado",
             `
-            <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div><strong>ID:</strong><br>${cells[0].innerText}</div>
-                <div><strong>Inicio:</strong><br>${cells[1].innerText}</div>
-                <div><strong>Fin:</strong><br>${cells[2].innerText}</div>
-                <div style="grid-column:1/-1;"><strong>Prestador:</strong><br>${cells[3].innerText}</div>
-                <div style="grid-column:1/-1;"><strong>Vacante:</strong><br>${cells[4].innerText}</div>
+            <div style="display:grid; grid-template-columns:1fr; gap:12px;">
+                <div><strong>Prestador:</strong><br>${cells[0].innerText}</div>
+                <div><strong>Vacante:</strong><br>${cells[1].innerText}</div>
+                <div><strong>Estatus:</strong><br>Aceptado</div>
             </div>
             `
         );

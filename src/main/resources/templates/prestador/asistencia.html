@@ -10,35 +10,12 @@
     <link rel="stylesheet" href="/css_admin/index.css"/>
 
     <style>
-        .right-actions{
-            display:flex;
-            gap:8px;
-            align-items:center;
-            flex-wrap: wrap;
-        }
-        .msg{
-            margin-top:10px;
-            font-size: 11px;
-        }
+        .msg{ margin-top:10px; font-size:11px; }
         .msg.ok{ color: var(--color-Texto-verde); }
         .msg.bad{ color: var(--color-Texto-rojo); }
-        .muted{ color: var(--muted); font-size: 11px; }
-        .kpi{
-            display:flex;
-            gap:10px;
-            align-items:center;
-            flex-wrap: wrap;
-        }
-        .rule{
-            margin: 6px 6px 12px;
-            font-size: 11px;
-            color: var(--muted);
-            line-height: 1.4;
-        }
-        .hist-empty{
-            color: var(--muted);
-            font-size: 11px;
-        }
+        .muted{ color: var(--muted); font-size:11px; }
+        .kpi{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+        .hist-empty{ color: var(--muted); font-size:11px; }
     </style>
 </head>
 
@@ -48,11 +25,8 @@
     <!-- TOPBAR -->
     <div class="topbar">
         <div class="topbar__title">PRESTADOR</div>
-
         <div class="topbar__right">
-            <div class="logos">
-                <img class="logo-img" src="/img/EscudosGEM.png" alt="Gobierno del Estado de México"/>
-            </div>
+            <img class="logo-img" src="/img/EscudosGEM.png" alt="Gobierno del Estado de México"/>
         </div>
     </div>
 
@@ -64,7 +38,6 @@
             <a class="tab" href="/usuario/actividades">ACTIVIDADES</a>
             <a class="tab tab--active" href="/usuario/asistencia">ASISTENCIA</a>
         </div>
-
         <div class="tabs__right">
             <form th:action="@{/logout}" method="post">
                 <button type="submit" class="btn btn--outline btn--logout">CERRAR SESIÓN</button>
@@ -75,50 +48,40 @@
     <!-- TOOLBAR -->
     <div class="toolbar">
         <div class="search">
-            <span class="search__icon">🔎</span>
-            <input class="search__input" type="text" value="Registro de asistencia del prestador" readonly/>
-        </div>
-
-        <div class="right-actions">
-            <button id="btnEntrada" class="btn btn--primary">Registrar entrada</button>
-            <button id="btnSalida" class="btn btn--outline">Registrar salida</button>
-            <button id="btnTotal" class="btn btn--outline">Ver horas</button>
+            <span class="search__icon">ℹ️</span>
+            <input class="search__input" type="text"
+                   value="La asistencia es registrada por el coordinador del área"
+                   readonly/>
         </div>
     </div>
 
     <!-- CONTENT -->
     <div class="content-grid">
         <div class="panel">
+
             <div class="panel__header">
                 <h3 class="panel__title">ASISTENCIA</h3>
-
                 <div class="kpi">
                     <span class="muted">Total acumulado:</span>
                     <span id="pillTotal" class="pill">—</span>
-                    <span id="pillMeta" class="pill pill--warn">Meta: 480 hrs</span>
+                    <span class="pill pill--warn">Meta: 480 hrs</span>
                 </div>
             </div>
 
-            <!-- ✅ MENSAJE FIJO (REGLA) -->
-            <p class="rule">
-                ℹ️ <strong>Solo se permite un registro de asistencia por día.</strong>
-                Evita registrar entrada y salida varias veces; primero registra tu <strong>entrada</strong> y al finalizar tu jornada registra tu <strong>salida</strong>.
-            </p>
-
-            <!-- ✅ TABLA RESUMEN (HOY / ÚLTIMO REGISTRO) -->
+            <!-- ESTATUS HOY -->
             <div class="table-wrap">
                 <table class="table">
                     <thead>
                     <tr>
-                        <th>Último registro</th>
-                        <th>Hora entrada</th>
-                        <th>Hora salida</th>
+                        <th>Fecha</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
                         <th>Estatus</th>
                     </tr>
                     </thead>
                     <tbody>
                     <tr>
-                        <td id="tdUltimo">—</td>
+                        <td id="tdFecha">Hoy</td>
                         <td id="tdEntrada">—</td>
                         <td id="tdSalida">—</td>
                         <td id="tdEstatus"><span class="pill">Sin registro</span></td>
@@ -127,14 +90,15 @@
                 </table>
             </div>
 
-            <div id="msg" class="msg muted">Usa los botones para registrar tu entrada y salida.</div>
+            <div id="msg" class="msg muted">
+                ℹ️ El registro de asistencia es realizado exclusivamente por el coordinador del área.
+            </div>
 
-            <!-- ✅ MENSAJE CUANDO ALCANCE LA META -->
             <div id="msgMeta" class="msg muted"></div>
 
             <hr class="divider"/>
 
-            <!-- ✅ HISTORIAL -->
+            <!-- HISTORIAL -->
             <div class="panel__header panel__header--compact">
                 <h3 class="panel__subtitle">HISTORIAL DE ASISTENCIAS</h3>
             </div>
@@ -159,168 +123,71 @@
 
         </div>
     </div>
-
 </div>
 
 <script>
-    // ✅ META
     const META_HORAS = 480;
 
-    // UI refs
-    const msg = document.getElementById("msg");
-    const msgMeta = document.getElementById("msgMeta");
     const pillTotal = document.getElementById("pillTotal");
+    const msgMeta = document.getElementById("msgMeta");
 
-    const tdUltimo = document.getElementById("tdUltimo");
     const tdEntrada = document.getElementById("tdEntrada");
     const tdSalida  = document.getElementById("tdSalida");
     const tdEstatus = document.getElementById("tdEstatus");
-
     const tbodyHistorial = document.getElementById("tbodyHistorial");
-
-    function setMsg(text, ok=true){
-        msg.className = "msg " + (ok ? "ok" : "bad");
-        msg.textContent = text;
-    }
-
-    function fmtDate(iso){
-        if(!iso) return "—";
-        try{
-            const d = new Date(iso);
-            return d.toLocaleString();
-        }catch(e){
-            return iso;
-        }
-    }
-
-    function fmtOnlyDate(iso){
-        if(!iso) return "—";
-        try{
-            const d = new Date(iso);
-            return d.toLocaleDateString();
-        }catch(e){
-            return iso;
-        }
-    }
-
-    async function post(url){
-        const res = await fetch(url, { method: "POST" });
-        if(!res.ok){
-            const t = await res.text().catch(()=> "");
-            throw new Error(t || ("Error " + res.status));
-        }
-        return res.json();
-    }
 
     async function get(url){
         const res = await fetch(url);
-        if(!res.ok){
-            const t = await res.text().catch(()=> "");
-            throw new Error(t || ("Error " + res.status));
-        }
+        if(!res.ok) throw new Error("Error " + res.status);
         return res.json();
     }
 
+    async function cargarHoy(){
+        const h = await get("/asistencias/hoy");
+
+        tdEntrada.textContent = h.horaEntrada ?? "—";
+        tdSalida.textContent  = h.horaSalida ?? "—";
+
+        let pill = "Sin registro";
+        let cls  = "pill";
+
+        if(h.estado === "PENDIENTE_SALIDA"){ pill="Entrada registrada"; cls="pill pill--warn"; }
+        if(h.estado === "COMPLETA"){ pill="Asistencia completada"; cls="pill pill--ok"; }
+
+        tdEstatus.innerHTML = `<span class="${cls}">${pill}</span>`;
+    }
+
     async function cargarTotal(){
-        try{
-            const horas = await get("/asistencias/total");
-            const totalNum = Number(horas ?? 0);
+        const horas = Number(await get("/asistencias/total") ?? 0);
+        pillTotal.textContent = horas.toFixed(2) + "/" + META_HORAS + " hrs";
 
-            pillTotal.textContent = totalNum.toFixed(2) + "/" + META_HORAS + " hrs";
-            pillTotal.className = "pill pill--ok";
-
-            if(totalNum >= META_HORAS){
-                msgMeta.className = "msg ok";
-                msgMeta.textContent = "✅ Ya alcanzaste la meta de " + META_HORAS + " horas. Ya puedes solicitar tu carta de término.";
-            } else {
-                msgMeta.className = "msg muted";
-                msgMeta.textContent = "";
-            }
-
-        }catch(e){
-            pillTotal.textContent = "—";
-            pillTotal.className = "pill";
-            msgMeta.className = "msg muted";
-            msgMeta.textContent = "";
+        if(horas >= META_HORAS){
+            msgMeta.className = "msg ok";
+            msgMeta.textContent = "✅ Ya alcanzaste la meta de horas. Puedes solicitar tu carta de término.";
         }
     }
 
     async function cargarHistorial(){
-        try{
-            const rows = await get("/asistencias/historial");
+        const rows = await get("/asistencias/historial");
 
-            if(!rows || rows.length === 0){
-                tbodyHistorial.innerHTML = `<tr><td colspan="4" class="hist-empty">Sin registros aún.</td></tr>`;
-                return;
-            }
-
-            tbodyHistorial.innerHTML = rows.map(r => `
-                <tr>
-                    <td>${fmtOnlyDate(r.fecha)}</td>
-                    <td>${fmtDate(r.horaEntrada)}</td>
-                    <td>${fmtDate(r.horaSalida)}</td>
-                    <td>${(r.horas ?? 0)} hrs</td>
-                </tr>
-            `).join("");
-
-        }catch(e){
-            tbodyHistorial.innerHTML = `<tr><td colspan="4" class="hist-empty">No se pudo cargar el historial.</td></tr>`;
+        if(!rows || rows.length === 0){
+            tbodyHistorial.innerHTML =
+                `<tr><td colspan="4" class="hist-empty">Sin registros aún.</td></tr>`;
+            return;
         }
+
+        tbodyHistorial.innerHTML = rows.map(r => `
+            <tr>
+                <td>${new Date(r.fecha).toLocaleDateString()}</td>
+                <td>${new Date(r.horaEntrada).toLocaleTimeString()}</td>
+                <td>${new Date(r.horaSalida).toLocaleTimeString()}</td>
+                <td>${r.horas} hrs</td>
+            </tr>
+        `).join("");
     }
 
-    document.getElementById("btnEntrada").addEventListener("click", async () => {
-        try{
-            const a = await post("/asistencias/entrada");
-            tdUltimo.textContent = "Entrada registrada";
-            tdEntrada.textContent = fmtDate(a.horaEntrada);
-            tdSalida.textContent  = fmtDate(a.horaSalida);
-            tdEstatus.innerHTML = `<span class="pill pill--warn">Entrada activa</span>`;
-            setMsg("✅ Entrada registrada correctamente.", true);
-
-            await cargarTotal();
-            await cargarHistorial();
-
-        }catch(e){
-            const txt = (e.message || "").toLowerCase();
-            if (txt.includes("ya tienes una asistencia registrada hoy")) {
-                setMsg("⚠️ Ya existe un registro de asistencia para hoy. Solo se permite una asistencia por día.", false);
-            } else if (txt.includes("ya tiene una entrada activa")) {
-                setMsg("⚠️ Ya tienes una entrada activa hoy. Registra tu salida para completar la asistencia.", false);
-            } else {
-                setMsg("❌ " + e.message, false);
-            }
-        }
-    });
-
-    document.getElementById("btnSalida").addEventListener("click", async () => {
-        try{
-            const a = await post("/asistencias/salida");
-            tdUltimo.textContent = "Salida registrada";
-            tdEntrada.textContent = fmtDate(a.horaEntrada);
-            tdSalida.textContent  = fmtDate(a.horaSalida);
-            tdEstatus.innerHTML = `<span class="pill pill--ok">Asistencia completada</span>`;
-            setMsg("✅ Salida registrada correctamente.", true);
-
-            await cargarTotal();
-            await cargarHistorial();
-
-        }catch(e){
-            const txt = (e.message || "").toLowerCase();
-            if (txt.includes("no existe entrada activa hoy") || txt.includes("no existe entrada activa")) {
-                setMsg("⚠️ No existe una entrada activa para hoy. Primero registra tu entrada.", false);
-            } else {
-                setMsg("❌ " + e.message, false);
-            }
-        }
-    });
-
-    document.getElementById("btnTotal").addEventListener("click", async () => {
-        await cargarTotal();
-        await cargarHistorial();
-        setMsg("✅ Información actualizada.", true);
-    });
-
     // Carga inicial
+    cargarHoy();
     cargarTotal();
     cargarHistorial();
 </script>

@@ -20,5 +20,6 @@ public interface AsignacionService {
     void crearAsignacionDesdePostulacionId(Long idPostulacion);
 
     List<AsignacionAdminRowDto> listarAsignacionesAdmin();
+    List<AsignacionAdminRowDto> listarAceptadasParaVistaAdmin();
 
 }

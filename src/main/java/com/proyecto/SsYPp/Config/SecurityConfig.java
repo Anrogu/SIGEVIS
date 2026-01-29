@@ -71,7 +71,9 @@ public class SecurityConfig {
 
                         // USUARIO
                         .requestMatchers("/usuario/**").hasAuthority("USUARIO")
-                        .requestMatchers("/asistencias/**").hasAuthority("USUARIO")
+
+                        .requestMatchers("/coordinador/asistencias/**").hasAuthority("COORDINADOR")
+                        .requestMatchers("/coordinador/prestadores/**").hasAuthority("COORDINADOR")
 
                         .anyRequest().authenticated()
                 )
