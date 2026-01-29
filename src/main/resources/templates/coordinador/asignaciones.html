@@ -75,7 +75,7 @@
         <div class="search">
             <span class="search__icon">🔎</span>
             <input id="searchAsignaciones" class="search__input" type="text"
-                   placeholder="Buscar por ID, prestador, vacante o área..."/>
+                   placeholder="Buscar por prestador, vacante o área..."/>
         </div>
         <button class="btn btn--primary" type="button" id="btnSearch">Buscar</button>
     </section>
@@ -105,9 +105,6 @@
                 <table class="table" id="tablaAsignaciones">
                     <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Inicio</th>
-                        <th>Fin</th>
                         <th>Prestador</th>
                         <th>Vacante</th>
                         <th>Área</th>
@@ -119,14 +116,10 @@
                     <tbody id="asigBody">
 
                     <tr th:each="a : ${asignaciones}"
-                        th:attr="data-row=${a.id}">
-                        <td th:text="${a.id}">1</td>
-                        <td th:text="${a.fechaInicio}">--</td>
-                        <td th:text="${a.fechaFin}">--</td>
-
-                        <!-- ✅ Prestador -->
+                        th:attr="data-row=${a.idAsignacion}">
+                        <!-- ✅ Prestador (nombre + correo) -->
                         <td>
-                            <span th:text="${a.prestadorNombre != null ? a.prestadorNombre : '—'}">—</span>
+                            <span th:text="${a.nombrePrestador != null ? a.nombrePrestador : '—'}">—</span>
                             <a class="subtxt"
                                th:if="${a.prestadorEmail != null}"
                                th:href="'mailto:' + ${a.prestadorEmail}"
@@ -135,21 +128,20 @@
                         </td>
 
                         <!-- ✅ Vacante -->
-                        <td th:text="${a.vacanteNombre != null ? a.vacanteNombre : '—'}">—</td>
+                        <td th:text="${a.nombreVacante != null ? a.nombreVacante : '—'}">—</td>
 
                         <!-- ✅ Área -->
                         <td th:text="${a.areaNombre != null ? a.areaNombre : '—'}">—</td>
 
-                        <!-- Estatus -->
+                        <!-- Estatus (siempre aceptadas, pero lo dejamos visual) -->
                         <td>
-                            <span th:if="${a.fechaFin == null}" class="pill pill--vigente">Activa</span>
-                            <span th:if="${a.fechaFin != null}" class="pill pill--vencido">Finalizada</span>
+                            <span class="pill pill--vigente">Aceptada</span>
                         </td>
 
                         <td class="actions">
                             <div class="actions-wrap">
                                 <button class="btn btn--mini" type="button"
-                                        th:attr="data-ver=${a.id}">
+                                        th:attr="data-ver=${a.idAsignacion}">
                                     Ver
                                 </button>
                             </div>
@@ -157,7 +149,7 @@
                     </tr>
 
                     <tr th:if="${asignaciones == null || #lists.isEmpty(asignaciones)}">
-                        <td colspan="8" style="text-align:center; padding:20px;">
+                        <td colspan="5" style="text-align:center; padding:20px;">
                             No hay asignaciones registradas.
                         </td>
                     </tr>
@@ -221,7 +213,7 @@
     });
     gobModalCancel.addEventListener("click", closeModal);
 
-    // VER DETALLE
+    // VER DETALLE (sin ID/fechas, solo datos visibles)
     document.getElementById("asigBody").addEventListener("click", e => {
         const btn = e.target.closest("[data-ver]");
         if (!btn) return;
@@ -233,15 +225,10 @@
             "Detalle de Asignación",
             `
             <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
-                <div><strong>ID:</strong><br>${cells[0].innerText}</div>
-                <div><strong>Inicio:</strong><br>${cells[1].innerText}</div>
-                <div><strong>Fin:</strong><br>${cells[2].innerText}</div>
-
-                <div style="grid-column:1/-1;"><strong>Prestador:</strong><br>${cells[3].innerText}</div>
-                <div><strong>Vacante:</strong><br>${cells[4].innerText}</div>
-                <div><strong>Área:</strong><br>${cells[5].innerText}</div>
-
-                <div><strong>Estatus:</strong><br>${cells[6].innerText}</div>
+                <div style="grid-column:1/-1;"><strong>Prestador:</strong><br>${cells[0].innerText}</div>
+                <div><strong>Vacante:</strong><br>${cells[1].innerText}</div>
+                <div><strong>Área:</strong><br>${cells[2].innerText}</div>
+                <div><strong>Estatus:</strong><br>${cells[3].innerText}</div>
             </div>
             `
         );
@@ -250,11 +237,14 @@
     // BUSCADOR
     const searchInput = document.getElementById("searchAsignaciones");
     const btnSearch = document.getElementById("btnSearch");
-    const rows = document.querySelectorAll("#asigBody tr[data-row]");
+
+    function getRows() {
+        return document.querySelectorAll("#asigBody tr[data-row]");
+    }
 
     function filtrar() {
         const q = (searchInput.value || "").toLowerCase().trim();
-        rows.forEach(r => {
+        getRows().forEach(r => {
             r.style.display = r.innerText.toLowerCase().includes(q) ? "" : "none";
         });
     }

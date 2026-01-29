@@ -37,14 +37,6 @@ public class CoordinadorViewController {
         return "coordinador/postulaciones";
     }
 
-    // ✅ MODIFICADO: ahora sí manda la lista al HTML
-    @GetMapping("/asignaciones")
-    public String asignaciones(Model model) {
-        List<AsignacionDto> lista = asignacionService.getAll();
-        model.addAttribute("asignaciones", lista);
-        return "coordinador/asignaciones";
-    }
-
     @GetMapping("/actividades")
     public String actividades() {
         return "coordinador/actividades";

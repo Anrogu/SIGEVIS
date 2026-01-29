@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.proyecto.SsYPp.Dto.AsignacionAdminRowDto;
+import com.proyecto.SsYPp.Dto.AsignacionCoordinadorRowDto;
 
 import java.util.List;
 
@@ -185,5 +186,34 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
     ORDER BY p."idPostulacion" DESC
 """, nativeQuery = true)
     List<AsignacionAdminRowDto> findAceptadasParaAsignacionesAdminVista();
+
+    @Query(value = """
+    SELECT
+        a."idAsignacion" AS idAsignacion,
+        a."fechaInicio"  AS fechaInicio,
+        a."fechaFin"     AS fechaFin,
+        CONCAT(
+            u."nombre", ' ', u."primerapellido",
+            COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
+        ) AS nombrePrestador,
+        u."email" AS prestadorEmail,
+        v."nombrePuesto" AS nombreVacante,
+        ad."nombre" AS areaNombre
+    FROM "Postulaciones" p
+    JOIN "StatusPostulacion" sp
+      ON sp."idPostulacion" = p."Estatus_IdEstatus"
+    JOIN "usuarios" u
+      ON u."idusuario" = p."Usuarios_idUsuario"
+    JOIN "Vacantes" v
+      ON v."idVacantes" = p."Vacante_IdVacante"
+    JOIN "AreasDgp" ad
+      ON ad."idArea" = v."AreasDgp_idArea"
+    LEFT JOIN "Asignaciones" a
+      ON a.postulaciones_idpostulacion = p."idPostulacion"
+    WHERE sp."status" = 'A'
+      AND v."AreasDgp_idArea" = :areaId
+    ORDER BY p."idPostulacion" DESC
+""", nativeQuery = true)
+    List<AsignacionCoordinadorRowDto> findAceptadasParaAsignacionesCoordinadorVista(@Param("areaId") Long areaId);
 
 }

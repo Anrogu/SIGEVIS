@@ -1,6 +1,7 @@
 package com.proyecto.SsYPp.Service.Impl;
 
 import com.proyecto.SsYPp.Dto.AsignacionAdminRowDto;
+import com.proyecto.SsYPp.Dto.AsignacionCoordinadorRowDto;
 import com.proyecto.SsYPp.Dto.AsignacionDto;
 import com.proyecto.SsYPp.Entity.Asignacion;
 import com.proyecto.SsYPp.Entity.Postulacion;
@@ -12,6 +13,7 @@ import com.proyecto.SsYPp.Repository.VacanteRepository;
 import com.proyecto.SsYPp.Service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 
 import java.time.OffsetTime;
 import java.util.List;
@@ -170,4 +172,10 @@ public class AsignacionServiceImpl implements AsignacionService {
 
         crearAsignacionDesdePostulacion(p);
     }
+    // ✅ Vista COORDINADOR de "Asignaciones" basada en Postulaciones ACEPTADAS (status='A') filtradas por área
+    @Override
+    public List<AsignacionCoordinadorRowDto> listarAsignacionesCoordinadorVista(Long areaId) {
+        return postulacionRepository.findAceptadasParaAsignacionesCoordinadorVista(areaId);
+    }
+
 }
