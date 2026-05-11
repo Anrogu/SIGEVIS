@@ -192,13 +192,10 @@ public interface PostulacionRepository extends JpaRepository<Postulacion, Long> 
         a."idAsignacion" AS idAsignacion,
         a."fechaInicio"  AS fechaInicio,
         a."fechaFin"     AS fechaFin,
-        CONCAT(
-            u."nombre", ' ', u."primerapellido",
+        CONCAT(u."nombre", ' ', u."primerapellido",
             COALESCE(NULLIF(CONCAT(' ', u."segundoapellido"), ' '), '')
-        ) AS nombrePrestador,
-        u."email" AS prestadorEmail,
-        v."nombrePuesto" AS nombreVacante,
-        ad."nombre" AS areaNombre
+        ) AS nombrePrestador,  u."email" AS prestadorEmail,
+        v."nombrePuesto" AS nombreVacante, ad."nombre" AS areaNombre
     FROM "Postulaciones" p
     JOIN "StatusPostulacion" sp
       ON sp."idPostulacion" = p."Estatus_IdEstatus"

@@ -13,6 +13,7 @@ import com.proyecto.SsYPp.Repository.VacanteRepository;
 import com.proyecto.SsYPp.Service.AsignacionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import java.util.ArrayList;
 
 
 import java.time.OffsetTime;
@@ -177,5 +178,21 @@ public class AsignacionServiceImpl implements AsignacionService {
     public List<AsignacionCoordinadorRowDto> listarAsignacionesCoordinadorVista(Long areaId) {
         return postulacionRepository.findAceptadasParaAsignacionesCoordinadorVista(areaId);
     }
+    public List<Usuario> obtenerBecariosPorVacante(Long vacanteId){
+
+        List<Asignacion> asignaciones =
+                asignacionRepository.findByVacantesIdvacante_IdAndActivoTrue(vacanteId);
+
+        List<Usuario> usuarios = new ArrayList<>();
+
+        for(Asignacion a : asignaciones){
+            usuarios.add(
+                    a.getPostulacionesIdpostulacion().getUsuariosIdusuario()
+            );
+        }
+
+        return usuarios;
+    }
+
 
 }

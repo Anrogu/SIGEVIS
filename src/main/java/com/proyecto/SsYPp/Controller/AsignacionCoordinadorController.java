@@ -8,6 +8,9 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import java.util.List;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.ResponseBody;
 
 @Controller
 @RequestMapping("/coordinador")
@@ -21,6 +24,12 @@ public class AsignacionCoordinadorController {
         this.asignacionService = asignacionService;
         this.usuarioRepository = usuarioRepository;
     }
+    @GetMapping("/becarios-por-vacante/{vacanteId}")
+    @ResponseBody
+    public List<Usuario> obtenerBecarios(@PathVariable Long vacanteId){
+        return asignacionService.obtenerBecariosPorVacante(vacanteId);
+    }
+
 
     @GetMapping("/asignaciones")
     public String vistaAsignaciones(Authentication auth, Model model) {

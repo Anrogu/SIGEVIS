@@ -28,4 +28,7 @@ public interface AsignacionRepository extends JpaRepository<Asignacion, Long> {
     List<AsignacionAdminRowDto> findAllAdminRows();
 
     List<Asignacion> findByVacantesIdvacante_AreasdgpIdarea_Id(Long areaId);
+    List<Asignacion> findByVacantesIdvacante_IdAndActivoTrue(Long vacanteId);
+
+
 }

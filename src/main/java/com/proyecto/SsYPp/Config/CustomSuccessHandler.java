@@ -28,7 +28,6 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
         boolean isUsuario = authentication.getAuthorities().stream()
                 .anyMatch(a -> a.getAuthority().equals("USUARIO"));
-
         String redirectURL;
         if (isAdmin) {
             redirectURL = "/admin/index";

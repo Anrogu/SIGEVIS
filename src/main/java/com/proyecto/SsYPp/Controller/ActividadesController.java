@@ -1,6 +1,7 @@
 package com.proyecto.SsYPp.Controller;
 
 import com.proyecto.SsYPp.Dto.ActividadDto; // Asegúrate de tener este DTO creado
+import com.proyecto.SsYPp.Dto.UsuarioDto;
 import com.proyecto.SsYPp.Repository.ActividadRepository;
 import com.proyecto.SsYPp.Service.ActividadService; // Asegúrate de tener este Servicio
 import com.proyecto.SsYPp.Service.UsuarioService;
@@ -83,5 +84,11 @@ public class ActividadesController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("{\"error\": \"No se pudo actualizar el estatus\"}");
         }
+    }
+    //listado de activiades
+    @GetMapping("/becarios-aceptados")
+    @ResponseBody
+    public List<UsuarioDto> getBecariosAceptados() {
+        return usuarioService.getUsuariosAceptados();
     }
 }

@@ -36,8 +36,12 @@ public class PrestadorAsistenciaFilter extends OncePerRequestFilter {
         // ✅ Aplicar solo a:
         // - vista: /usuario/asistencia
         // - API:  /asistencias/**
-        boolean esAsistencia = path.startsWith("/usuario/asistencia") || path.startsWith("/asistencias/");
-        if (!esAsistencia) {
+        //boolean esAsistencia = path.startsWith("/usuario/asistencia") || path.startsWith("/asistencias/");
+        boolean esModuloPrestador =
+                path.startsWith("/usuario/asistencia") ||
+                        path.startsWith("/asistencias/") ||
+                        path.startsWith("/usuario/actividades");
+        if (!esModuloPrestador) {
             filterChain.doFilter(request, response);
             return;
         }

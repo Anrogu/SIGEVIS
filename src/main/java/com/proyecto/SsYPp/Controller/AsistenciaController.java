@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
-@RequestMapping("/asistencias")
+@RequestMapping("/asistencia")
 public class AsistenciaController {
 
     private final AsistenciaService asistenciaService;

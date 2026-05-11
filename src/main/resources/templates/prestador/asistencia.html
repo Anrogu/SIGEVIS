@@ -14,8 +14,46 @@
         .msg.ok{ color: var(--color-Texto-verde); }
         .msg.bad{ color: var(--color-Texto-rojo); }
         .muted{ color: var(--muted); font-size:11px; }
-        .kpi{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
-        .hist-empty{ color: var(--muted); font-size:11px; }
+
+        .kpi{
+            display:flex;
+            gap:10px;
+            align-items:center;
+            flex-wrap:wrap;
+        }
+
+        .hist-empty{
+            color: var(--muted);
+            font-size:11px;
+        }
+
+        /* 🔥 BANNER GRANDE DE META CUMPLIDA */
+        .meta-banner{
+            display:none;
+            margin-top:20px;
+            padding:18px 22px;
+            border-radius:10px;
+            background: #e9f8ef;
+            border: 2px solid #2e7d32;
+            color:#1b5e20;
+            font-size:15px;
+            font-weight:600;
+            display:flex;
+            align-items:center;
+            gap:12px;
+        }
+
+        .meta-banner span.icon{
+            font-size:28px;
+        }
+
+        .meta-banner small{
+            display:block;
+            font-size:12px;
+            font-weight:400;
+            color:#2e7d32;
+            margin-top:4px;
+        }
     </style>
 </head>
 
@@ -68,6 +106,9 @@
                 </div>
             </div>
 
+
+            <!-- 🔥 BANNER DE META CUMPLIDA -->
+
             <!-- ESTATUS HOY -->
             <div class="table-wrap">
                 <table class="table">
@@ -89,14 +130,24 @@
                     </tbody>
                 </table>
             </div>
-
-            <div id="msg" class="msg muted">
+            <div id="mensajeTramite" class="msg"
+                 style="background:#e7f3ff;padding:10px;border-radius:6px;color:#084298;margin-top:10px;">
+                📄 Cuando completes las horas requeridas por tu institución educativa,
+                podrás acudir a la <b>Delegación Administrativa</b> para iniciar el trámite
+                de liberación y entrega de tus documentos de término.
+            </div>
+            <div class="msg muted">
                 ℹ️ El registro de asistencia es realizado exclusivamente por el coordinador del área.
             </div>
 
-            <div id="msgMeta" class="msg muted"></div>
+            <div id="mensajeHoras" class="msg"
+                 style="background:#fff3cd;padding:10px;border-radius:6px;color:#856404;margin-top:10px;">
+                ⚠️ Recuerda verificar con tu institución las horas requeridas para liberar tu servicio.
+                Servicio Social: <b>480 horas</b> | Prácticas Profesionales: <b>640 horas</b>.
+            </div>
 
             <hr class="divider"/>
+            <div class="msg muted">
 
             <!-- HISTORIAL -->
             <div class="panel__header panel__header--compact">
@@ -128,8 +179,8 @@
 <script>
     const META_HORAS = 480;
 
-    const pillTotal = document.getElementById("pillTotal");
-    const msgMeta = document.getElementById("msgMeta");
+    const pillTotal   = document.getElementById("pillTotal");
+    const metaBanner  = document.getElementById("metaBanner");
 
     const tdEntrada = document.getElementById("tdEntrada");
     const tdSalida  = document.getElementById("tdSalida");
@@ -143,7 +194,7 @@
     }
 
     async function cargarHoy(){
-        const h = await get("/asistencias/hoy");
+        const h = await get("/asistencia/hoy");
 
         tdEntrada.textContent = h.horaEntrada ?? "—";
         tdSalida.textContent  = h.horaSalida ?? "—";
@@ -158,17 +209,16 @@
     }
 
     async function cargarTotal(){
-        const horas = Number(await get("/asistencias/total") ?? 0);
+        const horas = Number(await get("/asistencia/total") ?? 0);
         pillTotal.textContent = horas.toFixed(2) + "/" + META_HORAS + " hrs";
 
         if(horas >= META_HORAS){
-            msgMeta.className = "msg ok";
-            msgMeta.textContent = "✅ Ya alcanzaste la meta de horas. Puedes solicitar tu carta de término.";
+            metaBanner.style.display = "flex";
         }
     }
 
     async function cargarHistorial(){
-        const rows = await get("/asistencias/historial");
+        const rows = await get("/asistencia/historial");
 
         if(!rows || rows.length === 0){
             tbodyHistorial.innerHTML =
@@ -186,11 +236,36 @@
         `).join("");
     }
 
-    // Carga inicial
     cargarHoy();
     cargarTotal();
     cargarHistorial();
-</script>
+    setTimeout(() => {
+    const mensaje = document.getElementById("mensajeHoras");
 
+    if(mensaje){
+        mensaje.style.transition = "opacity 1s";
+        mensaje.style.opacity = "0";
+
+        setTimeout(() => {
+            mensaje.style.display = "none";
+        }, 1000);
+    }
+
+}, 5000);
+
+    setTimeout(() => {
+    const mensaje = document.getElementById("mensajeTramite");
+
+    if(mensaje){
+        mensaje.style.transition = "opacity 1s";
+        mensaje.style.opacity = "0";
+
+        setTimeout(() => {
+            mensaje.style.display = "none";
+        }, 1000);
+    }
+
+}, 9000);
+</script>
 </body>
 </html>

@@ -77,4 +77,5 @@ public class UsuarioController {
             return ResponseEntity.badRequest().body("Error: " + e.getMessage());
         }
     }
+
 }

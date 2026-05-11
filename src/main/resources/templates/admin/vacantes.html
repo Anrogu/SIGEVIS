@@ -34,8 +34,7 @@
             <a class="tab tab--active" th:href="@{/admin/vacantes}">VACANTES</a>
             <a class="tab" th:href="@{/admin/postulaciones}">POSTULACIONES</a>
             <a class="tab" th:href="@{/admin/asignaciones}">ASIGNACIONES</a>
-            <a class="tab" th:href="@{/admin/actividades}">ACTIVIDADES Y EVIDENCIAS</a>
-            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS Y ROLES</a>
+            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS</a>
         </div>
         <div class="tabs__right">
             <button id="btnLogout" class="btn btn--outline btn--logout">CERRAR SESION</button>
@@ -143,8 +142,8 @@
 
                     <div>
                         <label>Horario</label>
-                        <select id="Horarios_idHorario">
-                            <option value="">Cargando horarios...</option>
+                        <select id="Horarios_idHorario" disabled>
+
                         </select>
                     </div>
                 </div>
@@ -245,6 +244,24 @@
         const areasSelect = document.getElementById("AreasDgp_idArea");
         const modalidadesSelect = document.getElementById("Modalidades_idModalidad");
         const horariosSelect = document.getElementById("Horarios_idHorario");
+
+        modalidadesSelect.addEventListener("change", function () {
+
+    const modalidadSeleccionada = this.value;
+
+    // IDs de horarios en tu BD
+    const HORARIO_MATUTINO = 1;
+    const HORARIO_VESPERTINO = 2;
+
+    if (modalidadSeleccionada == "1") { // Matutina
+        horariosSelect.value = HORARIO_MATUTINO;
+    }
+
+    if (modalidadSeleccionada == "2") { // Vespertina
+        horariosSelect.value = HORARIO_VESPERTINO;
+    }
+
+});
 
         async function cargarCarrerasSelect() {
             if (!carrerasSelect) return;
@@ -553,56 +570,70 @@
             openForm();
         });
         btnCancel?.addEventListener("click", closeForm);
+<!--
+       function openDetails(v) {
+    if (!v) return;
 
-        function openDetails(v) {
-            if (!v) return;
+    const areaId = getAreaId(v);
+    const unidadTxt =
+        v?.areasDgp?.nombre ??
+        v?.areasdgpIdarea?.nombre ??
+        (areaId ? areaName(areaId) : "—");
 
-            // Si el backend no manda areaNombre, lo resolvemos con el select:
-            const areaId = getAreaId(v);
-            const unidadTxt = v.areaNombre ?? (areaId ? areaName(areaId) : "—");
+    const carreraTxt =
+        v?.carreras?.nombre ??
+        v?.carrerasIdcarerra?.nombre ??
+        carreraName(getCarreraId(v));
 
-            const carreraTxt = carreraName(getCarreraId(v));
-            const modalidadTxt = modalidadName(getModalidadId(v));
-            const horarioTxt = horarioName(getHorarioId(v));
-            const creadorTxt = getCreatorName(v);
-            const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
-            const horaPub = fmtHora(v.fechaPublicacion);
+    const modalidadTxt =
+        v?.modalidades?.nombre ??
+        v?.modalidadesIdmodalidad?.nombre ??
+        modalidadName(getModalidadId(v));
 
-            vacDetails.innerHTML = `
-                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
-                    <div><strong>Título:</strong><br>${v.nombrePuesto ?? ""}</div>
-                    <div><strong>Unidad:</strong><br>${unidadTxt}</div>
+    const horarioTxt =
+        v?.horarios?.nombre ??
+        v?.horariosIdhorario?.nombre ??
+        horarioName(getHorarioId(v));
 
-                    <div><strong>No. Vacantes:</strong><br>${v.numeroPlazas ?? ""}</div>
-                    <div><strong>Estado:</strong><br>${estadoTxt}</div>
+    const creadorTxt = getCreatorName(v);
+    const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
+    const horaPub = fmtHora(v.fechaPublicacion);
 
-                    <div><strong>Creado por:</strong><br>${creadorTxt}</div>
-                    <div><strong>Publicación:</strong><br>${horaPub || "—"}</div>
+    vacDetails.innerHTML = `
+        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+            <div><strong>Título:</strong><br>${v.nombrePuesto ?? ""}</div>
+            <div><strong>Unidad:</strong><br>${unidadTxt}</div>
 
-                    <div><strong>Modalidad:</strong><br>${modalidadTxt}</div>
-                    <div><strong>Horario:</strong><br>${horarioTxt}</div>
+            <div><strong>No. Vacantes:</strong><br>${v.numeroPlazas ?? ""}</div>
+            <div><strong>Estado:</strong><br>${estadoTxt}</div>
 
-                    <div style="grid-column: 1 / -1;">
-                        <strong>Carrera:</strong><br>${carreraTxt}
-                    </div>
+            <div><strong>Creado por:</strong><br>${creadorTxt}</div>
+            <div><strong>Publicación:</strong><br>${horaPub || "—"}</div>
 
-                    <div style="grid-column: 1 / -1;">
-                        <strong>Descripción:</strong><br>
-                        <span style="white-space:pre-wrap;">${v.descripcion ?? ""}</span>
-                    </div>
+            <div><strong>Modalidad:</strong><br>${modalidadTxt}</div>
+            <div><strong>Horario:</strong><br>${horarioTxt}</div>
 
-                    <div style="grid-column: 1 / -1;">
-                        <strong>Requisitos:</strong><br>
-                        <span style="white-space:pre-wrap;">${v.requisitos ?? ""}</span>
-                    </div>
-                </div>
-            `;
+            <div style="grid-column: 1 / -1;">
+                <strong>Carrera:</strong><br>${carreraTxt}
+            </div>
 
-            vacDetailsWrap.style.display = "block";
-            renderTablaPaginada(currentList);
-            vacDetailsWrap.scrollIntoView({behavior: "smooth", block: "start"});
-        }
+            <div style="grid-column: 1 / -1;">
+                <strong>Descripción:</strong><br>
+                <span style="white-space:pre-wrap;">${v.descripcion ?? ""}</span>
+            </div>
 
+            <div style="grid-column: 1 / -1;">
+                <strong>Requisitos:</strong><br>
+                <span style="white-space:pre-wrap;">${v.requisitos ?? ""}</span>
+            </div>
+        </div>
+    `;
+
+    vacDetailsWrap.style.display = "block";
+    renderTablaPaginada(currentList);
+    vacDetailsWrap.scrollIntoView({behavior: "smooth", block: "start"});
+}
+-->
         function closeDetails() {
             selectedId = null;
             vacDetailsWrap.style.display = "none";

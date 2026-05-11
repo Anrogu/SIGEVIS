@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plataforma Servicio Social | Preguntas Frecuentes</title>
+
+    <!-- Reusa tus estilos -->
+    <link rel="stylesheet" href="/css_admin/styles.css" />
+    <link rel="stylesheet" href="/css_admin/index.css" />
+</head>
+
+<body>
+<div class="app">
+
+    <!-- HEADER PÚBLICO (mismo que Noticias) -->
+    <header class="public-header">
+
+        <!-- Fila 1: título centrado + logos derecha -->
+        <div class="public-header__row1">
+            <div></div>
+
+            <div class="public-header__title">PLATAFORMA SERVICIO SOCIAL</div>
+
+            <div class="public-header__logos">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
+            </div>
+        </div>
+
+        <!-- Fila 2: menú + botones derecha -->
+        <div class="public-header__row2">
+            <nav class="public-nav">
+                <a class="public-nav__link" href="/public/noticias">Noticias</a>
+                <a class="public-nav__link" href="/public/vacantes">Vacantes</a>
+                <a class="public-nav__link public-nav__link--active" href="/public/preguntas">Preguntas Frecuentes</a>
+                <a class="public-nav__link" href="/public/contacto">Contacto</a>
+            </nav>
+
+            <div class="public-actions" style="display:flex; gap:10px; align-items:center;">
+                <a class="btn btn--gold" href="/login" style="text-decoration:none;">Iniciar Sesión</a>
+                <a class="btn btn--primary" href="/register" style="text-decoration:none;">Registrarse</a>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- CONTENIDO -->
+    <section class="content-grid" id="publicLayout">
+
+        <main class="panel panel--left">
+
+            <div class="panel__header">
+                <h2 class="panel__title">PREGUNTAS FRECUENTES</h2>
+            </div>
+
+            <!-- Intro -->
+            <div class="panel" style="padding:12px; margin-top:12px;">
+                <p style="margin:0; color:var(--muted); line-height:1.55;">
+                    En esta sección se muestran respuestas a dudas comunes relacionadas con la consulta de vacantes,
+                    el proceso de postulación y el uso general del portal público (sin inicio de sesión).
+                </p>
+            </div>
+
+            <!-- FAQ Items -->
+            <section class="panel" style="padding:12px; margin-top:12px;">
+                <div class="faq-item" style="border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:10px;">
+                    <button class="faq-q" type="button"
+                            style="width:100%; text-align:left; border:0; cursor:pointer; background:#f3f3f3; padding:12px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                        ¿Necesito cuenta para ver noticias y vacantes?
+                        <span class="pill">+</span>
+                    </button>
+                    <div class="faq-a" style="display:none; padding:12px; border-top:1px solid var(--border); color:var(--muted); line-height:1.55;">
+                        No. El perfil público permite consultar noticias publicadas y vacantes disponibles sin iniciar sesión.
+                        El inicio de sesión se requiere únicamente para realizar acciones como postularse o dar seguimiento como prestador.
+                    </div>
+                </div>
+
+                <div class="faq-item" style="border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:10px;">
+                    <button class="faq-q" type="button"
+                            style="width:100%; text-align:left; border:0; cursor:pointer; background:#f3f3f3; padding:12px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                        ¿Cómo me postulo a una vacante?
+                        <span class="pill">+</span>
+                    </button>
+                    <div class="faq-a" style="display:none; padding:12px; border-top:1px solid var(--border); color:var(--muted); line-height:1.55;">
+                        Ingresa a la sección <b>Vacantes</b>, revisa la información y selecciona la opción de postulación.
+                        Si el sistema lo solicita, inicia sesión o regístrate como prestador para completar el proceso.
+                    </div>
+                </div>
+
+                <div class="faq-item" style="border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:10px;">
+                    <button class="faq-q" type="button"
+                            style="width:100%; text-align:left; border:0; cursor:pointer; background:#f3f3f3; padding:12px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                        ¿Qué ocurre después de enviar mi postulación?
+                        <span class="pill">+</span>
+                    </button>
+                    <div class="faq-a" style="display:none; padding:12px; border-top:1px solid var(--border); color:var(--muted); line-height:1.55;">
+                        La postulación queda en revisión. El administrador o el coordinador del área evaluará la solicitud
+                        y podrá aceptar o rechazar conforme a los criterios establecidos.
+                    </div>
+                </div>
+
+                <div class="faq-item" style="border:1px solid var(--border); border-radius:10px; overflow:hidden; margin-bottom:10px;">
+                    <button class="faq-q" type="button"
+                            style="width:100%; text-align:left; border:0; cursor:pointer; background:#f3f3f3; padding:12px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                        ¿Puedo postularme a más de una vacante?
+                        <span class="pill">+</span>
+                    </button>
+                    <div class="faq-a" style="display:none; padding:12px; border-top:1px solid var(--border); color:var(--muted); line-height:1.55;">
+                        Depende de las reglas configuradas en el sistema. En algunos casos se permite más de una postulación,
+                        y en otros se restringe a una postulación activa por periodo.
+                    </div>
+                </div>
+
+                <div class="faq-item" style="border:1px solid var(--border); border-radius:10px; overflow:hidden;">
+                    <button class="faq-q" type="button"
+                            style="width:100%; text-align:left; border:0; cursor:pointer; background:#f3f3f3; padding:12px; font-weight:700; display:flex; justify-content:space-between; align-items:center;">
+                        ¿Dónde pido apoyo si tengo un problema con el portal?
+                        <span class="pill">+</span>
+                    </button>
+                    <div class="faq-a" style="display:none; padding:12px; border-top:1px solid var(--border); color:var(--muted); line-height:1.55;">
+                        Consulta la sección <b>Contacto</b> para ver los medios oficiales de atención. Al reportar un problema,
+                        incluye tu nombre, matrícula (si aplica) y una captura del error para agilizar la atención.
+                    </div>
+                </div>
+
+            </section>
+
+            <footer class="panel-footer">
+                ©2025 - Subdirección de Desarrollo Tecnológico
+            </footer>
+
+        </main>
+
+    </section>
+</div>
+
+<script>
+    // Acordeón simple (sin cambiar tus CSS)
+    document.querySelectorAll(".faq-q").forEach(btn => {
+        btn.addEventListener("click", () => {
+            const item = btn.closest(".faq-item");
+            const ans = item.querySelector(".faq-a");
+            const pill = btn.querySelector(".pill");
+
+            const open = ans.style.display === "block";
+            ans.style.display = open ? "none" : "block";
+            pill.textContent = open ? "+" : "–";
+        });
+    });
+</script>
+
+</body>
+</html>

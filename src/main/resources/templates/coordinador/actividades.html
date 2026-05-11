@@ -99,7 +99,7 @@
 
 <script>
     const API_ACTIVIDADES = '/coordinador/actividades';
-    const API_USUARIOS = '/admin/usuarios/getAll';
+    const API_USUARIOS = '/coordinador/actividades/becarios-aceptados';
     const API_VACANTES = '/coordinador/vacantes/getAll';
 
     let cacheUsuarios = [];
@@ -126,12 +126,13 @@
 
             const selectVacante = document.getElementById('selectVacante');
             selectVacante.innerHTML = '<option value="">Seleccione una vacante...</option>';
-            vacantes.forEach(v => {
-                const opt = document.createElement('option');
-                opt.value = v.id;
-                opt.textContent = v.nombrePuesto || `Vacante #${v.id}`;
-                selectVacante.appendChild(opt);
-            });
+           vacantes.forEach(v => {
+    const opt = document.createElement('option');
+    opt.value = v.idVacantes;
+    opt.textContent = v.nombrePuesto || `Vacante #${v.idVacantes}`;
+    selectVacante.appendChild(opt);
+});
+
 
             const selectUser = document.getElementById('selectUsuario');
             selectUser.innerHTML = '<option value="">Seleccione el becario...</option>';

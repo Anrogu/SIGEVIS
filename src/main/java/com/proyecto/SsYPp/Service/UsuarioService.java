@@ -21,4 +21,5 @@ public interface UsuarioService {
     boolean toggleStatus(Integer id);
     // ✅ NUEVO: obtener id por email (para autor de noticias)
     Integer getIdUsuarioByEmail(String email);
+    List<UsuarioDto> getUsuariosAceptados();
 }

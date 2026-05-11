@@ -46,4 +46,5 @@ public class CoordinadorViewController {
     public String asistencias() {
         return "coordinador/asistencias";
     }
+
 }

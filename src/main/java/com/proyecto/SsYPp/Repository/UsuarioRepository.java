@@ -34,4 +34,22 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
         ORDER BY u.nombre ASC, u.primerapellido ASC
     """)
     List<Usuario> findPrestadoresAceptadosPorArea(@Param("areaId") Long areaId);
+
+    //listado de activiades
+    @Query(value = """
+SELECT u.*
+FROM usuarios u
+JOIN postulaciones p ON p."IdUsuario" = u.idusuario
+WHERE p."IdEstatus" = 3
+""", nativeQuery = true)
+    List<Usuario> findUsuariosAceptados();
+
+    @Query(value = """
+SELECT u.*
+FROM usuarios u
+JOIN "Postulaciones" p ON p."Usuarios_idUsuario" = u.idusuario
+JOIN "Asignaciones" a ON a.postulaciones_idpostulacion = p."idPostulacion"
+WHERE a.activo = true
+""", nativeQuery = true)
+    List<Usuario> findUsuariosConAsignacion();
 }

@@ -20,6 +20,11 @@ import java.time.OffsetTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.proyecto.SsYPp.Entity.Actividad;
+import com.proyecto.SsYPp.Repository.ActividadRepository;
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
 @Service
 public class PostulacionServiceImpl implements PostulacionService {
 
@@ -37,6 +42,9 @@ public class PostulacionServiceImpl implements PostulacionService {
 
     @Autowired
     private AsignacionService asignacionService;
+
+    @Autowired
+    private ActividadRepository actividadRepository;
 
     @Override
     public PostulacionDto create(PostulacionDto postulacion) {
@@ -264,6 +272,20 @@ public class PostulacionServiceImpl implements PostulacionService {
                 .orElseThrow(() -> new RuntimeException("Estatus no encontrado"));
 
         p.setEstatusIdestatus(nuevo);
+        // ✅ Si fue aceptado (estatus 3) crear actividad inicial
+        if (estatusId == 3L) {
+
+            asignacionService.crearAsignacionDesdePostulacion(p);
+            Actividad actividad = new Actividad();
+            actividad.setDescripcion("Inicio de servicio social");
+            actividad.setHorasDestinadas(BigDecimal.ZERO);
+            actividad.setFechaActividad(LocalDate.now());
+            actividad.setEstatusActividad("ACTIVA");
+            actividad.setTipoActividad("SERVICIO");
+            actividad.setIdUsuario(p.getUsuariosIdusuario());
+
+            actividadRepository.save(actividad);
+        }
         postulacionRepository.save(p);
     }
 
@@ -347,6 +369,15 @@ public class PostulacionServiceImpl implements PostulacionService {
                 p.setComentarios("Aceptado. " + (mensajeExtra != null ? mensajeExtra : ""));
                 // ✅ Usar asignacionService (ahora sí inyectado)
                 asignacionService.crearAsignacionDesdePostulacion(p);
+                Actividad actividad = new Actividad();
+                actividad.setDescripcion("Inicio de servicio social");
+                actividad.setHorasDestinadas(BigDecimal.ZERO);
+                actividad.setFechaActividad(LocalDate.now());
+                actividad.setEstatusActividad("ACTIVA");
+                actividad.setTipoActividad("SERVICIO");
+                actividad.setIdUsuario(p.getUsuariosIdusuario());
+
+                actividadRepository.save(actividad);
             }
             else if (statusId == 4) { // Rechazado
                 p.setComentarios("Rechazado: " + mensajeExtra);

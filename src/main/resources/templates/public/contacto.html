@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Plataforma Servicio Social | Contacto</title>
+
+    <!-- Reusa tus estilos -->
+    <link rel="stylesheet" href="/css_admin/styles.css" />
+    <link rel="stylesheet" href="/css_admin/index.css" />
+</head>
+
+<body>
+<div class="app">
+
+    <!-- HEADER PÚBLICO (mismo que Noticias) -->
+    <header class="public-header">
+
+        <!-- Fila 1: título centrado + logos derecha -->
+        <div class="public-header__row1">
+            <div></div>
+
+            <div class="public-header__title">PLATAFORMA SERVICIO SOCIAL</div>
+
+            <div class="public-header__logos">
+                <img src="/img/EscudosGEM.png" alt="Escudos GEM" class="logo-img">
+            </div>
+        </div>
+
+        <!-- Fila 2: menú + botones derecha -->
+        <div class="public-header__row2">
+            <nav class="public-nav">
+                <a class="public-nav__link" href="/public/noticias">Noticias</a>
+                <a class="public-nav__link" href="/public/vacantes">Vacantes</a>
+                <a class="public-nav__link" href="/public/preguntas">Preguntas Frecuentes</a>
+                <a class="public-nav__link public-nav__link--active" href="/public/contacto">Contacto</a>
+            </nav>
+
+            <div class="public-actions" style="display:flex; gap:10px; align-items:center;">
+                <a class="btn btn--gold" href="/login" style="text-decoration:none;">Iniciar Sesión</a>
+                <a class="btn btn--primary" href="/register" style="text-decoration:none;">Registrarse</a>
+            </div>
+        </div>
+
+    </header>
+
+    <!-- CONTENIDO -->
+    <section class="content-grid" id="publicLayout">
+
+        <main class="panel panel--left">
+
+            <div class="panel__header">
+                <h2 class="panel__title">INFORMACIÓN DE CONTACTO</h2>
+            </div>
+
+            <!-- Intro -->
+            <div class="panel" style="padding:12px; margin-top:12px;">
+                <p style="margin:0; color:var(--muted); line-height:1.55;">
+                    En esta sección se presentan los medios oficiales para solicitar apoyo, reportar incidencias
+                    o resolver dudas relacionadas con el uso del sistema.
+                </p>
+            </div>
+
+            <!-- Tarjeta de contacto -->
+            <section class="panel" style="padding:12px; margin-top:12px;">
+                <div class="panel" style="padding:12px; margin-bottom:12px;">
+                    <h3 style="margin:0 0 6px; font-size:1rem;">Oficialía Mayor - Gobierno del Estado de México</h3>
+                    <p style="margin:0; color:var(--muted); line-height:1.55;">
+                        Área responsable del seguimiento y atención relacionada con el uso de la plataforma.
+                    </p>
+                </div>
+
+                <div class="panel" style="padding:12px; display:flex; flex-direction:column; gap:10px;">
+                    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                        <div style="color:var(--muted);">
+                            <b>Correo:</b> soporte.sigevis@edomex.gob.mx
+                        </div>
+                        <div style="color:var(--muted);">
+                            <b>Teléfono:</b> (722) 000 0000 · Ext. 0000
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+                        <div style="color:var(--muted);">
+                            <b>Horario:</b> Lunes a viernes · 9:00 a 18:00 hrs
+                        </div>
+                        <div style="color:var(--muted);">
+                            <b>Ubicación:</b> Toluca, Estado de México
+                        </div>
+                    </div>
+
+                    <div style="margin-top:8px; color:var(--muted); line-height:1.55;">
+                        <b>Recomendación:</b> Al solicitar apoyo, incluye tu nombre completo, matrícula (si aplica)
+                        y una breve descripción del problema. Si es posible, agrega una captura de pantalla.
+                    </div>
+                </div>
+            </section>
+
+            <footer class="panel-footer">
+                ©2025 - Subdirección de Desarrollo Tecnológico
+            </footer>
+
+        </main>
+
+    </section>
+</div>
+</body>
+</html>

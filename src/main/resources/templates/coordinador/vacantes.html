@@ -149,8 +149,10 @@
 
                     <div>
                         <label>Horario</label>
-                        <select id="Horarios_idHorario">
-                            <option value="">Cargando horarios...</option>
+                        <select id="Horarios_idHorario" disabled >
+                            <!-- ======================================================
+     <option value="">Cargando horarios...</option>
+====================================================== -->
                         </select>
                     </div>
                 </div>
@@ -168,7 +170,7 @@
                     </div>
 
                     <div>
-                        <label>Programar Publicación</label>
+                        <label>Hora de Publicación</label>
                         <input id="fechaPublicacion" class="input--small" type="time" step="1"/>
                     </div>
                 </div>
@@ -246,6 +248,24 @@
         const carrerasSelect = document.getElementById("carreras_idCarrera");
         const modalidadesSelect = document.getElementById("Modalidades_idModalidad");
         const horariosSelect = document.getElementById("Horarios_idHorario");
+
+        modalidadesSelect.addEventListener("change", function () {
+
+    const modalidadSeleccionada = this.value;
+
+    // IDs de horarios en tu BD
+    const HORARIO_MATUTINO = 1;
+    const HORARIO_VESPERTINO = 2;
+
+    if (modalidadSeleccionada == "1") { // Matutina
+        horariosSelect.value = HORARIO_MATUTINO;
+    }
+
+    if (modalidadSeleccionada == "2") { // Vespertina
+        horariosSelect.value = HORARIO_VESPERTINO;
+    }
+
+});
 
         const areaTxt = document.getElementById("areaTxt");
         const coorAreaId = document.getElementById("coorAreaId");

@@ -18,29 +18,23 @@ public class Actividad {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "\"idActividad\"", nullable = false)
     private Long id;
-
     @Size(max = 255)
     @NotNull
     @Column(name = "descripcion", nullable = false)
     private String descripcion;
-
     @NotNull
     @Column(name = "\"horasDestinadas\"", nullable = false, precision = 4, scale = 1)
     private BigDecimal horasDestinadas;
     @NotNull
     @Column(name = "\"fechaActividad\"", nullable = false)
     private LocalDate fechaActividad;    @NotNull
-
     @Size(max = 255)
     @NotNull
     @Column(name = "\"estatusActividad\"", nullable = false)
     private String estatusActividad;
-
     @Size(max = 255)
     @Column(name = "\"tipoActividad\"")
     private String tipoActividad;
-
-
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "\"IdUsuario\"", nullable = false)
     private Usuario idUsuario;

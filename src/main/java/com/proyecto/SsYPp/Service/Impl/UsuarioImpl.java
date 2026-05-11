@@ -4,9 +4,11 @@ import com.proyecto.SsYPp.Entity.Rol;
 import com.proyecto.SsYPp.Entity.Carrera;
 import com.proyecto.SsYPp.Entity.Usuario;
 import com.proyecto.SsYPp.Dto.UsuarioDto;
+import com.proyecto.SsYPp.Entity.Asignacion;
 import com.proyecto.SsYPp.Repository.CarreraRepository;
 import com.proyecto.SsYPp.Repository.RolRepository;
 import com.proyecto.SsYPp.Repository.UsuarioRepository;
+import com.proyecto.SsYPp.Repository.AsignacionRepository;
 import com.proyecto.SsYPp.Service.UsuarioService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +32,9 @@ public class UsuarioImpl implements UsuarioService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private AsignacionRepository asignacionRepository;
 
     @Override
     public Page<UsuarioDto> getAll(Pageable pageable) {
@@ -153,8 +158,20 @@ public class UsuarioImpl implements UsuarioService {
         // tu entidad Usuario tiene getId() (Long)
         return usuario.getId().intValue();
     }
+    @Override
+    public List<UsuarioDto> getUsuariosAceptados() {
 
+        List<Usuario> usuarios = usuarioRepository.findUsuariosConAsignacion();
 
+        return usuarios.stream().map(u -> {
+            UsuarioDto dto = new UsuarioDto();
+            dto.setIdusuario(u.getId().intValue());
+            dto.setNombre(u.getNombre());
+            dto.setPrimerapellido(u.getPrimerapellido());
+            dto.setEmail(u.getEmail());
+            return dto;
+        }).toList();
+    }
     // --- MÉTODOS AUXILIARES ---
 
     private UsuarioDto convertirEntidadADTO(Usuario usuario) {
