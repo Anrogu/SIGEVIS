@@ -44,6 +44,10 @@ public class Usuario {
     @Column(name = "email", nullable = false)
     private String email;
 
+    @Size(max = 15)
+    @Column(name = "telefono")
+    private String telefono; 
+
     @Column(name = "emailverifiedat")
     private OffsetDateTime emailverifiedat;
 

@@ -139,6 +139,21 @@
                 </div>
 
                 <div>
+                    <label for="telefono">Número Telefónico</label>
+
+                    <input type="text"
+                           id="telefono"
+                           name="telefono"
+                           placeholder="7221234567"
+                           required
+                           maxlength="10"
+                           pattern="[0-9]{10}"
+                           inputmode="numeric"
+                           oninput="this.value = this.value.replace(/[^0-9]/g, '')"
+                           title="Ingrese exactamente 10 números">
+                </div>
+
+                <div>
                     <label for="carrerasIdcarrera">Carrera</label>
                     <select id="carrerasIdcarrera" name="carrerasIdcarrera" required>
                         <option value="" disabled selected hidden>Seleccione una Carrera...</option>

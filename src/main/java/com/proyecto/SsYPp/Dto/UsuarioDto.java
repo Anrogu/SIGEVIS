@@ -36,6 +36,8 @@ public class UsuarioDto implements Serializable {
     @NotNull
     @Size(max = 255)
     String password;
+    @Size(max = 15)
+    String telefono;
     @NotNull
     Boolean status;
     Integer idrol;

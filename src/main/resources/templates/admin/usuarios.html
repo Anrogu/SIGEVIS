@@ -74,6 +74,7 @@
                     <tr>
                         <th>Nombre</th>
                         <th>Correo</th>
+                        <th>Télefono</th>
                         <th>Rol</th>
                         <th>Estado</th>
                         <th class="th-actions">Acciones</th>
@@ -89,6 +90,8 @@
                         <td th:text="${u.nombre + ' ' + u.primerapellido + ' ' + (u.segundoapellido ?: '')}"></td>
 
                         <td th:text="${u.email}"></td>
+
+                        <td th:text="${u.telefono}"></td>
 
                         <td th:text="${u.idrol == 1 ? 'Administrador' : (u.idrol == 2 ? 'Prestador' : 'Tutor')}"></td>
 
@@ -107,6 +110,7 @@
                                         th:data-app1="${u.primerapellido}"
                                         th:data-app2="${u.segundoapellido}"
                                         th:data-email="${u.email}"
+                                        th:data-telefono="${u.telefono}"
                                         th:data-rol="${u.idrol}"
                                         th:data-status="${u.status}">
                                     Editar
@@ -176,6 +180,14 @@
                 <div class="form-row">
                     <label>Correo</label>
                     <input type="email" th:field="*{email}" id="fieldEmail" required />
+                </div>
+
+                <div class="form-row">
+                    <label>Teléfono</label>
+                    <input type="text"
+                           th:field="*{telefono}"
+                           id="fieldTelefono"
+                           maxlength="15" />
                 </div>
 
                 <div class="form-row">
@@ -334,6 +346,7 @@
         const fApp1 = document.getElementById("fieldApp1");
         const fApp2 = document.getElementById("fieldApp2");
         const fEmail = document.getElementById("fieldEmail");
+        const fTelefono = document.getElementById("fieldTelefono");
         const fPass = document.getElementById("fieldPassword");
         const fRol = document.getElementById("fieldRol");
         const fStatus = document.getElementById("fieldStatus");
@@ -404,6 +417,7 @@
                 if (fApp1) fApp1.value = btnEdit.getAttribute("data-app1") || "";
                 if (fApp2) fApp2.value = btnEdit.getAttribute("data-app2") || "";
                 if (fEmail) fEmail.value = btnEdit.getAttribute("data-email") || "";
+                if (fTelefono) fTelefono.value = btnEdit.getAttribute("data-telefono") || "";
                 if (fRol) fRol.value = btnEdit.getAttribute("data-rol") || "";
 
                 if (fPass) fPass.value = "";
@@ -498,6 +512,7 @@
             primerapellido: fApp1?.value?.trim() || "",
             segundoapellido: fApp2?.value?.trim() || null,
             email: fEmail?.value?.trim() || "",
+            telefono: fTelefono?.value?.trim() || "",
             password: (fPass?.value && fPass.value.trim() !== "") ? fPass.value : null,
             idrol: fRol?.value ? Number(fRol.value) : null,
             status: (fStatus?.value === "true")

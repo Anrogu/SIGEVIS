@@ -110,6 +110,7 @@ public class UsuarioImpl implements UsuarioService {
         usuarioExistente.setSegundoapellido(usuarioDto.getSegundoapellido());
         usuarioExistente.setEmail(usuarioDto.getEmail());
         usuarioExistente.setStatus(usuarioDto.getStatus());
+        usuarioExistente.setTelefono(usuarioDto.getTelefono());
 
         // 4. Actualizar Rol
         if (usuarioDto.getIdrol() != null) {
@@ -129,6 +130,7 @@ public class UsuarioImpl implements UsuarioService {
         Usuario actualizado = usuarioRepository.save(usuarioExistente);
         return convertirEntidadADTO(actualizado);
     }
+
     // ✅ NUEVO METODO (para Activar/Desactivar desde el Controller)
     @Override
     public boolean toggleStatus(Integer id) {
@@ -149,6 +151,7 @@ public class UsuarioImpl implements UsuarioService {
 
         return nuevoStatus;
     }
+
     @Override
     public Integer getIdUsuarioByEmail(String email) {
         Usuario usuario = usuarioRepository.findByEmail(email);
@@ -158,6 +161,7 @@ public class UsuarioImpl implements UsuarioService {
         // tu entidad Usuario tiene getId() (Long)
         return usuario.getId().intValue();
     }
+
     @Override
     public List<UsuarioDto> getUsuariosAceptados() {
 
@@ -195,6 +199,7 @@ public class UsuarioImpl implements UsuarioService {
         usuarioDto.setSegundoapellido(usuario.getSegundoapellido());
         usuarioDto.setEmail(usuario.getEmail());
         usuarioDto.setStatus(usuario.getStatus());
+        usuarioDto.setTelefono(usuario.getTelefono());
         // No devolvemos la contraseña real por seguridad
         usuarioDto.setPassword(usuario.getPassword());
 
@@ -213,6 +218,7 @@ public class UsuarioImpl implements UsuarioService {
         usuario.setEmail(dto.getEmail());
         usuario.setStatus(dto.getStatus());
         usuario.setPassword(dto.getPassword());
+        usuario.setTelefono(dto.getTelefono());
 
         // Buscar Rol
         if (dto.getIdrol() != null) {
