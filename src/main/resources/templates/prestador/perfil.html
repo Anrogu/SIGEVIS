@@ -91,23 +91,69 @@
                         th:attr="data-row=${v.idVacantes}">
                         <td th:text="${v.nombrePuesto}">Título</td>
                         <td th:text="${v.areaNombre != null ? v.areaNombre : '—'}">Unidad</td>
-                        <td th:text="${v.numeroPlazas}">0</td>
                         <td>
-                            <span th:if="${v.estatus == true}" class="pill pill--vigente">Publicado</span>
-                            <span th:if="${v.estatus != true}" class="pill pill--cancelado">No publicado</span>
+                            <span th:text="${v.plazasOcupadas}">0</span>
+                            /
+                            <span th:text="${v.numeroPlazas}">0</span>
                         </td>
+
+                        <td>
+
+    <span
+            th:if="${v.plazasOcupadas >= v.numeroPlazas}"
+            class="pill pill--cancelado">
+        Vacante llena
+    </span>
+
+                            <span
+                                    th:if="${v.plazasOcupadas < v.numeroPlazas and v.estatus == true}"
+                                    class="pill pill--vigente">
+        Publicado
+    </span>
+
+                            <span
+                                    th:if="${v.estatus != true}"
+                                    class="pill pill--cancelado">
+        No publicado
+    </span>
+
+                        </td>
+
                         <td class="actions">
+
                             <button class="btn btn--mini btn--outline"
                                     th:attr="data-view=${v.idVacantes}">
                                 Ver
                             </button>
 
-                            <form th:action="@{/postulaciones/postular-form}" method="post" style="display:inline;">
-                                <input type="hidden" name="vacanteId" th:value="${v.idVacantes}" />
-                                <button class="btn btn--mini btn--primary" type="submit">
+                            <form
+                                    th:if="${v.plazasOcupadas < v.numeroPlazas}"
+                                    th:action="@{/postulaciones/postular-form}"
+                                    method="post"
+                                    style="display:inline;">
+
+                                <input type="hidden"
+                                       name="vacanteId"
+                                       th:value="${v.idVacantes}" />
+
+                                <button class="btn btn--mini btn--primary"
+                                        type="submit">
                                     Postularme
                                 </button>
+
                             </form>
+
+                            <button
+                                    th:if="${v.plazasOcupadas >= v.numeroPlazas}"
+                                    class="btn btn--mini"
+                                    type="button"
+                                    disabled
+                                    style="background:#9ca3af; cursor:not-allowed; color:white;">
+
+                                Llena
+
+                            </button>
+
                         </td>
                     </tr>
                     </tbody>

@@ -21,6 +21,7 @@ public class VacanteServiceImpl implements VacanteService {
     @Autowired private UsuarioRepository usuarioRepository;
     @Autowired private PostulacionRepository postulacionRepository;
 
+
     @Override
     public VacanteDto create(VacanteDto dto) {
         Vacante v = convertirDTOAEntidad(dto);
@@ -90,6 +91,7 @@ public class VacanteServiceImpl implements VacanteService {
         dto.setNombrePuesto(v.getNombrePuesto());
         dto.setDescripcion(v.getDescripcion());
         dto.setNumeroPlazas(v.getNumeroPlazas());
+        dto.setPlazasOcupadas(v.getPlazasOcupadas());
         dto.setEstatus(v.getEstatus());
         dto.setFechaPublicacion(v.getFechaPublicacion());
         dto.setFechaVencimiento(v.getFechaVencimiento());

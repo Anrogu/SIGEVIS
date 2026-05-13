@@ -234,11 +234,18 @@
         const PAGE_SIZE = 9;
         let currentPage = 1;
 
-        function pillEstatus(estatus) {
-            return estatus === true
-                ? `<span class="pill pill--vigente">Publicado</span>`
-                : `<span class="pill pill--cancelado">No publicado</span>`;
-        }
+        function pillEstatus(v) {
+
+    const llena = Number(v.plazasOcupadas || 0) >= Number(v.numeroPlazas || 0);
+
+    if (llena) {
+        return `<span class="pill pill--cancelado">Vacante llena</span>`;
+    }
+
+    return v.estatus === true
+        ? `<span class="pill pill--vigente">Publicado</span>`
+        : `<span class="pill pill--cancelado">No publicado</span>`;
+}
 
         function getTotalPages(list) {
             return Math.max(1, Math.ceil(list.length / PAGE_SIZE));
@@ -361,15 +368,48 @@
                 }
 
                 tr.innerHTML = `
-                    <td>${v.nombrePuesto ?? ""}</td>
-                    <td>${v.areaNombre ?? "—"}</td>
-                    <td>${v.numeroPlazas ?? ""}</td>
-                    <td>${pillEstatus(v.estatus)}</td>
-                    <td class="actions">
-                        <button class="btn btn--mini btn--outline" type="button" data-view="${id}">Ver</button>
-                        <button class="btn btn--mini btn--primary" type="button" data-postular="${id}">Postularme</button>
-                    </td>
-                `;
+
+    <td>${v.nombrePuesto ?? ""}</td>
+
+    <td>${v.areaNombre ?? "—"}</td>
+
+    <td>
+        ${v.plazasOcupadas || 0} / ${v.numeroPlazas || 0}
+    </td>
+
+    <td>${pillEstatus(v)}</td>
+
+    <td class="actions">
+
+        <button class="btn btn--mini btn--outline"
+                type="button"
+                data-view="${id}">
+            Ver
+        </button>
+
+        ${
+            Number(v.plazasOcupadas || 0) >= Number(v.numeroPlazas || 0)
+
+            ? `
+                <button class="btn btn--mini"
+                        type="button"
+                        disabled
+                        style="background:#9ca3af; cursor:not-allowed; color:white;">
+                    Llena
+                </button>
+              `
+
+            : `
+                <button class="btn btn--mini btn--primary"
+                        type="button"
+                        data-postular="${id}">
+                    Postularme
+                </button>
+              `
+        }
+
+    </td>
+`;
                 tbody.appendChild(tr);
             });
         }

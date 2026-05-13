@@ -153,17 +153,44 @@ public class AsignacionServiceImpl implements AsignacionService {
 
     @Override
     public void crearAsignacionDesdePostulacion(Postulacion p) {
+
+        // ===== OBTENER VACANTE =====
+        Vacante vacante = p.getVacanteIdvacante();
+
+        Integer ocupadas = vacante.getPlazasOcupadas();
+        Integer total = vacante.getNumeroPlazas();
+
+        if (ocupadas == null) {
+            ocupadas = 0;
+        }
+
+        // ===== VALIDAR SI YA ESTÁ LLENA =====
+        if (ocupadas >= total) {
+            throw new RuntimeException("La vacante ya no tiene plazas disponibles.");
+        }
+
+        // ===== CREAR ASIGNACIÓN =====
         Asignacion nueva = new Asignacion();
 
         nueva.setPostulacionesIdpostulacion(p);
-        nueva.setVacantesIdvacante(p.getVacanteIdvacante());
+        nueva.setVacantesIdvacante(vacante);
 
         nueva.setFechaInicio(OffsetTime.now());
 
-        // ⚠️ si tu BD marca fechaFin NOT NULL, dejamos algo válido
+        // temporal
         nueva.setFechaFin(OffsetTime.now().plusHours(1));
 
         asignacionRepository.save(nueva);
+
+        // ===== AUMENTAR PLAZAS OCUPADAS =====
+        vacante.setPlazasOcupadas(ocupadas + 1);
+
+        // ===== SI YA SE LLENÓ, CERRAR VACANTE =====
+        if ((ocupadas + 1) >= total) {
+            vacante.setEstatus(false);
+        }
+
+        vacantesRepository.save(vacante);
     }
 
     @Override

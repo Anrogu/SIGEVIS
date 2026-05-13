@@ -19,6 +19,7 @@ public class VacanteDto implements Serializable {
     private String nombrePuesto;
     private String descripcion;
     private Integer numeroPlazas;
+    private Integer plazasOcupadas;
     private Boolean estatus;
     private LocalDate fechaVencimiento;
 

@@ -35,6 +35,9 @@ public class Vacante {
     @Column(name = "\"numeroPlazas\"", nullable = false)
     private Integer numeroPlazas;
 
+    @Column(name = "plazas_ocupadas")
+    private Integer plazasOcupadas = 0;
+
     @NotNull
     @Column(name = "estatus", nullable = false)
     private Boolean estatus;

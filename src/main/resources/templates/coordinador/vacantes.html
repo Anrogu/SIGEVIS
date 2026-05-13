@@ -699,19 +699,42 @@
                 const creadorTxt = getCreatorName(v);
 
                 const tr = document.createElement("tr");
-                tr.setAttribute("data-row", String(id));
+tr.setAttribute("data-row", String(id));
 
-                if (selectedId != null && id === Number(selectedId)) {
-                    tr.style.outline = "2px solid rgba(122,15,26,.35)";
-                    tr.style.background = "rgba(122,15,26,.04)";
-                }
+const plazasOcupadas = Number(v.plazasOcupadas ?? v.plazas_ocupadas ?? 0);
+const totalPlazas = Number(v.numeroPlazas ?? 0);
+
+const vacanteLlena = plazasOcupadas >= totalPlazas;
+
+// ✅ Pintar en gris cuando ya no hay lugares
+if (vacanteLlena) {
+    tr.style.background = "#f3f4f6";
+    tr.style.color = "#6b7280";
+    tr.style.opacity = "0.85";
+}
+
+// ✅ Resaltar seleccionada
+if (selectedId != null && id === Number(selectedId)) {
+    tr.style.outline = "2px solid rgba(122,15,26,.35)";
+
+    // Si NO está llena
+    if (!vacanteLlena) {
+        tr.style.background = "rgba(122,15,26,.04)";
+    }
+}
 
                 tr.innerHTML = `
                     <td>${v.nombrePuesto ?? ""}</td>
                     <td>${unidadTxt}</td>
-                    <td>${v.numeroPlazas ?? ""}</td>
+                    <td>${plazasOcupadas}/${totalPlazas}</td>
                     <td>${creadorTxt}</td>
-                    <td>${pillEstatus(v)}</td>
+                   <td>
+    ${
+        vacanteLlena
+            ? `<span class="pill pill--cancelado">Llena</span>`
+            : pillEstatus(v)
+    }
+</td>
                     <td class="actions">
                         <button class="btn btn--mini" type="button" data-edit="${id}">Editar</button>
                         <button class="btn btn--mini btn--outline" type="button" data-del="${id}">Eliminar</button>

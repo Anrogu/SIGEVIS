@@ -157,13 +157,26 @@
                 <div class="form-row form-row--2">
                     <div>
                         <label>Número de Vacantes</label>
-                        <input id="numeroPlazas" class="input--small" type="number" min="1" placeholder="5"/>
+                        <input id="numeroPlazas"
+                               class="input--small"
+                               type="number"
+                               min="1"
+                               placeholder="5"/>
                     </div>
 
                     <div>
                         <label>Programar Publicación</label>
-                        <input id="fechaPublicacion" class="input--small" type="time" step="1"/>
+                        <input id="fechaPublicacion"
+                               class="input--small"
+                               type="time"
+                               step="1"/>
                     </div>
+                </div>
+
+                <div class="form-row">
+                    <label>Fecha límite de la vacante</label>
+                    <input id="fechaLimite"
+                           type="date"/>
                 </div>
 
                 <div class="form-row form-row--2">
@@ -541,11 +554,28 @@
         const horarioName = (id) => getSelectText("Horarios_idHorario", id);
         const areaName = (id) => getSelectText("AreasDgp_idArea", id);
 
-        function pillEstatus(estatus) {
-            return estatus === true
-                ? `<span class="pill pill--vigente">Publicado</span>`
-                : `<span class="pill pill--cancelado">No publicado</span>`;
-        }
+        function pillEstatus(v) {
+
+    const hoy = new Date();
+    const fechaLimite = v.fechaLimite ? new Date(v.fechaLimite) : null;
+
+    // VACANTE LLENA
+    if (v.numeroPlazas <= 0) {
+        return `<span class="pill pill--cancelado">Llena</span>`;
+    }
+
+    // VACANTE VENCIDA
+    if (fechaLimite && fechaLimite < hoy) {
+        return `<span class="pill" style="background:#d1d5db; color:#444;">
+                    Vencida
+                </span>`;
+    }
+
+    // PUBLICADA / NO PUBLICADA
+    return v.estatus === true
+        ? `<span class="pill pill--vigente">Publicado</span>`
+        : `<span class="pill pill--cancelado">No publicado</span>`;
+}
 
         function fmtHora(hora) {
             if (!hora) return "";
@@ -570,7 +600,7 @@
             openForm();
         });
         btnCancel?.addEventListener("click", closeForm);
-<!--
+
        function openDetails(v) {
     if (!v) return;
 
@@ -633,7 +663,7 @@
     renderTablaPaginada(currentList);
     vacDetailsWrap.scrollIntoView({behavior: "smooth", block: "start"});
 }
--->
+
         function closeDetails() {
             selectedId = null;
             vacDetailsWrap.style.display = "none";
@@ -744,6 +774,13 @@
                 const creadorTxt = getCreatorName(v);
 
                 const tr = document.createElement("tr");
+                const hoy = new Date();
+const fechaLimite = v.fechaLimite ? new Date(v.fechaLimite) : null;
+
+if (fechaLimite && fechaLimite < hoy) {
+    tr.style.backgroundColor = "#f1f1f1";
+    tr.style.color = "#666";
+}
                 tr.setAttribute("data-row", String(id));
 
                 if (selectedId != null && id === Number(selectedId)) {
@@ -756,7 +793,7 @@
                     <td>${unidadTxt}</td>
                     <td>${v.numeroPlazas ?? ""}</td>
                     <td>${creadorTxt}</td>
-                    <td>${pillEstatus(v.estatus)}</td>
+                    <td>${pillEstatus(v)}</td>
                     <td class="actions">
                         <button class="btn btn--mini" type="button" data-edit="${id}">Editar</button>
                         <button class="btn btn--mini btn--outline" type="button" data-del="${id}">Eliminar</button>
@@ -809,6 +846,9 @@
 
                 const hhmmss = fmtHora(editing.fechaPublicacion);
                 document.getElementById("fechaPublicacion").value = hhmmss || "";
+
+                document.getElementById("fechaLimite").value =
+                editing.fechaLimite || "";
 
                 openForm();
                 return;
@@ -879,6 +919,8 @@
                 horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
 
                 fechaPublicacion: fechaPublicacionFinal,
+                fechaLimite: document.getElementById("fechaLimite").value || null,
+
                 usuariosIdUsuario: usuariosIdUsuarioVal > 0 ? usuariosIdUsuarioVal : null,
                 creadoPorNombre: currentUser || null
             };
