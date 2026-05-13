@@ -29,7 +29,7 @@ public class VacanteServiceImpl implements VacanteService {
 
     @Override
     public List<VacanteDto> getAll() {
-        return vacanteRepository.findAll()
+        return vacanteRepository.findVacantesActivas()
                 .stream()
                 .map(this::convertirEntidadADTO)
                 .collect(Collectors.toList());
@@ -71,6 +71,7 @@ public class VacanteServiceImpl implements VacanteService {
         existente.setNumeroPlazas(dto.getNumeroPlazas());
         existente.setEstatus(dto.getEstatus());
         existente.setFechaPublicacion(dto.getFechaPublicacion());
+        existente.setFechaVencimiento(dto.getFechaVencimiento());
         existente.setRequisitos(dto.getRequisitos());
 
         existente.setAreasdgpIdarea(area);
@@ -91,6 +92,7 @@ public class VacanteServiceImpl implements VacanteService {
         dto.setNumeroPlazas(v.getNumeroPlazas());
         dto.setEstatus(v.getEstatus());
         dto.setFechaPublicacion(v.getFechaPublicacion());
+        dto.setFechaVencimiento(v.getFechaVencimiento());
         dto.setRequisitos(v.getRequisitos());
 
         // ✅ Área (normalmente siempre existe, pero por seguridad)
@@ -162,6 +164,7 @@ public class VacanteServiceImpl implements VacanteService {
         v.setNumeroPlazas(dto.getNumeroPlazas());
         v.setEstatus(dto.getEstatus());
         v.setFechaPublicacion(dto.getFechaPublicacion());
+        v.setFechaVencimiento(dto.getFechaVencimiento());
         v.setRequisitos(dto.getRequisitos());
 
         v.setAreasdgpIdarea(area);
@@ -178,7 +181,7 @@ public class VacanteServiceImpl implements VacanteService {
     public List<VacanteDto> getVacantesParaPrestadorSinPostuladas(Long idUsuario) {
 
         // 1) Traer todas las vacantes (SIN filtrar por carrera/área)
-        List<Vacante> vacantesPerfil = vacanteRepository.findAll();
+        List<Vacante> vacantesPerfil = vacanteRepository.findVacantesActivas();
 
         // 2) Vacantes ya postuladas por este usuario
         List<Long> idsPostuladas = postulacionRepository.findVacanteIdsPostuladasByUsuario(idUsuario);

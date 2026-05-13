@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
+import java.time.LocalDate;
 
 import java.time.LocalTime;
 
@@ -37,6 +38,10 @@ public class Vacante {
     @NotNull
     @Column(name = "estatus", nullable = false)
     private Boolean estatus;
+
+    // FECHA DE VENCIMIENTO
+    @Column(name = "fecha_vencimiento")
+    private LocalDate fechaVencimiento;
 
     @NotNull
     @Column(name = "\"fechaPublicacion\"", nullable = false)

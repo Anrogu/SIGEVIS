@@ -8,6 +8,7 @@ import lombok.Setter;
 
 import java.io.Serializable;
 import java.time.LocalTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -19,6 +20,7 @@ public class VacanteDto implements Serializable {
     private String descripcion;
     private Integer numeroPlazas;
     private Boolean estatus;
+    private LocalDate fechaVencimiento;
 
     @JsonFormat(pattern = "HH:mm:ss")
     private LocalTime fechaPublicacion;

@@ -175,6 +175,12 @@
                     </div>
                 </div>
 
+                <!-- NUEVO -->
+                <div class="form-row">
+                    <label>Fecha de vencimiento</label>
+                    <input id="fechaVencimiento" type="date"/>
+                </div>
+
                 <div class="form-row form-row--2">
                     <div>
                         <label>Estatus</label>
@@ -494,11 +500,29 @@
         const modalidadName = (id) => getSelectText("Modalidades_idModalidad", id);
         const horarioName = (id) => getSelectText("Horarios_idHorario", id);
 
-        function pillEstatus(estatus) {
-            return estatus === true
-                ? `<span class="pill pill--vigente">Publicado</span>`
-                : `<span class="pill pill--cancelado">No publicado</span>`;
-        }
+        function pillEstatus(vacante) {
+
+    const hoy = new Date();
+    hoy.setHours(0,0,0,0);
+
+    // fecha_vencimiento de la vacante
+    const fechaVenc = vacante.fechaVencimiento
+        ? new Date(vacante.fechaVencimiento + "T00:00:00")
+        : null;
+
+    // Si ya venció
+    if (fechaVenc && fechaVenc < hoy) {
+        return `<span class="pill pill--cancelado">Vencida</span>`;
+    }
+
+    // Si está publicada
+    if (vacante.estatus === true) {
+        return `<span class="pill pill--vigente">Publicada</span>`;
+    }
+
+    // Si no está publicada
+    return `<span class="pill pill--cancelado">No publicada</span>`;
+}
 
         function fmtHora(hora) {
             if (!hora) return "";
@@ -537,6 +561,7 @@
             const creadorTxt = getCreatorName(v);
             const estadoTxt = v.estatus === true ? "Publicado" : "No publicado";
             const horaPub = fmtHora(v.fechaPublicacion);
+            const fechaVenc = v.fechaVencimiento ?? "Sin fecha";
 
             vacDetails.innerHTML = `
                 <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
@@ -548,6 +573,8 @@
 
                     <div><strong>Creado por:</strong><br>${creadorTxt}</div>
                     <div><strong>Publicación:</strong><br>${horaPub || "—"}</div>
+
+                    <div><strong>Vence:</strong><br>${fechaVenc}</div>
 
                     <div><strong>Modalidad:</strong><br>${modalidadTxt}</div>
                     <div><strong>Horario:</strong><br>${horarioTxt}</div>
@@ -684,7 +711,7 @@
                     <td>${unidadTxt}</td>
                     <td>${v.numeroPlazas ?? ""}</td>
                     <td>${creadorTxt}</td>
-                    <td>${pillEstatus(v.estatus)}</td>
+                    <td>${pillEstatus(v)}</td>
                     <td class="actions">
                         <button class="btn btn--mini" type="button" data-edit="${id}">Editar</button>
                         <button class="btn btn--mini btn--outline" type="button" data-del="${id}">Eliminar</button>
@@ -735,6 +762,8 @@
                 document.getElementById("Modalidades_idModalidad").value = String(editing?.modalidadesIdmodalidad?.id ?? getModalidadId(editing) ?? "");
                 document.getElementById("Horarios_idHorario").value = String(editing?.horariosIdhorario?.id ?? getHorarioId(editing) ?? "");
                 document.getElementById("estatus").value = String(editing.estatus ?? true);
+                document.getElementById("fechaVencimiento").value =
+                editing.fechaVencimiento ?? "";
 
                 const hhmmss = fmtHora(editing.fechaPublicacion);
                 document.getElementById("fechaPublicacion").value = hhmmss || "";
@@ -796,6 +825,8 @@
                 requisitos: document.getElementById("requisitos").value.trim(),
                 numeroPlazas: Number(document.getElementById("numeroPlazas").value || 0),
                 estatus: document.getElementById("estatus").value === "true",
+
+                fechaVencimiento: document.getElementById("fechaVencimiento").value || null,
 
                 // ⚠️ Se manda pero el BACKEND igual lo fuerza; aquí solo para que no truene tu lógica
                 areasDgp_idArea: areaId,
