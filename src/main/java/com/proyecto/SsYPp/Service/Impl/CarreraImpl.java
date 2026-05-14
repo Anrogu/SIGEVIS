@@ -20,4 +20,10 @@ public class CarreraImpl implements CarreraService {
         List<Carrera> carrera = carreraRepository.findAll();
         return new ArrayList<>(carrera);
     }
+
+    @Override
+    public List<Carrera> obtenerCarrerasPorEscuela(Integer idEscuela) {
+
+        return carreraRepository.findByEscuela_Idescuela(idEscuela);
+    }
 }

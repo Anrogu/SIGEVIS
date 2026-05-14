@@ -154,13 +154,31 @@
                     </div>
 
                     <div>
-                        <label for="carrerasIdcarrera">Carrera</label>
-                        <select id="carrerasIdcarrera" name="carrerasIdcarrera" required>
-                            <option value="" disabled selected hidden>Seleccione una Carrera...</option>
-                            <option th:each="carrera : ${carreras}"
-                                    th:value="${carrera.id}"
-                                    th:text="${carrera.nombre}">
+                        <label for="escuela">Escuela</label>
+
+                        <select id="escuela" name="escuela" required>
+                            <option value="" disabled selected hidden>
+                                Seleccione una Escuela...
                             </option>
+
+                            <option th:each="escuela : ${escuelas}"
+                                    th:value="${escuela.idescuela}"
+                                    th:text="${escuela.nombre}">
+                            </option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label for="carrerasIdcarrera">Carrera</label>
+
+                        <select id="carrerasIdcarrera"
+                                name="carrerasIdcarrera"
+                                required>
+
+                            <option value="" disabled selected hidden>
+                                Primero seleccione una escuela...
+                            </option>
+
                         </select>
                     </div>
 
@@ -291,6 +309,47 @@
                 mostrarError("Error de conexión con el servidor.");
             }
         });
+
+        document.getElementById("escuela")
+.addEventListener("change", async function () {
+
+    const idEscuela = this.value;
+
+    const carreraSelect =
+        document.getElementById("carrerasIdcarrera");
+
+    carreraSelect.innerHTML =
+        '<option disabled selected>Cargando carreras...</option>';
+
+    try {
+
+        const response =
+            await fetch(`/Carreras/escuela/${idEscuela}`);
+
+        const carreras = await response.json();
+
+        carreraSelect.innerHTML =
+            '<option value="" disabled selected hidden>' +
+            'Seleccione una Carrera...' +
+            '</option>';
+
+        carreras.forEach(carrera => {
+
+            carreraSelect.innerHTML += `
+                <option value="${carrera.id}">
+                    ${carrera.nombre}
+                </option>
+            `;
+        });
+
+    } catch (error) {
+
+        console.error(error);
+
+        carreraSelect.innerHTML =
+            '<option disabled>Error al cargar carreras</option>';
+    }
+});
     </script>
 
     </body>

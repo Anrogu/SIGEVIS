@@ -18,4 +18,10 @@ public class CarreraController {
     public List<Carrera> getAll() {
         return carreraService.getAllCarreras();
     }
+    @GetMapping("/escuela/{idEscuela}")
+    public List<Carrera> obtenerCarrerasPorEscuela(
+            @PathVariable Integer idEscuela) {
+
+        return carreraService.obtenerCarrerasPorEscuela(idEscuela);
+    }
 }

@@ -28,4 +28,8 @@ public class Carrera {
     @NotNull
     @Column(name = "descripcion", nullable = false)
     private String descripcion;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "escuelas_idescuela")
+    private Escuelas escuela;
 }

@@ -8,4 +8,5 @@ import java.util.List;
 public interface CarreraService {
 
     public List<Carrera> getAllCarreras();
+    List<Carrera> obtenerCarrerasPorEscuela(Integer idEscuela);
 }

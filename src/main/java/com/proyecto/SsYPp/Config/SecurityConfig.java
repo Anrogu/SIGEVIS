@@ -56,7 +56,8 @@ public class SecurityConfig {
                                 "/public",
                                 "/gob/auth/**",
                                 "/noticias/publicadas",
-                                "/noticias/*"
+                                "/noticias/*",
+                                "/Carreras/**"
                         ).permitAll()
 
                         // ✅ EXCEPCIÓN: permitir "asignar" a ADMIN y COORDINADOR
