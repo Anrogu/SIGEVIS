@@ -554,29 +554,36 @@
         const horarioName = (id) => getSelectText("Horarios_idHorario", id);
         const areaName = (id) => getSelectText("AreasDgp_idArea", id);
 
-        function pillEstatus(v) {
+        function pillEstatus(vacante) {
 
     const hoy = new Date();
-    const fechaLimite = v.fechaLimite ? new Date(v.fechaLimite) : null;
+    hoy.setHours(0,0,0,0);
 
-    // VACANTE LLENA
-    if (v.numeroPlazas <= 0) {
+    const fechaLimite = vacante.fechaVencimiento
+    ? new Date(vacante.fechaVencimiento + "T00:00:00")
+    : null;
+
+    const plazasOcupadas = Number(vacante.plazasOcupadas ?? 0);
+    const totalPlazas = Number(vacante.numeroPlazas ?? 0);
+
+    // ✅ Vacante llena
+    if (plazasOcupadas >= totalPlazas && totalPlazas > 0) {
         return `<span class="pill pill--cancelado">Llena</span>`;
     }
 
-    // VACANTE VENCIDA
+    // ✅ Vacante vencida
     if (fechaLimite && fechaLimite < hoy) {
-        return `<span class="pill" style="background:#d1d5db; color:#444;">
-                    Vencida
-                </span>`;
+        return `<span class="pill pill--cancelado">Vencida</span>`;
     }
 
-    // PUBLICADA / NO PUBLICADA
-    return v.estatus === true
-        ? `<span class="pill pill--vigente">Publicado</span>`
-        : `<span class="pill pill--cancelado">No publicado</span>`;
-}
+    // ✅ Publicada
+    if (vacante.estatus === true) {
+        return `<span class="pill pill--vigente">Publicada</span>`;
+    }
 
+    // ✅ No publicada
+    return `<span class="pill pill--cancelado">No publicada</span>`;
+}
         function fmtHora(hora) {
             if (!hora) return "";
             const s = String(hora);
@@ -764,6 +771,9 @@
             }
 
             lista.forEach(v => {
+            const plazasOcupadas = Number(v.plazasOcupadas ?? v.plazas_ocupadas ?? 0);
+            const totalPlazas = Number(v.numeroPlazas ?? 0);
+            const vacanteLlena = plazasOcupadas >= totalPlazas;
                 const id = getVacId(v);
                 if (!id || Number.isNaN(id)) return;
 
@@ -775,23 +785,38 @@
 
                 const tr = document.createElement("tr");
                 const hoy = new Date();
-const fechaLimite = v.fechaLimite ? new Date(v.fechaLimite) : null;
+                hoy.setHours(0,0,0,0);
+
+const fechaLimite = v.fechaVencimiento
+    ? new Date(v.fechaVencimiento + "T00:00:00")
+    : null;
+
+if (vacanteLlena) {
+    tr.style.background = "#f3f4f6";
+    tr.style.color = "#6b7280";
+    tr.style.opacity = "0.85";
+}
 
 if (fechaLimite && fechaLimite < hoy) {
-    tr.style.backgroundColor = "#f1f1f1";
-    tr.style.color = "#666";
+    tr.style.background = "#f3f4f6";
+    tr.style.color = "#6b7280";
+    tr.style.opacity = "0.85";
 }
                 tr.setAttribute("data-row", String(id));
 
                 if (selectedId != null && id === Number(selectedId)) {
-                    tr.style.outline = "2px solid rgba(122,15,26,.35)";
-                    tr.style.background = "rgba(122,15,26,.04)";
-                }
+
+    tr.style.outline = "2px solid rgba(122,15,26,.35)";
+
+    if (!vacanteLlena) {
+        tr.style.background = "rgba(122,15,26,.04)";
+    }
+}
 
                 tr.innerHTML = `
                     <td>${v.nombrePuesto ?? ""}</td>
                     <td>${unidadTxt}</td>
-                    <td>${v.numeroPlazas ?? ""}</td>
+                    <td>${plazasOcupadas}/${totalPlazas}</td>
                     <td>${creadorTxt}</td>
                     <td>${pillEstatus(v)}</td>
                     <td class="actions">
@@ -848,7 +873,7 @@ if (fechaLimite && fechaLimite < hoy) {
                 document.getElementById("fechaPublicacion").value = hhmmss || "";
 
                 document.getElementById("fechaLimite").value =
-                editing.fechaLimite || "";
+                editing.fechaVencimiento || "";
 
                 openForm();
                 return;
@@ -919,7 +944,7 @@ if (fechaLimite && fechaLimite < hoy) {
                 horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
 
                 fechaPublicacion: fechaPublicacionFinal,
-                fechaLimite: document.getElementById("fechaLimite").value || null,
+                fechaVencimiento: document.getElementById("fechaLimite").value || null,
 
                 usuariosIdUsuario: usuariosIdUsuarioVal > 0 ? usuariosIdUsuarioVal : null,
                 creadoPorNombre: currentUser || null
