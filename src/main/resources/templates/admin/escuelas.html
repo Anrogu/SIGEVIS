@@ -17,7 +17,7 @@
         }
 
         .container{
-            max-width: 900px;
+            max-width: 1100px;
             margin: auto;
             background: white;
             padding: 25px;
@@ -28,13 +28,20 @@
             margin-bottom: 25px;
         }
 
+        h2{
+            margin-top: 40px;
+            margin-bottom: 15px;
+        }
+
         form{
             display: flex;
             gap: 10px;
             margin-bottom: 30px;
+            flex-wrap: wrap;
         }
 
-        input{
+        input,
+        select{
             flex: 1;
             padding: 10px;
         }
@@ -47,6 +54,7 @@
         table{
             width: 100%;
             border-collapse: collapse;
+            margin-bottom: 30px;
         }
 
         table th,
@@ -66,9 +74,14 @@
 
 <div class="container">
 
-    <h1>Administración de Escuelas</h1>
+    <h1>Administración de Escuelas y Carreras</h1>
 
-    <!-- FORMULARIO -->
+    <!-- ========================= -->
+    <!-- FORMULARIO ESCUELAS -->
+    <!-- ========================= -->
+
+    <h2>Agregar Escuela</h2>
+
     <form th:action="@{/admin/escuelas/guardar}"
           method="post"
           th:object="${nuevaEscuela}">
@@ -79,18 +92,22 @@
                required>
 
         <button type="submit">
-            Guardar
+            Guardar Escuela
         </button>
 
     </form>
 
-    <!-- TABLA -->
+    <!-- ========================= -->
+    <!-- TABLA ESCUELAS -->
+    <!-- ========================= -->
+
     <table>
 
         <thead>
         <tr>
             <th>ID</th>
             <th>Escuela</th>
+            <th>Acciones</th>
         </tr>
         </thead>
 
@@ -101,6 +118,89 @@
             <td th:text="${escuela.idescuela}"></td>
 
             <td th:text="${escuela.nombre}"></td>
+
+            <td>
+
+                <a th:href="@{/admin/escuelas/eliminar/{id}(id=${escuela.idescuela})}"
+                   onclick="return confirm('¿Eliminar escuela?')">
+
+                    Eliminar
+
+                </a>
+
+            </td>
+
+        </tr>
+
+        </tbody>
+
+    </table>
+
+    <!-- ========================= -->
+    <!-- FORMULARIO CARRERAS -->
+    <!-- ========================= -->
+
+    <h2>Agregar Carrera</h2>
+
+    <form th:action="@{/admin/escuelas/guardar-carrera}"
+          method="post"
+          th:object="${nuevaCarrera}">
+
+        <input type="text"
+               th:field="*{nombre}"
+               placeholder="Nombre de la carrera"
+               required>
+
+        <input type="text"
+               th:field="*{descripcion}"
+               placeholder="Descripción"
+               required>
+
+        <select th:field="*{escuela}" required>
+
+            <option value="">
+                Seleccione una escuela
+            </option>
+
+            <option th:each="escuela : ${escuelas}"
+                    th:value="${escuela.idescuela}"
+                    th:text="${escuela.nombre}">
+            </option>
+
+        </select>
+
+        <button type="submit">
+            Guardar Carrera
+        </button>
+
+    </form>
+
+    <!-- ========================= -->
+    <!-- TABLA CARRERAS -->
+    <!-- ========================= -->
+
+    <table>
+
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Carrera</th>
+            <th>Descripción</th>
+            <th>Escuela</th>
+        </tr>
+        </thead>
+
+        <tbody>
+
+        <tr th:each="carrera : ${carreras}">
+
+            <td th:text="${carrera.id}"></td>
+
+            <td th:text="${carrera.nombre}"></td>
+
+            <td th:text="${carrera.descripcion}"></td>
+
+            <td th:text="${carrera.escuela.nombre}"></td>
 
         </tr>
 

@@ -9,4 +9,7 @@ public interface CarreraService {
 
     public List<Carrera> getAllCarreras();
     List<Carrera> obtenerCarrerasPorEscuela(Integer idEscuela);
+    Carrera guardarCarrera(Carrera carrera);
+
+    void eliminarCarrera(Integer id);
 }

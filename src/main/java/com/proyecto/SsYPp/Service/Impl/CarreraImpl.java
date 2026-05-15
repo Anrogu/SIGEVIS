@@ -26,4 +26,16 @@ public class CarreraImpl implements CarreraService {
 
         return carreraRepository.findByEscuela_Idescuela(idEscuela);
     }
+
+    @Override
+    public Carrera guardarCarrera(Carrera carrera) {
+
+        return carreraRepository.save(carrera);
+    }
+
+    @Override
+    public void eliminarCarrera(Integer id) {
+
+        carreraRepository.deleteById(id);
+    }
 }

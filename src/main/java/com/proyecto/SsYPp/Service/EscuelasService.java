@@ -9,4 +9,7 @@ public interface EscuelasService {
     List<Escuelas> obtenerEscuelas();
 
     Escuelas guardarEscuela(Escuelas escuela);
+
+    void eliminarEscuela(Integer id);
 }
+

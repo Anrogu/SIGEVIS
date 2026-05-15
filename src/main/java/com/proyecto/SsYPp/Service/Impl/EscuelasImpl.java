@@ -25,4 +25,9 @@ public class EscuelasImpl implements EscuelasService {
 
         return escuelasRepository.save(escuela);
     }
+    @Override
+    public void eliminarEscuela(Integer id) {
+
+        escuelasRepository.deleteById(id);
+    }
 }
