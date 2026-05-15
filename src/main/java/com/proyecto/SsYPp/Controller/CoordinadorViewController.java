@@ -7,6 +7,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import com.proyecto.SsYPp.Service.CarreraService;
 
 import java.util.List;
 
@@ -16,6 +17,9 @@ public class CoordinadorViewController {
 
     @Autowired
     private AsignacionService asignacionService; // ✅ NUEVO
+
+    @Autowired
+    private CarreraService carreraService;
 
     @GetMapping("/index")
     public String index() {
@@ -28,7 +32,13 @@ public class CoordinadorViewController {
     }
 
     @GetMapping("/vacantes")
-    public String vacantes() {
+    public String vacantes(Model model) {
+
+        model.addAttribute(
+                "carreras",
+                carreraService.getAllCarreras()
+        );
+
         return "coordinador/vacantes";
     }
 

@@ -31,5 +31,6 @@ public class Carrera {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "escuelas_idescuela")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
     private Escuelas escuela;
 }
