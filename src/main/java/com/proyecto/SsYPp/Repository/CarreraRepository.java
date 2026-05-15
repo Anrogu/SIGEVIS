@@ -9,4 +9,6 @@ public interface CarreraRepository extends JpaRepository<Carrera,Integer> {
 
     List<Carrera> findByEscuela_Idescuela(Integer idescuela);
 
+    boolean existsByEscuela_Idescuela(Integer idescuela);
+
 }

@@ -76,6 +76,30 @@
 
     <h1>Administración de Escuelas y Carreras</h1>
 
+    <!-- MENSAJE ERROR -->
+    <div th:if="${error}"
+         style="background:#f8d7da;
+            color:#721c24;
+            padding:10px;
+            margin-bottom:15px;
+            border-radius:5px;">
+
+        <span th:text="${error}"></span>
+
+    </div>
+
+    <!-- MENSAJE SUCCESS -->
+    <div th:if="${success}"
+         style="background:#d4edda;
+            color:#155724;
+            padding:10px;
+            margin-bottom:15px;
+            border-radius:5px;">
+
+        <span th:text="${success}"></span>
+
+    </div>
+
     <!-- ========================= -->
     <!-- FORMULARIO ESCUELAS -->
     <!-- ========================= -->
@@ -187,6 +211,7 @@
             <th>Carrera</th>
             <th>Descripción</th>
             <th>Escuela</th>
+            <th>Acciones</th>
         </tr>
         </thead>
 
@@ -201,6 +226,17 @@
             <td th:text="${carrera.descripcion}"></td>
 
             <td th:text="${carrera.escuela.nombre}"></td>
+
+            <td>
+
+                <a th:href="@{/admin/escuelas/eliminar-carrera/{id}(id=${carrera.id})}"
+                   onclick="return confirm('¿Eliminar carrera?')">
+
+                    Eliminar
+
+                </a>
+
+            </td>
 
         </tr>
 
