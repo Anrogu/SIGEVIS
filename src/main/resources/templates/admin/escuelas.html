@@ -1,250 +1,327 @@
 <!DOCTYPE html>
-<html lang="es"
-      xmlns:th="http://www.thymeleaf.org">
-
+<html lang="es" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Administrar Escuelas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Administrador | Escuelas</title>
 
     <link rel="stylesheet" href="/css_admin/styles.css">
+    <link rel="stylesheet" href="/css_admin/index.css">
 
     <style>
-
-        body{
-            font-family: Arial, sans-serif;
-            padding: 30px;
-            background: #f5f5f5;
+        .th-actions{
+            width:120px;
+            text-align:center;
         }
 
-        .container{
-            max-width: 1100px;
-            margin: auto;
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
+        .actions-cell{
+            display:flex;
+            justify-content:center;
+            gap:8px;
         }
 
-        h1{
-            margin-bottom: 25px;
+        .section-space{
+            margin-top:18px;
         }
-
-        h2{
-            margin-top: 40px;
-            margin-bottom: 15px;
-        }
-
-        form{
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
-        }
-
-        input,
-        select{
-            flex: 1;
-            padding: 10px;
-        }
-
-        button{
-            padding: 10px 20px;
-            cursor: pointer;
-        }
-
-        table{
-            width: 100%;
-            border-collapse: collapse;
-            margin-bottom: 30px;
-        }
-
-        table th,
-        table td{
-            border: 1px solid #ddd;
-            padding: 10px;
-        }
-
-        table th{
-            background: #eee;
-        }
-
     </style>
 </head>
 
 <body>
 
-<div class="container">
+<div class="app">
 
-    <h1>Administración de Escuelas y Carreras</h1>
+    <!-- HEADER -->
+    <header class="topbar">
+        <div class="topbar__left">
+            <span class="topbar__title">ADMINISTRADOR</span>
+        </div>
 
-    <!-- MENSAJE ERROR -->
-    <div th:if="${error}"
-         style="background:#f8d7da;
-            color:#721c24;
-            padding:10px;
-            margin-bottom:15px;
-            border-radius:5px;">
+        <div class="topbar__right">
+            <div class="logos">
+                <img th:src="@{/img/EscudosGEM.png}"
+                     alt="Escudos"
+                     class="logo-img">
+            </div>
+        </div>
+    </header>
 
-        <span th:text="${error}"></span>
+    <!-- TABS -->
+    <nav class="tabs">
 
-    </div>
+        <div class="tabs__left">
+            <a class="tab" th:href="@{/admin/index}">NOTICIAS</a>
+            <a class="tab" th:href="@{/admin/vacantes}">VACANTES</a>
+            <a class="tab" th:href="@{/admin/postulaciones}">POSTULACIONES</a>
+            <a class="tab" th:href="@{/admin/asignaciones}">ASIGNACIONES</a>
+            <a class="tab" th:href="@{/admin/usuarios}">USUARIOS</a>
+            <a class="tab tab--active" th:href="@{/admin/escuelas}">ESCUELAS</a>
+        </div>
 
-    <!-- MENSAJE SUCCESS -->
-    <div th:if="${success}"
-         style="background:#d4edda;
-            color:#155724;
-            padding:10px;
-            margin-bottom:15px;
-            border-radius:5px;">
-
-        <span th:text="${success}"></span>
-
-    </div>
-
-    <!-- ========================= -->
-    <!-- FORMULARIO ESCUELAS -->
-    <!-- ========================= -->
-
-    <h2>Agregar Escuela</h2>
-
-    <form th:action="@{/admin/escuelas/guardar}"
-          method="post"
-          th:object="${nuevaEscuela}">
-
-        <input type="text"
-               th:field="*{nombre}"
-               placeholder="Nombre de la escuela"
-               required>
-
-        <button type="submit">
-            Guardar Escuela
-        </button>
-
-    </form>
+        <div class="tabs__right">
+            <button id="btnLogout"
+                    class="btn btn--outline btn--logout">
+                CERRAR SESION
+            </button>
+        </div>
+    </nav>
 
     <!-- ========================= -->
-    <!-- TABLA ESCUELAS -->
+    <!-- PANEL ESCUELAS -->
     <!-- ========================= -->
 
-    <table>
+    <section class="content-grid is-split">
 
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Escuela</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
+        <!-- TABLA -->
+        <main class="panel panel--left">
 
-        <tbody>
+            <div class="panel__header">
+                <h2 class="panel__title">
+                    ESCUELAS REGISTRADAS
+                </h2>
+            </div>
 
-        <tr th:each="escuela : ${escuelas}">
+            <!-- mensajes -->
+            <div th:if="${error}" class="error-message">
+                <span th:text="${error}"></span>
+            </div>
 
-            <td th:text="${escuela.idescuela}"></td>
+            <div th:if="${success}"
+                 style="background:#e8f5e9;
+                        color:#2e7d32;
+                        padding:10px;
+                        border-radius:6px;
+                        margin-bottom:15px;
+                        font-size:11px;">
+                <span th:text="${success}"></span>
+            </div>
 
-            <td th:text="${escuela.nombre}"></td>
+            <div class="table-wrap">
 
-            <td>
+                <table class="table">
 
-                <a th:href="@{/admin/escuelas/eliminar/{id}(id=${escuela.idescuela})}"
-                   onclick="return confirm('¿Eliminar escuela?')">
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Escuela</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
 
-                    Eliminar
+                    <tbody>
 
-                </a>
+                    <tr th:each="escuela : ${escuelas}">
+                        <td th:text="${escuela.idescuela}"></td>
 
-            </td>
+                        <td th:text="${escuela.nombre}"></td>
 
-        </tr>
+                        <td class="actions">
+                            <div class="actions-cell">
 
-        </tbody>
+                                <a th:href="@{/admin/escuelas/eliminar/{id}(id=${escuela.idescuela})}"
+                                   class="btn btn--mini btn--outline"
+                                   onclick="return confirm('¿Eliminar escuela?')">
 
-    </table>
+                                    Eliminar
+
+                                </a>
+
+                            </div>
+                        </td>
+                    </tr>
+
+                    </tbody>
+
+                </table>
+            </div>
+        </main>
+
+        <!-- FORM -->
+        <aside class="panel panel--right"
+               style="display:block;opacity:1;transform:none;pointer-events:auto;">
+
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">
+                    GESTIÓN DE ESCUELA
+                </h3>
+            </div>
+
+            <form class="form"
+                  th:action="@{/admin/escuelas/guardar}"
+                  method="post"
+                  th:object="${nuevaEscuela}">
+
+                <div class="form-row">
+                    <label>Nombre de Escuela</label>
+
+                    <input type="text"
+                           th:field="*{nombre}"
+                           placeholder="Ingrese nombre"
+                           required>
+                </div>
+
+                <div class="form-actions form-actions--center">
+                    <button type="submit"
+                            class="btn btn--primary">
+                        Guardar Escuela
+                    </button>
+                </div>
+
+            </form>
+
+        </aside>
+    </section>
 
     <!-- ========================= -->
-    <!-- FORMULARIO CARRERAS -->
+    <!-- PANEL CARRERAS -->
     <!-- ========================= -->
 
-    <h2>Agregar Carrera</h2>
+    <section class="content-grid is-split section-space">
 
-    <form th:action="@{/admin/escuelas/guardar-carrera}"
-          method="post"
-          th:object="${nuevaCarrera}">
+        <!-- TABLA -->
+        <main class="panel panel--left">
 
-        <input type="text"
-               th:field="*{nombre}"
-               placeholder="Nombre de la carrera"
-               required>
+            <div class="panel__header">
+                <h2 class="panel__title">
+                    CARRERAS REGISTRADAS
+                </h2>
+            </div>
 
-        <input type="text"
-               th:field="*{descripcion}"
-               placeholder="Descripción"
-               required>
+            <div class="table-wrap">
 
-        <select th:field="*{escuela}" required>
+                <table class="table">
 
-            <option value="">
-                Seleccione una escuela
-            </option>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Carrera</th>
+                        <th>Descripción</th>
+                        <th>Escuela</th>
+                        <th class="th-actions">Acciones</th>
+                    </tr>
+                    </thead>
 
-            <option th:each="escuela : ${escuelas}"
-                    th:value="${escuela.idescuela}"
-                    th:text="${escuela.nombre}">
-            </option>
+                    <tbody>
 
-        </select>
+                    <tr th:each="carrera : ${carreras}">
 
-        <button type="submit">
-            Guardar Carrera
-        </button>
+                        <td th:text="${carrera.id}"></td>
 
-    </form>
+                        <td th:text="${carrera.nombre}"></td>
 
-    <!-- ========================= -->
-    <!-- TABLA CARRERAS -->
-    <!-- ========================= -->
+                        <td th:text="${carrera.descripcion}"></td>
 
-    <table>
+                        <td th:text="${carrera.escuela.nombre}"></td>
 
-        <thead>
-        <tr>
-            <th>ID</th>
-            <th>Carrera</th>
-            <th>Descripción</th>
-            <th>Escuela</th>
-            <th>Acciones</th>
-        </tr>
-        </thead>
+                        <td class="actions">
 
-        <tbody>
+                            <div class="actions-cell">
 
-        <tr th:each="carrera : ${carreras}">
+                                <a th:href="@{/admin/escuelas/eliminar-carrera/{id}(id=${carrera.id})}"
+                                   class="btn btn--mini btn--outline"
+                                   onclick="return confirm('¿Eliminar carrera?')">
 
-            <td th:text="${carrera.id}"></td>
+                                    Eliminar
 
-            <td th:text="${carrera.nombre}"></td>
+                                </a>
 
-            <td th:text="${carrera.descripcion}"></td>
+                            </div>
 
-            <td th:text="${carrera.escuela.nombre}"></td>
+                        </td>
+                    </tr>
 
-            <td>
+                    </tbody>
 
-                <a th:href="@{/admin/escuelas/eliminar-carrera/{id}(id=${carrera.id})}"
-                   onclick="return confirm('¿Eliminar carrera?')">
+                </table>
+            </div>
+        </main>
 
-                    Eliminar
+        <!-- FORM -->
+        <aside class="panel panel--right"
+               style="display:block;opacity:1;transform:none;pointer-events:auto;">
 
-                </a>
+            <div class="panel__header panel__header--compact">
+                <h3 class="panel__subtitle">
+                    GESTIÓN DE CARRERA
+                </h3>
+            </div>
 
-            </td>
+            <form class="form"
+                  th:action="@{/admin/escuelas/guardar-carrera}"
+                  method="post"
+                  th:object="${nuevaCarrera}">
 
-        </tr>
+                <div class="form-row">
+                    <label>Nombre Carrera</label>
 
-        </tbody>
+                    <input type="text"
+                           th:field="*{nombre}"
+                           placeholder="Nombre carrera"
+                           required>
+                </div>
 
-    </table>
+                <div class="form-row">
+                    <label>Descripción</label>
+
+                    <input type="text"
+                           th:field="*{descripcion}"
+                           placeholder="Descripción"
+                           required>
+                </div>
+
+                <div class="form-row">
+                    <label>Escuela</label>
+
+                    <select th:field="*{escuela}" required>
+
+                        <option value="">
+                            Seleccione...
+                        </option>
+
+                        <option th:each="escuela : ${escuelas}"
+                                th:value="${escuela.idescuela}"
+                                th:text="${escuela.nombre}">
+                        </option>
+
+                    </select>
+                </div>
+
+                <div class="form-actions form-actions--center">
+
+                    <button type="submit"
+                            class="btn btn--primary">
+
+                        Guardar Carrera
+
+                    </button>
+
+                </div>
+
+            </form>
+
+        </aside>
+    </section>
 
 </div>
+
+<script>
+    const btnLogout = document.getElementById("btnLogout");
+
+    btnLogout?.addEventListener("click", async () => {
+        try {
+            const res = await fetch("/logout", {
+                method:"POST",
+                credentials:"same-origin"
+            });
+
+            if(res.ok || res.status===302){
+                window.location.href="/login?logout";
+            }
+
+        } catch(err){
+            console.error(err);
+        }
+    });
+</script>
 
 </body>
 </html>

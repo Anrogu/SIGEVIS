@@ -62,30 +62,54 @@
                 <h2 class="panel__title">NOTICIAS PUBLICADAS</h2>
             </div>
 
-            <div id="newsList" style="display:flex; flex-direction:column; gap:12px;"></div>
+            <div id="newsList" class="news-grid"></div>
 
             <div class="pagination" id="pagination" style="margin-top:14px;"></div>
 
             <!-- Preview tipo tu diseño -->
-            <section class="panel panel--preview" id="newsPreview" style="margin-top:16px; display:none;">
-                <div class="panel__header">
-                    <h3 class="panel__subtitle" id="previewTitle">Título</h3>
-                    <div class="panel__actions">
-                        <button class="btn btn--outline btn--mini" type="button" id="btnClosePreview">Cerrar</button>
-                    </div>
-                </div>
+            <section class="news-preview"
+                     id="newsPreview"
+                     style="display:none;">
 
-                <div class="preview-container-static" style="margin-top:10px;">
-                    <div class="preview-text-static">
-                        <div style="display:flex; gap:12px; flex-wrap:wrap; margin: 6px 0 12px; font-size:0.85rem; color: var(--muted);">
-                            <span><b>Hora:</b> <span id="previewHora"></span></span>
-                            <span><b>Autor:</b> <span id="previewAutor"></span></span>
-                            <span><b>Estatus:</b> <span id="previewEstatus"></span></span>
+                <div style="display:flex;
+                justify-content:space-between;
+                align-items:flex-start;
+                gap:12px;">
+
+                    <div>
+                        <h2 class="news-preview__title"
+                            id="previewTitle">
+                            Título
+                        </h2>
+
+                        <div class="news-preview__meta">
+
+                <span>
+                    🕒 <span id="previewHora"></span>
+                </span>
+
+                            <span>
+                    👤 <span id="previewAutor"></span>
+                </span>
+
+                            <span id="previewEstatus"></span>
+
                         </div>
-
-                        <div id="previewContenido" style="white-space:pre-wrap; line-height:1.55;"></div>
                     </div>
+
+                    <button class="btn btn--outline btn--mini"
+                            id="btnClosePreview"
+                            type="button">
+
+                        Cerrar
+
+                    </button>
                 </div>
+
+                <div id="previewContenido"
+                     class="news-preview__content">
+                </div>
+
             </section>
 
             <footer class="panel-footer">
@@ -197,29 +221,63 @@
       }
 
       function renderCards(lista){
-        list.innerHTML = lista.map(n => `
-          <article class="panel" style="padding:12px;">
-            <div style="display:flex; align-items:flex-start; justify-content:space-between; gap:12px;">
-              <div style="flex:1;">
-                <div style="display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:6px; font-size:.85rem; color:var(--muted);">
-                  <span><b>Hora:</b> ${escapeHtml(fmtHora(n.fechaPublicacion))}</span>
-                  <span><b>Autor:</b> ${escapeHtml(n.nombreAutor ?? "")}</span>
-                  ${pillEstatus(n.estatus)}
+
+    if(!lista.length){
+        list.innerHTML = `
+            <div class="panel"
+                 style="padding:20px;text-align:center;">
+                No hay noticias.
+            </div>
+        `;
+        return;
+    }
+
+    list.innerHTML = lista.map(n => `
+
+        <article class="news-card">
+
+            <div>
+
+                <div class="news-card__meta">
+
+                    <span class="news-chip">
+                        🕒 ${escapeHtml(fmtHora(n.fechaPublicacion))}
+                    </span>
+
+                    <span class="news-chip">
+                        👤 ${escapeHtml(n.nombreAutor ?? "")}
+                    </span>
+
+                    ${pillEstatus(n.estatus)}
+
                 </div>
 
-                <h3 style="margin:0 0 6px; font-size:1rem;">${escapeHtml(n.titulo)}</h3>
-                <p style="margin:0; color:var(--muted); line-height:1.45;">
-                  ${escapeHtml(resumen(n.contenido))}
-                </p>
-              </div>
+                <h3 class="news-title">
+                    ${escapeHtml(n.titulo)}
+                </h3>
 
-              <div style="display:flex; flex-direction:column; gap:8px; align-items:flex-end;">
-                <button class="btn btn--outline btnRead" type="button" data-id="${n.id}">Leer</button>
-              </div>
+                <p class="news-summary">
+                    ${escapeHtml(resumen(n.contenido,120))}
+                </p>
+
             </div>
-          </article>
-        `).join("");
-      }
+
+            <div class="news-actions">
+
+                <button class="btn btn--primary btn-read btnRead"
+                        data-id="${n.id}"
+                        type="button">
+
+                    Leer
+
+                </button>
+
+            </div>
+
+        </article>
+
+    `).join("");
+}
 
       function renderPaginado(listData) {
         currentList = Array.isArray(listData) ? listData : [];
