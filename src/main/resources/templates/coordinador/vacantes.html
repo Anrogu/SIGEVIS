@@ -859,6 +859,8 @@ if (selectedId != null && id === Number(selectedId)) {
                 horarios_idHorario: Number(document.getElementById("Horarios_idHorario").value || 0),
 
                 fechaPublicacion: hhmmss,
+
+                usuariosIdUsuario: Number(document.getElementById("usuariosIdUsuario").value || 0),
                 creadoPorNombre: currentUser || null
             };
 
@@ -894,6 +896,8 @@ if (selectedId != null && id === Number(selectedId)) {
                 if (fresh) openDetails(fresh);
 
             } else {
+                console.log("PAYLOAD CREATE:", payloadCommon);
+
                 const res = await fetch(`${API}/create`, {
                     method: "POST",
                     headers: {"Content-Type": "application/json"},

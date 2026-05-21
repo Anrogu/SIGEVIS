@@ -182,13 +182,24 @@ public class VacanteServiceImpl implements VacanteService {
     @Override
     public List<VacanteDto> getVacantesParaPrestadorSinPostuladas(Long idUsuario) {
 
-        // 1) Traer todas las vacantes (SIN filtrar por carrera/área)
-        List<Vacante> vacantesPerfil = vacanteRepository.findVacantesActivas();
+        // 1) Obtener usuario y su carrera
+        Usuario usuario = usuarioRepository.findById(idUsuario)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        // 2) Vacantes ya postuladas por este usuario
+        if (usuario.getCarrerasIdcarrera() == null) {
+            return List.of();
+        }
+
+        // 2) Traer vacantes SOLO de su carrera
+        Long carreraId = usuario.getCarrerasIdcarrera().getId().longValue();
+
+        List<Vacante> vacantesPerfil =
+                vacanteRepository.findVacantesActivasByCarrera(carreraId);
+
+        // 3) Vacantes ya postuladas por este usuario
         List<Long> idsPostuladas = postulacionRepository.findVacanteIdsPostuladasByUsuario(idUsuario);
 
-        // 3) Filtrar y convertir
+        // 4) Filtrar y convertir
         return vacantesPerfil.stream()
                 .filter(v -> !idsPostuladas.contains(v.getId()))
                 .map(this::convertirEntidadADTO)

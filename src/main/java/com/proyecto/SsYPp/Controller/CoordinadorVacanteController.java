@@ -9,9 +9,11 @@ import com.proyecto.SsYPp.Service.PostulacionService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+import com.proyecto.SsYPp.Dto.VacanteDto;
 
 import java.time.LocalTime;
 import java.util.List;
+
 
 @RestController
 @RequestMapping("/coordinador/vacantes")
@@ -20,6 +22,7 @@ public class CoordinadorVacanteController {
     private final UsuarioRepository usuarioRepository;
     private final VacanteRepository vacanteRepository;
     private final PostulacionService postulacionService;
+    private final CarreraRepository carreraRepository;
 
     public CoordinadorVacanteController(
             UsuarioRepository usuarioRepository,
@@ -33,6 +36,7 @@ public class CoordinadorVacanteController {
         this.usuarioRepository = usuarioRepository;
         this.vacanteRepository = vacanteRepository;
         this.postulacionService = postulacionService;
+        this.carreraRepository = carreraRepository;
     }
 
     // =========================================================
@@ -78,21 +82,35 @@ public class CoordinadorVacanteController {
     // 3) Crear vacante (FORZAR área del coordinador)
     // =========================================================
     @PostMapping("/create")
-    public ResponseEntity<?> create(@RequestBody Vacante req, Authentication auth) {
+    public ResponseEntity<?> create(
+            @RequestBody VacanteDto req,
+            Authentication auth
+    ) {
 
         Usuario creador = getUsuario(auth);
         AreaDgp area = creador.getArea();
 
-        // 🔒 Forzar área y creador
-        req.setAreasdgpIdarea(area);
-        req.setCreadoPor(creador);
+        Carrera carrera = carreraRepository.findById(
+                req.getCarrerasIdCarrera().intValue()
+        ).orElseThrow(() -> new RuntimeException("Carrera no encontrada"));
 
-        // Convertir hora si viene null
-        if (req.getFechaPublicacion() == null) {
-            return ResponseEntity.badRequest().body("Fecha de publicación requerida");
-        }
+        Vacante v = new Vacante();
 
-        Vacante guardada = vacanteRepository.save(req);
+        v.setNombrePuesto(req.getNombrePuesto());
+        v.setDescripcion(req.getDescripcion());
+        v.setNumeroPlazas(req.getNumeroPlazas());
+        v.setEstatus(req.getEstatus());
+        v.setFechaPublicacion(req.getFechaPublicacion());
+        v.setFechaVencimiento(req.getFechaVencimiento());
+        v.setRequisitos(req.getRequisitos());
+
+        // FORZAR
+        v.setAreasdgpIdarea(area);
+        v.setCreadoPor(creador);
+        v.setCarrerasIdcarrera(carrera);
+
+        Vacante guardada = vacanteRepository.save(v);
+
         return ResponseEntity.ok(guardada);
     }
 
