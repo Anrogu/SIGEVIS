@@ -13,15 +13,16 @@
 
 <div class="login-container">
 
+    <!-- PANEL IZQUIERDO: Ahora incluye el escudo de la UMB -->
     <div class="login-left">
-        <div class="overlay">
-            <h2 style="font-size: 3rem; letter-spacing: 2px;">¡BIENVENIDO!</h2>
+        <div class="overlay" style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;">
+            <img th:src="@{/img/EscudoColibri.png}" alt="Logo UMB" class="logo-umb-left" style="max-width: 220px; height: auto; margin-bottom: 10px;">
+            <h2 style="font-size: 3rem; letter-spacing: 2px; margin: 0;">¡BIENVENIDO!</h2>
         </div>
     </div>
 
+    <!-- PANEL DERECHO: Formulario limpio sin logos en la esquina superior derecha -->
     <div class="login-right">
-
-        <img th:src="@{/img/EscudosGEM.png}" alt="Gobierno del Estado de México" class="logo-edomex">
 
         <div class="login-content-wrapper">
 
@@ -55,9 +56,11 @@
                 ¿No tienes cuenta? <a th:href="@{/register}">Regístrate aquí</a>
             </div>
 
-        </div> <div class="copyright">
-        ©2025 - Subdirección de Desarrollo Tecnológico
-    </div>
+        </div>
+
+        <div class="copyright">
+            ©2025 - Subdirección de Desarrollo Tecnológico
+        </div>
 
     </div>
 </div>
@@ -65,7 +68,6 @@
 <script>
     function togglePassword() {
         const input = document.getElementById("contrasena");
-        // Si usas FontAwesome, puedes cambiar el icono
         const icon = document.querySelector(".toggle-password i");
 
         if (input.type === "password") {

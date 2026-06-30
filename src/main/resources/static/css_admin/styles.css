@@ -2,32 +2,36 @@
     /* Letra */
     --font-family: 'Poppins', sans-serif;
 
-    /* Paleta de Colores */
-    --color-vino: #7b1e3d;
-    --color-dorado: #B59560;
-    --color-dorado-claro: #B88E55;
-    --color-negro: #010101;
-    --color-gris: #CCCCCC;
-    --color-crema: #F5E0C7;
+    /* =========================
+       PALETA INSTITUCIONAL UMB
+       ========================= */
 
-    --color-verde: #7EF5FC;
+    --color-vino: #8DBF22;
+    --color-dorado: #8DBF22;
+    --color-dorado-claro: #A8CC49;
+
+    --color-negro: #2F2F2F;
+    --color-gris: #D9D9D9;
+    --color-crema: #EEF5D7;
+
+    --color-verde: #EAF5D5;
     --color-rojo: #FDECEA;
     --color-naranja: #FFF4E5;
 
-    --color-Texto-verde: #517D32;
+    --color-Texto-verde: #5D7C16;
     --color-Texto-rojo: #C84141;
     --color-Texto-naranja: #C77700;
 
     /* Variables de UI */
-    --texto-oscuro: #333333;
-    --texto-claro: #ffffff;
-    --borde-input: #CCCCCC;
-    --muted: #666;
+    --texto-oscuro: #2F2F2F;
+    --texto-claro: #FFFFFF;
+    --borde-input: #D9D9D9;
+    --muted: #6B6B6B;
 
-    --bg: #ffffff;
-    --border: #cfcfcf;
-    --border-2: #b9b9b9;
-    --text: #1f1f1f;
+    --bg: #FFFFFF;
+    --border: #D7E6B3;
+    --border-2: #C6DA98;
+    --text: #2F2F2F;
 
     /* VARIABLES DE IMÁGENES */
     --img-fondo-login: url('/img/Fondo_1.png');
@@ -44,7 +48,8 @@ body {
     margin: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     color: var(--text);
-    background: #f6f6f6;
+    background: #F3F6EB;
+    background: #F3F6EB;
 }
 
 .app {
@@ -467,4 +472,32 @@ body {
     .content-grid { grid-template-columns: 1fr; }
     .content-grid.is-split { grid-template-columns: 1fr; }
     .panel--right { display: block; }
+}
+
+.btn--primary:hover{
+    background: #6A9914;
+    border-color: #6A9914;
+}
+
+.tab:hover{
+    background: #EEF5D7;
+    color: #6A9914;
+}
+
+.table thead th{
+    background: #EEF5D7;
+    color: #5D7C16;
+}
+
+.page--active{
+    background: #8DBF22;
+    color: #fff;
+    border-color: #8DBF22;
+}
+
+.form input:focus,
+.form select:focus,
+.form textarea:focus{
+    border-color: #8DBF22;
+    box-shadow: 0 0 0 3px rgba(141,191,34,.20);
 }
